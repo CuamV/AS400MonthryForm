@@ -115,7 +115,7 @@ namespace あすよん月次帳票
                 animThread.SetApartmentState(ApartmentState.STA);
                 animThread.Start();
 
-                // --- メインスレッドでシミュレーション実行 ---
+                // --- メインスレッドでマスタ更新実行 ---
                 await Task.Delay(100); // ちょっと待って anim が作られる
 
                 // ライブラリごとに処理

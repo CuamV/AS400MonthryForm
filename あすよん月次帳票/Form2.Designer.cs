@@ -648,6 +648,7 @@ namespace あすよん月次帳票
 
         private void StyleButton(Button btn, Color backColor, Color foreColor, Color? borderColor = null, int radius = 12)
         {
+            // -- ボタンのスタイル設定 --
             btn.FlatStyle = FlatStyle.Flat;
             btn.FlatAppearance.BorderSize = 0; // 枠線はPaintで描画
             btn.Cursor = Cursors.Hand;

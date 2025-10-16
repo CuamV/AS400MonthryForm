@@ -24,6 +24,7 @@ namespace あすよん月次帳票
         private static List<string> runtimelog = new List<string>();
 
         private string HIZ = DateTime.Now.ToString("yyyyMMdd");
+        private string TIM = DateTime.Now.ToString("HHmmss");
         private const string LockFilePath = @"\\ohnosv01\OhnoSys\099_sys\Lock";
         private const string LogFilePath = @"\\ohnosv01\OhnoSys\099_sys\LOG";
         private const int lockMinutes = 10; // ← ロック保持時間（10分）
@@ -86,8 +87,8 @@ namespace あすよん月次帳票
             string idText = txtBxID.Text.Trim();
             string passText = txtBxPASS.Text.Trim();
 
-            string lockFilePath = Path.Combine(LockFilePath, "sim_lock.txt");
-            string logFilePath = Path.Combine(LogFilePath, $@"{HIZ}\sim_log.txt");
+            string lockFilePath = Path.Combine(LockFilePath, "LOCK_sim.txt");
+            string logFilePath = Path.Combine(LogFilePath, $@"{HIZ}\LOG_Simulation.txt");
 
             bool locked = false; // ← ロック取得済みフラグ
 
@@ -189,7 +190,7 @@ namespace あすよん月次帳票
             suncarpass = "A" + passText;
             sundusuid = "S" + idText;
             sunduspass = "S" + passText;
-            jobnm = idText.Substring(idText.Length - 3);
+            jobnm = idText.Substring(idText.Length - 3);  // 下3桁
 
             string sumirateYM = DateTime.Now.ToString("yyyyMM");
             FormActionMethod formActionMethod = new FormActionMethod();
@@ -207,7 +208,7 @@ namespace あすよん月次帳票
                     if (string.IsNullOrEmpty(selectedBumon))
                     {
                         // 部門未選択 → 全部門でシミュレーション
-                        formActionMethod.SimulateIZAIKO_Ohno(ohuid, ohpass, jobnm, sumirateYM);
+                        formActionMethod.SimulateIZAIKO_Ohno(ohuid, ohpass, sumirateYM);
                         formActionMethod.AddLog("オーノ_シュミレーション実行", listBxSituation);
                         if (Application.OpenForms["Form1"] is Form1 form1) form1.AddLog($"{HIZTIM}　オーノ_シュミレーション実行 実行者ID:{ohuid}");
 
@@ -215,7 +216,7 @@ namespace あすよん月次帳票
                     else
                     {
                         // 部門1つ選択 → 部門指定シミュレーション
-                        formActionMethod.SimulateIZAIKO_Ohno(ohuid, ohpass, jobnm, sumirateYM, selectedBumon);
+                        formActionMethod.SimulateIZAIKO_Ohno(ohuid, ohpass, sumirateYM, selectedBumon);
                         formActionMethod.AddLog($"オーノ({selectedBumon}) のシュミレーション実行", listBxSituation);
                         if (Application.OpenForms["Form1"] is Form1 form1) form1.AddLog($"{HIZTIM}　オーノ({selectedBumon})_シュミレーション実行 実行者ID:{ohuid}");
                     }
@@ -224,14 +225,14 @@ namespace あすよん月次帳票
                 // --- サンミック(ダスコン) ---
                 if (chkBxSundus.Checked)
                 {
-                    formActionMethod.SimulateIZAIKO_Sun(sundusuid, sunduspass, jobnm, sumirateYM, "SD");
+                    formActionMethod.SimulateIZAIKO_Sun(sundusuid, sunduspass, sumirateYM, "SD");
                     formActionMethod.AddLog("サンミック(ダスコン)のシュミレーション実行", listBxSituation);
                     if (Application.OpenForms["Form1"] is Form1 form1) form1.AddLog($"{HIZTIM}　サンミック(ダスコン)_シュミレーション実行 実行者ID:{sundusuid}");
                 }
                 // --- サンミック(カーペット) ---
                 if (chkBxSuncar.Checked)
                 {
-                    formActionMethod.SimulateIZAIKO_Sun(suncaruid, suncarpass, jobnm, sumirateYM, "SC");
+                    formActionMethod.SimulateIZAIKO_Sun(suncaruid, suncarpass, sumirateYM, "SC");
                     formActionMethod.AddLog("サンミック(カーペット)のシュミレーション実行", listBxSituation);
                     if (Application.OpenForms["Form1"] is Form1 form1) form1.AddLog($"{HIZTIM}　サンミック(カーペット)_シュミレーション実行 実行者ID:{suncaruid}");
                 }

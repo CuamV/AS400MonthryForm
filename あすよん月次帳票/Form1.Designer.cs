@@ -47,7 +47,7 @@ namespace あすよん月次帳票
             // btnEnd
             // 
             this.btnEnd.Font = new System.Drawing.Font("Meiryo UI", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(128)));
-            this.btnEnd.Location = new System.Drawing.Point(494, 436);
+            this.btnEnd.Location = new System.Drawing.Point(476, 421);
             this.btnEnd.Name = "btnEnd";
             this.btnEnd.Size = new System.Drawing.Size(102, 35);
             this.btnEnd.TabIndex = 68;
@@ -127,7 +127,7 @@ namespace あすよん月次帳票
             // 
             // Form1
             // 
-            this.ClientSize = new System.Drawing.Size(629, 487);
+            this.ClientSize = new System.Drawing.Size(629, 468);
             this.Controls.Add(this.lnkLbMaster);
             this.Controls.Add(this.lnkLbDisplay);
             this.Controls.Add(this.lnkLbExport);
@@ -214,20 +214,31 @@ namespace あすよん月次帳票
             }
         }
 
+        // ボタンごとの位置を保持（伸び防止用）
+        private readonly Dictionary<Button, int> originalYPositions = new Dictionary<Button, int>();
+        private readonly Dictionary<Button, bool> animatingButtons = new Dictionary<Button, bool>();
+        private readonly Dictionary<Button, Color> originalColors = new Dictionary<Button, Color>();
+
         // クリックアニメーション
         private async Task AnimateButton(Button btn)
         {
             var originalSize = btn.Size;
+            var originalLocation = btn.Location; // ★ 元の位置を記録
             var enlargedSize = new Size((int)(btn.Width * 1.1), (int)(btn.Height * 1.1));
-            int radius = 18;
+            int radius = 16;
 
             // 拡大アニメーション
             for (int i = 0; i < 5; i++)
             {
-                btn.Size = new Size(
-                    btn.Size.Width + (enlargedSize.Width - originalSize.Width) / 5,
-                    btn.Size.Height + (enlargedSize.Height - originalSize.Height) / 5);
-                // Regionを再設定して角丸を維持
+                int newWidth = btn.Size.Width + (enlargedSize.Width - originalSize.Width) / 5;
+                int newHeight = btn.Size.Height + (enlargedSize.Height - originalSize.Height) / 5;
+
+                int deltaX = (newWidth - btn.Size.Width) / 2;
+                int deltaY = (newHeight - btn.Size.Height) / 2;
+
+                btn.Location = new Point(btn.Location.X - deltaX, btn.Location.Y - deltaY);
+                btn.Size = new Size(newWidth, newHeight);
+
                 using (var path = new System.Drawing.Drawing2D.GraphicsPath())
                 {
                     path.AddArc(0, 0, radius, radius, 180, 90);
@@ -243,9 +254,15 @@ namespace あすよん月次帳票
             // 縮小アニメーション
             for (int i = 0; i < 5; i++)
             {
-                btn.Size = new Size(
-                    btn.Size.Width - (enlargedSize.Width - originalSize.Width) / 5,
-                    btn.Size.Height - (enlargedSize.Height - originalSize.Height) / 5);
+                int newWidth = btn.Size.Width - (enlargedSize.Width - originalSize.Width) / 5;
+                int newHeight = btn.Size.Height - (enlargedSize.Height - originalSize.Height) / 5;
+
+                int deltaX = (btn.Size.Width - newWidth) / 2;
+                int deltaY = (btn.Size.Height - newHeight) / 2;
+
+                btn.Location = new Point(btn.Location.X + deltaX, btn.Location.Y + deltaY);
+                btn.Size = new Size(newWidth, newHeight);
+
                 using (var path = new System.Drawing.Drawing2D.GraphicsPath())
                 {
                     path.AddArc(0, 0, radius, radius, 180, 90);
@@ -257,7 +274,11 @@ namespace あすよん月次帳票
                 }
                 await Task.Delay(15);
             }
-            btn.Size = originalSize; // 最終的に元のサイズに戻す
+
+            // ★ 最後に完全リセット
+            btn.Size = originalSize;
+            btn.Location = originalLocation;
+
             // 最後に Region を元に戻す
             using (var path = new System.Drawing.Drawing2D.GraphicsPath())
             {

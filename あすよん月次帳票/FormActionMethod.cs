@@ -5,13 +5,7 @@ using System.Collections.Generic;
 using System.Data;
 using System.IO;
 using System.Linq;
-//using System.Net.Sockets;
-//using System.Runtime.InteropServices.ComTypes;
-//using System.Security.Cryptography;
-using System.Text;
 using System.Text.Json;
-//using System.Threading;
-//using System.Threading.Tasks;
 using System.Windows.Forms;
 
 namespace あすよん月次帳票
@@ -19,9 +13,6 @@ namespace あすよん月次帳票
 
     internal class FormActionMethod
     {
-        private string startDate;
-        private string endDate;
-
         static public string ctl = "[enter]";  // Ctlr(実行)
         static public string f3 = "[pf3]";  // F3(終了)
         static public string tb = "[tab]"; // Tab(カーソル次送り)
@@ -300,9 +291,9 @@ namespace あすよん月次帳票
         }
 
         // 全部門版シュミレーション
-        public void SimulateIZAIKO_Ohno(string uid, string pass, string jobnm, string ym)
+        public void SimulateIZAIKO_Ohno(string uid, string pass, string ym)
         {
-            PCommOperator.StartConnection("DSP" + jobnm, PCommWindowState.MIN);
+            PCommOperator.StartConnection("AUT000", PCommWindowState.MIN);
 
             // オーノシュミレーション実行
             Simulate(uid, pass);
@@ -327,9 +318,9 @@ namespace あすよん月次帳票
             PCommOperator.StopConnection();
         }
         // 部門指定版シュミレーション
-        public void SimulateIZAIKO_Ohno(string uid, string pass, string jobnm, string ym, string bumon)
+        public void SimulateIZAIKO_Ohno(string uid, string pass, string ym, string bumon)
         {
-            PCommOperator.StartConnection("DSP" + jobnm, PCommWindowState.MIN);
+            PCommOperator.StartConnection("AUT000", PCommWindowState.MIN);
 
             // オーノシュミレーション実行
             Simulate(uid, pass, bumon);
@@ -356,9 +347,9 @@ namespace あすよん月次帳票
         }
 
 
-        public void SimulateIZAIKO_Sun(string uid, string pass, string jobnm, string ym, string file)
+        public void SimulateIZAIKO_Sun(string uid, string pass, string ym, string file)
         {
-            PCommOperator.StartConnection("DSP" + jobnm, PCommWindowState.MIN);
+            PCommOperator.StartConnection("AUT000", PCommWindowState.MIN);
             // サンミックシュミレーション実行
             Simulate(uid, pass);
 
