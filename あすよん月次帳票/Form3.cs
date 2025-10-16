@@ -6,6 +6,7 @@ using System.Runtime.InteropServices;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using static あすよん月次帳票.Form1;
 
 namespace あすよん月次帳票
 {
@@ -19,7 +20,6 @@ namespace あすよん月次帳票
         string suncarpass;
         string sundusuid;
         string sunduspass;
-        string jobnm;
 
         private static List<string> runtimelog = new List<string>();
 
@@ -36,6 +36,7 @@ namespace あすよん月次帳票
 
             this.Region = System.Drawing.Region.FromHrgn(
                 CreateRoundRectRgn(0, 0, this.Width, this.Height, 40, 40));
+            
         }
 
         [DllImport("Gdi32.dll", EntryPoint = "CreateRoundRectRgn")]
@@ -190,7 +191,6 @@ namespace あすよん月次帳票
             suncarpass = "A" + passText;
             sundusuid = "S" + idText;
             sunduspass = "S" + passText;
-            jobnm = idText.Substring(idText.Length - 3);  // 下3桁
 
             string sumirateYM = DateTime.Now.ToString("yyyyMM");
             FormActionMethod formActionMethod = new FormActionMethod();

@@ -4,6 +4,7 @@ using System.Data;
 using System.Drawing;
 using System.Linq;
 using System.Runtime.InteropServices;
+using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
@@ -50,10 +51,8 @@ namespace あすよん月次帳票
         {
             ApplySnowManColors();
 
-            formActionMethod.ShowYearMonth(cmbxStrYearMonth, cmbxEndYearMonth);
-
-            // startDate / endDate の初期化
-            formActionMethod.UpdateStartEndDate(cmbxStrYearMonth, cmbxEndYearMonth);
+            //// デフォルト値は前月
+            //formActionMethod.UpdateStartEndDate(txtBxStrYearMonth, txtBxEndYearMonth);
 
             // ★アニメーション登録
             SetButtonAnimation(btnDisplay);
@@ -72,10 +71,11 @@ namespace あすよん月次帳票
             DataProcessor processor = new DataProcessor();
             HIZTIM = $"{DateTime.Now:yyyy/MM/dd HH:mm:ss}";
 
-            if (cmbxStrYearMonth.SelectedItem == null || cmbxEndYearMonth.SelectedItem == null)
+            // 年月入力チェック
+            if (!FormActionMethod.TryParseYearMonth(txtBxStrYearMonth, out int strY, out int strM) ||
+                !FormActionMethod.TryParseYearMonth(txtBxEndYearMonth, out int endY, out int endM))
             {
-                MessageBox.Show("開始年月と終了年月を選択してください。",
-                                "警告", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                MessageBox.Show("年月は6桁の数字(yyyyMM)で入力してください。", "警告", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 return;
             }
             // 会社未選択NG
@@ -122,16 +122,17 @@ namespace あすよん月次帳票
 
             // チェック状態取得
             var selCompanies = FormActionMethod.GetCompany(chkBxOhno, chkBxSundus, chkBxSuncar); // 会社
-            var selBumons = chkLBxBumon.CheckedItems.Cast<string>().Select(x => x.Split(':')[0]).ToList();  // 部門
-            var selSelleres = FormActionMethod.GetSallerOrSupplier(chkLbxSaller);  // 販売先
-            var selSupplieres = FormActionMethod.GetSallerOrSupplier(chkLbxSupplier);  // 仕入先
+            var selBumons = FormActionMethod.GetSelectedBumons(listBxBumon);  // 部門（先頭空白行は無視して取得）
+            var selSelleres = FormActionMethod.GetSallerOrSupplier(listBxSaller);  // 販売先 （先頭空白行は無視）
+            var selSupplieres = FormActionMethod.GetSallerOrSupplier(listBxSupplier);  // 仕入先 （先頭空白行は無視）
             var selSlCategories = FormActionMethod.GetSalseProduct(chkBxSl, chkBxPr, chkBxIv, chkBxSalesAll);  // 販売区分
             var (selSlPrProducts, selIvProducts) = FormActionMethod.GetProduct(chkBxRawMaterials, chkBxSemiFinProducts,
                                                           chkBxProduct, chkBxProcess, chkBxProAll,
                                                           chkBxOhno, chkBxSundus, chkBxSuncar);  // 商品区分(在庫)
 
-            // コンボボックスから期間を取得
-            (startDate, endDate) = formActionMethod.UpdateStartEndDate(cmbxStrYearMonth, cmbxEndYearMonth);
+            // 開始・終了日付取得
+            (string startDate, string endDate) = FormActionMethod.GetStartEndDate(strY, strM);
+            (string _, string end) = FormActionMethod.GetStartEndDate(endY, endM);
 
             // 各データ取得(売上,仕入)
             DataTable ohnoSales = null, ohnoPurchase = null, ohnoStock = null;
@@ -384,14 +385,13 @@ namespace あすよん月次帳票
 
         private void Company_CheckedChanged(object sender, EventArgs e)
         {
-            FormActionMethod.SelectCompany_Bumon(chkBxOhno, chkBxSundus, chkBxSuncar, chkLBxBumon);
+            FormActionMethod.SelectCompany_Bumon(chkBxOhno, chkBxSundus, chkBxSuncar, listBxBumon);
         }
+               
 
-
-        // ItemCheck はまだ反映前なので、次のタイミングで処理
-        private void chkLBxBumon_ItemCheck(object sender, ItemCheckEventArgs e)
+        private void listBxBumon_selectedIndexChanged(object sender, EventArgs e)
         {
-            FormActionMethod.ShowBumon(this, chkLBxBumon, e, chkLbxSaller, chkLbxSupplier, chkBxOhno, chkBxSundus, chkBxSuncar);
+            FormActionMethod.ShowBumon(this, listBxBumon, listBxSaller, listBxSupplier, chkBxOhno, chkBxSundus, chkBxSuncar);
         }
 
         private void chkDataType(object sender, EventArgs e)
@@ -422,6 +422,15 @@ namespace あすよん月次帳票
             chkBxProcess.Enabled = !showAll;
         }
 
+        private void TxtBxYearMonth_KeyPress(object sender, KeyPressEventArgs e)
+        {
+            // 数字とバックスペースのみ許可
+            if (!char.IsDigit(e.KeyChar) && e.KeyChar != (char)Keys.Back)
+            {
+                e.Handled = true;
+            }
+        }
+
         private void ApplySnowManColors()
         {
             // フォーム全体の背景
@@ -441,6 +450,7 @@ namespace あすよん月次帳票
             lbBumon.ForeColor = ColorManager.MemeBase;
             lbCompany.ForeColor = ColorManager.MemeBase;
             lbSymbol1.ForeColor = ColorManager.MemeBase;
+            label2.ForeColor = ColorManager.MemeBase;
 
             // DataGridView に色を適用
             StyleDataGrid(dgvDataOhno, ColorManager.KojiDark1, Color.FromArgb(245, 240, 220), ColorManager.KojiLight2);   

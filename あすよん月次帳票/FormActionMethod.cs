@@ -6,6 +6,7 @@ using System.Data;
 using System.IO;
 using System.Linq;
 using System.Text.Json;
+using System.Text.RegularExpressions;
 using System.Windows.Forms;
 
 namespace あすよん月次帳票
@@ -161,35 +162,64 @@ namespace あすよん月次帳票
             cmbxEndYearMonth.SelectedItem = beforeYm;
         }
 
-        public (string sd, string ed) UpdateStartEndDate(ComboBox cmbxStrYearMonth,ComboBox cmbxEndYearMonth)
+        public (string sd, string ed) UpdateStartEndDate(TextBox txtBxStrYearMonth,TextBox txtBxEndYearMonth)
         {
-            if (cmbxStrYearMonth.SelectedItem == null || cmbxEndYearMonth.SelectedItem == null) return(null, null);
+            string strInput = txtBxStrYearMonth.Text.Trim();
+            string endInput = txtBxEndYearMonth.Text.Trim();
 
-            string selectedStr = cmbxStrYearMonth.SelectedItem.ToString();
-            string selectedEnd = cmbxEndYearMonth.SelectedItem.ToString();
+            // yyyyMM形式のチェック
+            if (!Regex.IsMatch(strInput, @"^\d{6}$"))
+            {
+                MessageBox.Show("開始年月の形式が不正です。YYYYMM 形式で入力してください。", "警告", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                return (null, null);
+            }
 
-            return UpdateStEnDate(selectedStr, selectedEnd);
-        }
+            if (!Regex.IsMatch(endInput, @"^\d{6}$"))
+            {
+                MessageBox.Show("終了年月の形式が不正です。YYYYMM 形式で入力してください。", "警告", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                return (null, null);
+            }
 
-        public (string sd, string ed) UpdateStEnDate(string selStr, string selEnd)
-        {
-            string[] partsStr = selStr.Split(new char[] { '年', '月' }, StringSplitOptions.RemoveEmptyEntries);
-            string[] partsEnd = selEnd.Split(new char[] { '年', '月' }, StringSplitOptions.RemoveEmptyEntries);
+            // DateTimeに変換（yyyyMM → yyyy/MM/01）
+            DateTime start = DateTime.ParseExact(strInput, "yyyyMM", null);
+            DateTime end = DateTime.ParseExact(endInput, "yyyyMM", null);
 
-            int strYear = int.Parse(partsStr[0]);
-            int strMonth = int.Parse(partsStr[1]);
-            int endYear = int.Parse(partsEnd[0]);
-            int endMonth = int.Parse(partsEnd[1]);
-
-            // startDateは月初
-            string sd = new DateTime(strYear, strMonth, 1).ToString("yyyyMMdd");
-            // endDateは月末(その月の最終日を自動取得)
-            int lastDay = DateTime.DaysInMonth(endYear, endMonth);
-            string ed = new DateTime(endYear, endMonth, lastDay).ToString("yyyyMMdd");
+            string sd = start.ToString("yyyyMMdd"); // 月初
+            int lastDay = DateTime.DaysInMonth(end.Year, end.Month);
+            string ed = new DateTime(end.Year, end.Month, lastDay).ToString("yyyyMMdd"); // 月末
 
             return (sd, ed);
         }
 
+        public static bool TryParseYearMonth(TextBox txtBox, out int year, out int month)
+        {
+            year = 0;
+            month = 0;
+
+            string input = txtBox.Text.Trim();
+
+            // yyyyMM 6桁の数字かチェック
+            if (!Regex.IsMatch(input, @"^\d{6}$"))
+                return false;
+
+            year = int.Parse(input.Substring(0, 4));
+            month = int.Parse(input.Substring(4, 2));
+
+            // 月が1～12かチェック
+            if (month < 1 || month > 12)
+                return false;
+
+            return true;
+        }
+
+        // 年月から yyyyMMdd の開始日・終了日を取得
+        public static (string startDate, string endDate) GetStartEndDate(int year, int month)
+        {
+            string startDate = new DateTime(year, month, 1).ToString("yyyyMMdd");
+            int lastDay = DateTime.DaysInMonth(year, month);
+            string endDate = new DateTime(year, month, lastDay).ToString("yyyyMMdd");
+            return (startDate, endDate);
+        }
 
         public static bool CheckAndLockSimulation(string currentUID, string lockFilePath, string logFilePath, int lockMinutes)
         {
@@ -258,7 +288,7 @@ namespace あすよん月次帳票
             });
         }
 
-        public static void ReleaseSimulationLock(string currentUID, string lockFilePath, string logFilePath)
+        public static bool ReleaseSimulationLock(string currentUID, string lockFilePath, string logFilePath)
         {
             try
             {
@@ -274,12 +304,17 @@ namespace あすよん月次帳票
                         File.WriteAllLines(lockFilePath, lines);
 
                         AppendLog(logFilePath, $"RELEASED by {currentUID}");
+
+                        return true;
                     }
+                    return false; // 他人のロックは解除しない
                 }
+                return false; // ロックファイルが存在しない
             }
             catch (Exception ex)
             {
                 MessageBox.Show($"ロック解除中にエラーが発生しました：\n{ex.Message}", "エラー");
+                return false;
             }
         }
 
@@ -543,73 +578,80 @@ namespace あすよん月次帳票
             if (chkBxSalesAll.Checked) selectedSlProduct.AddRange(new string[] { "売上", "仕入", "在庫" });
             return selectedSlProduct;
         }
-        public static List<string> GetSallerOrSupplier(CheckedListBox chkLbx)
+
+        // 部門リスト用（空白行ガード付き）
+        public static List<string> GetSelectedBumons(ListBox listBxBumon)
         {
-            return chkLbx.CheckedItems.Cast<string>()
-                      .Select(x =>
-                      {
-                          // 例: "[00123] サンプル㈱" → "00123"
-                          var start = x.IndexOf('[') + 1;
-                          var end = x.IndexOf(']');
-                          return x.Substring(start, end - start);
-                      })
-                      .ToList();
+            return listBxBumon.SelectedItems
+                               .Cast<string>()
+                               .Where(x => !string.IsNullOrWhiteSpace(x)) // 空白行を除外
+                               .Select(x => x.Split(':')[0]) // "コード:名前" → コード抽出
+                               .ToList();
+        }
+
+        public static List<string> GetSallerOrSupplier(ListBox listbx)
+        {
+            return listbx.SelectedItems
+                        .Cast<string>()
+                        .Where(x => !string.IsNullOrWhiteSpace(x)) // 空白行を除外
+                        .Select(x =>
+                        {
+                            // 形式チェック：空白行や [ ] が正しくない場合はスキップ
+                            if (!x.StartsWith("[") || !x.Contains("]")) return null;
+
+                            var start = x.IndexOf('[') + 1;
+                            var end = x.IndexOf(']');
+                            return x.Substring(start, end - start);
+                        })
+                        .Where(code => !string.IsNullOrEmpty(code)) // null も除外
+                        .ToList();
         }
 
 
-        public static void SelectCompany_Bumon(CheckBox chkBxOhno, CheckBox chkBxSundus, CheckBox chkBxSuncar, CheckedListBox chkLBxBumon)
+        public static void SelectCompany_Bumon(CheckBox chkBxOhno, CheckBox chkBxSundus, CheckBox chkBxSuncar, ListBox listBxBumon)
         {
-            chkLBxBumon.Items.Clear();
+            listBxBumon.Items.Clear();
 
             // 会社選択確認
             var selctedComp = FormActionMethod.GetCompany(chkBxOhno, chkBxSundus, chkBxSuncar);
 
-            // 選択された会社の部門をchkLBxBumonに追加
+            // 先頭に空白行を追加
+            listBxBumon.Items.Add(string.Empty);
+
+            // 選択された会社の部門をlistBxBumonに追加
             foreach (var bumon in JsonLoader.GetBUMONs(selctedComp.ToArray()))
             {
-                chkLBxBumon.Items.Add($"{bumon.Code}:{bumon.Name}");
+                listBxBumon.Items.Add($"{bumon.Code}:{bumon.Name}");
             }
-
-            if (chkLBxBumon.Items.Count > 0)
-                chkLBxBumon.SelectedIndex = 0;
+            listBxBumon.SelectedIndex = 0; // 空白行を選択状態にする
         }
 
-        public static void ShowBumon(Form form, CheckedListBox chkLBxBumon, ItemCheckEventArgs e,
-                                     CheckedListBox chkLbxSaller, CheckedListBox chkLbxSupplier,
+        public static void ShowBumon(Form form, ListBox listBxBumon, ListBox listBxSaller, ListBox listBxSupplier,
                                      CheckBox chkBxOhno, CheckBox chkBxSundus, CheckBox chkBxSuncar)
         {
-            form.BeginInvoke(new System.Action(() =>
-            {
-                var selBumon = chkLBxBumon.CheckedItems
-                    .Cast<string>()
-                    .Select(item => item.Split(':')[0])
-                    .ToList();
+            // Invokeで後回しにしなくてOK（選択状態はすでに反映済み）
+            var selBumon = listBxBumon.SelectedItems
+                .Cast<string>()
+                .Select(item => item.Split(':')[0])
+                .ToList();
 
-                string changingItem = chkLBxBumon.Items[e.Index].ToString().Split(':')[0];
-                if (e.NewValue == CheckState.Checked)
-                {
-                    // 今チェックしようとしているアイテムを追加
-                    if (!selBumon.Contains(changingItem))
-                        selBumon.Add(changingItem);
-                }
-                else
-                {
-                    // 今チェックを外すアイテムを削除
-                    selBumon.Remove(changingItem);
-                }
-                Bumon_CheckedChanged(selBumon, chkLbxSaller, chkLbxSupplier, chkBxOhno, chkBxSundus, chkBxSuncar);
-
-            }));
+            Bumon_selectedChanged(selBumon, listBxSaller, listBxSupplier, chkBxOhno, chkBxSundus, chkBxSuncar);
         }
 
-        private static void Bumon_CheckedChanged(List<string> selBumon, CheckedListBox chkLbxSaller, CheckedListBox chkLbxSupplier,
+        private static bool isUpdating = false;
+        private static void Bumon_selectedChanged(List<string> selBumon, ListBox listBxSaller, ListBox listBxSupplier,
                                                  CheckBox chkBxOhno, CheckBox chkBxSundus, CheckBox chkBxSuncar)
         {
-            // チェックされている部門がない場合はクリアして終了
-            if (selBumon.Count == 0)
+            if (isUpdating) return; // 再入防止
+            isUpdating = true;
+
+            try
             {
-                chkLbxSaller.DataSource = null;
-                chkLbxSupplier.DataSource = null;
+                // チェックされている部門がない場合はクリアして終了
+                if (selBumon.Count == 0)
+            {
+                listBxSaller.DataSource = null;
+                listBxSupplier.DataSource = null;
                 return;
             }
 
@@ -619,26 +661,41 @@ namespace あすよん月次帳票
             // 部門ごとに販売先リストを取得
             var sallerList = new List<mf_HANBAI>();
             var supplierList = new List<mf_SHIIRE>();
+
             foreach (var comp in selctedComp)
             {
                 sallerList.AddRange(JsonLoader.GetMf_HANBAIs(comp, selBumon));
                 supplierList.AddRange(JsonLoader.GetMf_SHIIREs(comp, selBumon));
             }
 
-            // **既存アイテムをクリアしてから追加**
-            chkLbxSaller.Items.Clear();
-            chkLbxSupplier.Items.Clear();
 
-            // 販売先を表示
-            foreach (var s in sallerList.OrderBy(x => x.Name))
+
+            // **既存アイテムをクリアしてから追加**
+            listBxSaller.Items.Clear();
+            listBxSupplier.Items.Clear();
+
+            // ---販売先を表示---
+            // 先頭に空白行を追加
+            listBxSaller.Items.Add(string.Empty);
+            foreach (var s in sallerList.OrderBy(x => x.Code))
             {
-                chkLbxSaller.Items.Add($"[{s.Code}] {s.Name}", false);
+                listBxSaller.Items.Add($"[{s.Code}] {s.Name}");
             }
 
             // 仕入先を表示
-            foreach (var s in supplierList.OrderBy(x => x.Name))
+            // 先頭に空白行を追加
+            listBxSupplier.Items.Add(string.Empty);
+            foreach (var s in supplierList.OrderBy(x => x.Code))
             {
-                chkLbxSupplier.Items.Add($"[{s.Code}] {s.Name}", false);
+                listBxSupplier.Items.Add($"[{s.Code}] {s.Name}");
+            }
+            // 空白行を選択状態にする
+            listBxSaller.SelectedIndex = 0; 
+            listBxSupplier.SelectedIndex = 0;
+            }
+            finally
+            {
+                isUpdating = false; // 再入防止フラグ解除
             }
         }
 

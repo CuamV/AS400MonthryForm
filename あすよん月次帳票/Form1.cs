@@ -11,14 +11,16 @@ namespace あすよん月次帳票
 {
     public partial class Form1 : Form
     {
+        private string HIZ = DateTime.Now.ToString("yyyyMMdd");
+        private string TIM = DateTime.Now.ToString("HHmmss");
         private Label lbSituation;
 
         private string mfPath = @"\\ohnosv01\OhnoSys\099_sys\mf";
         private readonly string logPath =
             Path.Combine(Application.UserAppDataPath, "log.txt");
+        private const string LockFilePath = @"\\ohnosv01\OhnoSys\099_sys\Lock";
+        private const string LogFilePath = @"\\ohnosv01\OhnoSys\099_sys\LOG";
         
-        
-
         public Form1()
         {
             InitializeComponent();
@@ -223,6 +225,17 @@ namespace あすよん月次帳票
 
         private void btnEnd_Click(object sender, EventArgs e)
         {
+            string lockFilePath = Path.Combine(LockFilePath, "LOCK_sim.txt");
+            string logFilePath = Path.Combine(LogFilePath, $@"{HIZ}\LOG_Simulation.txt");
+            string currentUserID = Properties.Settings.Default.UserID;
+
+            if (File.Exists(lockFilePath))
+            {
+                // ロックファイルが存在する場合、ロックを解除+削除
+                var flg = FormActionMethod.ReleaseSimulationLock(currentUserID, lockFilePath, logFilePath);
+                if(flg)
+                File.Delete(lockFilePath);
+            }
             Application.Exit();
         }
     }

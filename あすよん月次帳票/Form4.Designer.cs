@@ -52,27 +52,30 @@ namespace あすよん月次帳票
             this.chkBxIv = new System.Windows.Forms.CheckBox();
             this.chkBxSalesAll = new System.Windows.Forms.CheckBox();
             this.grpBxOrganization = new System.Windows.Forms.GroupBox();
-            this.chkLbxSupplier = new System.Windows.Forms.CheckedListBox();
-            this.chkLbxSaller = new System.Windows.Forms.CheckedListBox();
+            this.listBxSupplier = new System.Windows.Forms.ListBox();
+            this.listBxSaller = new System.Windows.Forms.ListBox();
+            this.listBxBumon = new System.Windows.Forms.ListBox();
             this.chkBxSuncar = new System.Windows.Forms.CheckBox();
-            this.chkLBxBumon = new System.Windows.Forms.CheckedListBox();
             this.lbSupplier = new System.Windows.Forms.Label();
             this.lbSaller = new System.Windows.Forms.Label();
             this.lbBumon = new System.Windows.Forms.Label();
             this.chkBxOhno = new System.Windows.Forms.CheckBox();
             this.chkBxSundus = new System.Windows.Forms.CheckBox();
             this.lbCompany = new System.Windows.Forms.Label();
-            this.cmbxEndYearMonth = new System.Windows.Forms.ComboBox();
-            this.lbSymbol1 = new System.Windows.Forms.Label();
-            this.cmbxStrYearMonth = new System.Windows.Forms.ComboBox();
             this.lbYearMonth = new System.Windows.Forms.Label();
             this.btnForm1Back = new System.Windows.Forms.Button();
             this.lbTitleExportExcel = new System.Windows.Forms.Label();
             this.pictureBox1 = new System.Windows.Forms.PictureBox();
+            this.groupBox1 = new System.Windows.Forms.GroupBox();
+            this.txtBxEndYearMonth = new System.Windows.Forms.TextBox();
+            this.txtBxStrYearMonth = new System.Windows.Forms.TextBox();
+            this.label1 = new System.Windows.Forms.Label();
+            this.label2 = new System.Windows.Forms.Label();
             this.grpBxCondition.SuspendLayout();
             this.grpBxData.SuspendLayout();
             this.grpBxOrganization.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).BeginInit();
+            this.groupBox1.SuspendLayout();
             this.SuspendLayout();
             // 
             // btnExportExcel
@@ -108,12 +111,10 @@ namespace あすよん月次帳票
             // 
             // grpBxCondition
             // 
+            this.grpBxCondition.Controls.Add(this.label2);
+            this.grpBxCondition.Controls.Add(this.groupBox1);
             this.grpBxCondition.Controls.Add(this.grpBxData);
             this.grpBxCondition.Controls.Add(this.grpBxOrganization);
-            this.grpBxCondition.Controls.Add(this.cmbxEndYearMonth);
-            this.grpBxCondition.Controls.Add(this.lbSymbol1);
-            this.grpBxCondition.Controls.Add(this.cmbxStrYearMonth);
-            this.grpBxCondition.Controls.Add(this.lbYearMonth);
             this.grpBxCondition.Font = new System.Drawing.Font("Meiryo UI", 14.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(128)));
             this.grpBxCondition.Location = new System.Drawing.Point(15, 155);
             this.grpBxCondition.Name = "grpBxCondition";
@@ -273,10 +274,10 @@ namespace あすよん月次帳票
             // 
             // grpBxOrganization
             // 
-            this.grpBxOrganization.Controls.Add(this.chkLbxSupplier);
-            this.grpBxOrganization.Controls.Add(this.chkLbxSaller);
+            this.grpBxOrganization.Controls.Add(this.listBxSupplier);
+            this.grpBxOrganization.Controls.Add(this.listBxSaller);
+            this.grpBxOrganization.Controls.Add(this.listBxBumon);
             this.grpBxOrganization.Controls.Add(this.chkBxSuncar);
-            this.grpBxOrganization.Controls.Add(this.chkLBxBumon);
             this.grpBxOrganization.Controls.Add(this.lbSupplier);
             this.grpBxOrganization.Controls.Add(this.lbSaller);
             this.grpBxOrganization.Controls.Add(this.lbBumon);
@@ -291,23 +292,41 @@ namespace あすよん月次帳票
             this.grpBxOrganization.TabStop = false;
             this.grpBxOrganization.Text = "組織";
             // 
-            // chkLbxSupplier
+            // listBxSupplier
             // 
-            this.chkLbxSupplier.Font = new System.Drawing.Font("Meiryo UI", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(128)));
-            this.chkLbxSupplier.FormattingEnabled = true;
-            this.chkLbxSupplier.Location = new System.Drawing.Point(256, 307);
-            this.chkLbxSupplier.Name = "chkLbxSupplier";
-            this.chkLbxSupplier.Size = new System.Drawing.Size(220, 130);
-            this.chkLbxSupplier.TabIndex = 33;
+            this.listBxSupplier.Font = new System.Drawing.Font("Meiryo UI", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(128)));
+            this.listBxSupplier.FormattingEnabled = true;
+            this.listBxSupplier.ItemHeight = 17;
+            this.listBxSupplier.Location = new System.Drawing.Point(256, 307);
+            this.listBxSupplier.Name = "listBxSupplier";
+            this.listBxSupplier.SelectionMode = System.Windows.Forms.SelectionMode.MultiExtended;
+            this.listBxSupplier.Size = new System.Drawing.Size(219, 140);
+            this.listBxSupplier.TabIndex = 63;
+            this.listBxSupplier.SelectedIndexChanged += new System.EventHandler(this.listBoxBumon_SelectedIndexChanged);
             // 
-            // chkLbxSaller
+            // listBxSaller
             // 
-            this.chkLbxSaller.Font = new System.Drawing.Font("Meiryo UI", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(128)));
-            this.chkLbxSaller.FormattingEnabled = true;
-            this.chkLbxSaller.Location = new System.Drawing.Point(18, 307);
-            this.chkLbxSaller.Name = "chkLbxSaller";
-            this.chkLbxSaller.Size = new System.Drawing.Size(220, 130);
-            this.chkLbxSaller.TabIndex = 32;
+            this.listBxSaller.Font = new System.Drawing.Font("Meiryo UI", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(128)));
+            this.listBxSaller.FormattingEnabled = true;
+            this.listBxSaller.ItemHeight = 17;
+            this.listBxSaller.Location = new System.Drawing.Point(16, 307);
+            this.listBxSaller.Name = "listBxSaller";
+            this.listBxSaller.SelectionMode = System.Windows.Forms.SelectionMode.MultiExtended;
+            this.listBxSaller.Size = new System.Drawing.Size(220, 140);
+            this.listBxSaller.TabIndex = 62;
+            this.listBxSaller.SelectedIndexChanged += new System.EventHandler(this.listBoxBumon_SelectedIndexChanged);
+            // 
+            // listBxBumon
+            // 
+            this.listBxBumon.Font = new System.Drawing.Font("Meiryo UI", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(128)));
+            this.listBxBumon.FormattingEnabled = true;
+            this.listBxBumon.ItemHeight = 17;
+            this.listBxBumon.Location = new System.Drawing.Point(20, 148);
+            this.listBxBumon.Name = "listBxBumon";
+            this.listBxBumon.SelectionMode = System.Windows.Forms.SelectionMode.MultiExtended;
+            this.listBxBumon.Size = new System.Drawing.Size(221, 106);
+            this.listBxBumon.TabIndex = 60;
+            this.listBxBumon.SelectedIndexChanged += new System.EventHandler(this.listBoxBumon_SelectedIndexChanged);
             // 
             // chkBxSuncar
             // 
@@ -320,16 +339,6 @@ namespace あすよん月次帳票
             this.chkBxSuncar.Text = "サンミックカーペット";
             this.chkBxSuncar.UseVisualStyleBackColor = true;
             this.chkBxSuncar.Click += new System.EventHandler(this.Company_CheckedChanged);
-            // 
-            // chkLBxBumon
-            // 
-            this.chkLBxBumon.Font = new System.Drawing.Font("Meiryo UI", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(128)));
-            this.chkLBxBumon.FormattingEnabled = true;
-            this.chkLBxBumon.Location = new System.Drawing.Point(20, 149);
-            this.chkLBxBumon.Name = "chkLBxBumon";
-            this.chkLBxBumon.Size = new System.Drawing.Size(211, 99);
-            this.chkLBxBumon.TabIndex = 30;
-            this.chkLBxBumon.ItemCheck += new System.Windows.Forms.ItemCheckEventHandler(this.chkLBxBumon_ItemCheck);
             // 
             // lbSupplier
             // 
@@ -395,38 +404,11 @@ namespace あすよん月次帳票
             this.lbCompany.TabIndex = 22;
             this.lbCompany.Text = "【会社】";
             // 
-            // cmbxEndYearMonth
-            // 
-            this.cmbxEndYearMonth.Font = new System.Drawing.Font("Meiryo UI", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(128)));
-            this.cmbxEndYearMonth.FormattingEnabled = true;
-            this.cmbxEndYearMonth.Location = new System.Drawing.Point(738, 122);
-            this.cmbxEndYearMonth.Name = "cmbxEndYearMonth";
-            this.cmbxEndYearMonth.Size = new System.Drawing.Size(150, 25);
-            this.cmbxEndYearMonth.TabIndex = 27;
-            // 
-            // lbSymbol1
-            // 
-            this.lbSymbol1.AutoSize = true;
-            this.lbSymbol1.Location = new System.Drawing.Point(703, 124);
-            this.lbSymbol1.Name = "lbSymbol1";
-            this.lbSymbol1.Size = new System.Drawing.Size(29, 24);
-            this.lbSymbol1.TabIndex = 26;
-            this.lbSymbol1.Text = "～";
-            // 
-            // cmbxStrYearMonth
-            // 
-            this.cmbxStrYearMonth.Font = new System.Drawing.Font("Meiryo UI", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(128)));
-            this.cmbxStrYearMonth.FormattingEnabled = true;
-            this.cmbxStrYearMonth.Location = new System.Drawing.Point(547, 123);
-            this.cmbxStrYearMonth.Name = "cmbxStrYearMonth";
-            this.cmbxStrYearMonth.Size = new System.Drawing.Size(150, 25);
-            this.cmbxStrYearMonth.TabIndex = 14;
-            // 
             // lbYearMonth
             // 
             this.lbYearMonth.AutoSize = true;
             this.lbYearMonth.Font = new System.Drawing.Font("メイリオ", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(128)));
-            this.lbYearMonth.Location = new System.Drawing.Point(536, 99);
+            this.lbYearMonth.Location = new System.Drawing.Point(558, 55);
             this.lbYearMonth.Name = "lbYearMonth";
             this.lbYearMonth.Size = new System.Drawing.Size(61, 20);
             this.lbYearMonth.TabIndex = 9;
@@ -463,6 +445,55 @@ namespace あすよん月次帳票
             this.pictureBox1.TabIndex = 72;
             this.pictureBox1.TabStop = false;
             // 
+            // groupBox1
+            // 
+            this.groupBox1.Controls.Add(this.txtBxEndYearMonth);
+            this.groupBox1.Controls.Add(this.txtBxStrYearMonth);
+            this.groupBox1.Controls.Add(this.label1);
+            this.groupBox1.Font = new System.Drawing.Font("Meiryo UI", 11.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(128)));
+            this.groupBox1.Location = new System.Drawing.Point(571, 96);
+            this.groupBox1.Name = "groupBox1";
+            this.groupBox1.Size = new System.Drawing.Size(290, 62);
+            this.groupBox1.TabIndex = 67;
+            this.groupBox1.TabStop = false;
+            this.groupBox1.Text = "〚 取得期間 〛";
+            // 
+            // txtBxEndYearMonth
+            // 
+            this.txtBxEndYearMonth.Location = new System.Drawing.Point(170, 26);
+            this.txtBxEndYearMonth.Name = "txtBxEndYearMonth";
+            this.txtBxEndYearMonth.Size = new System.Drawing.Size(106, 27);
+            this.txtBxEndYearMonth.TabIndex = 72;
+            this.txtBxEndYearMonth.KeyPress += new System.Windows.Forms.KeyPressEventHandler(this.TxtBxYearMonth_KeyPress);
+            // 
+            // txtBxStrYearMonth
+            // 
+            this.txtBxStrYearMonth.Location = new System.Drawing.Point(15, 26);
+            this.txtBxStrYearMonth.Name = "txtBxStrYearMonth";
+            this.txtBxStrYearMonth.Size = new System.Drawing.Size(106, 27);
+            this.txtBxStrYearMonth.TabIndex = 71;
+            this.txtBxStrYearMonth.KeyPress += new System.Windows.Forms.KeyPressEventHandler(this.TxtBxYearMonth_KeyPress);
+            // 
+            // label1
+            // 
+            this.label1.AutoSize = true;
+            this.label1.Font = new System.Drawing.Font("Meiryo UI", 11.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(128)));
+            this.label1.Location = new System.Drawing.Point(135, 32);
+            this.label1.Name = "label1";
+            this.label1.Size = new System.Drawing.Size(24, 19);
+            this.label1.TabIndex = 40;
+            this.label1.Text = "～";
+            // 
+            // label2
+            // 
+            this.label2.AutoSize = true;
+            this.label2.Font = new System.Drawing.Font("Meiryo UI", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(128)));
+            this.label2.Location = new System.Drawing.Point(568, 76);
+            this.label2.Name = "label2";
+            this.label2.Size = new System.Drawing.Size(287, 17);
+            this.label2.TabIndex = 68;
+            this.label2.Text = "●取得期間はyyyymmの6桁年月で指定してください";
+            // 
             // Form4
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 12F);
@@ -470,6 +501,7 @@ namespace あすよん月次帳票
             this.ClientSize = new System.Drawing.Size(950, 680);
             this.Controls.Add(this.lbTitleExportExcel);
             this.Controls.Add(this.pictureBox1);
+            this.Controls.Add(this.lbYearMonth);
             this.Controls.Add(this.btnForm1Back);
             this.Controls.Add(this.grpBxCondition);
             this.Controls.Add(this.lbSituation);
@@ -488,6 +520,8 @@ namespace あすよん月次帳票
             this.grpBxOrganization.ResumeLayout(false);
             this.grpBxOrganization.PerformLayout();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).EndInit();
+            this.groupBox1.ResumeLayout(false);
+            this.groupBox1.PerformLayout();
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -510,19 +544,13 @@ namespace あすよん月次帳票
         private System.Windows.Forms.CheckBox chkBxIv;
         private System.Windows.Forms.CheckBox chkBxSalesAll;
         private System.Windows.Forms.GroupBox grpBxOrganization;
-        private System.Windows.Forms.CheckedListBox chkLbxSupplier;
-        private System.Windows.Forms.CheckedListBox chkLbxSaller;
         private System.Windows.Forms.CheckBox chkBxSuncar;
-        private System.Windows.Forms.CheckedListBox chkLBxBumon;
         private System.Windows.Forms.Label lbSupplier;
         private System.Windows.Forms.Label lbSaller;
         private System.Windows.Forms.Label lbBumon;
         private System.Windows.Forms.CheckBox chkBxOhno;
         private System.Windows.Forms.CheckBox chkBxSundus;
         private System.Windows.Forms.Label lbCompany;
-        private System.Windows.Forms.ComboBox cmbxEndYearMonth;
-        private System.Windows.Forms.Label lbSymbol1;
-        private System.Windows.Forms.ComboBox cmbxStrYearMonth;
         private System.Windows.Forms.Label lbYearMonth;
         private System.Windows.Forms.Button btnForm1Back;
         private System.Windows.Forms.CheckBox chkBxProcess;
@@ -706,5 +734,13 @@ namespace あすよん月次帳票
 
         private PictureBox pictureBox1;
         private Label lbTitleExportExcel;
+        private ListBox listBxBumon;
+        private ListBox listBxSupplier;
+        private ListBox listBxSaller;
+        private GroupBox groupBox1;
+        private TextBox txtBxEndYearMonth;
+        private TextBox txtBxStrYearMonth;
+        private Label label1;
+        private Label label2;
     }
 }
