@@ -12,6 +12,7 @@ namespace あすよん月次帳票
     {
         private void InitializeComponent()
         {
+            this.components = new System.ComponentModel.Container();
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(Form1));
             this.lbSituation = new System.Windows.Forms.Label();
             this.listBxSituation = new System.Windows.Forms.ListBox();
@@ -22,6 +23,7 @@ namespace あすよん月次帳票
             this.lnkLbExport = new System.Windows.Forms.LinkLabel();
             this.lnkLbDisplay = new System.Windows.Forms.LinkLabel();
             this.lnkLbMaster = new System.Windows.Forms.LinkLabel();
+            this.timerReleaseLock = new System.Windows.Forms.Timer(this.components);
             this.SuspendLayout();
             // 
             // lbSituation
@@ -124,6 +126,10 @@ namespace あすよん月次帳票
             this.lnkLbMaster.TabStop = true;
             this.lnkLbMaster.Text = "● マスタ更新";
             this.lnkLbMaster.LinkClicked += new System.Windows.Forms.LinkLabelLinkClickedEventHandler(this.lnkLbMaster_LinkClicked);
+            // 
+            // timerReleaseLock
+            // 
+            this.timerReleaseLock.Interval = 60000;
             // 
             // Form1
             // 
@@ -338,5 +344,7 @@ namespace あすよん月次帳票
         private LinkLabel lnkLbExport;
         private LinkLabel lnkLbDisplay;
         private LinkLabel lnkLbMaster;
+        private Timer timerReleaseLock;
+        private System.ComponentModel.IContainer components;
     }
 }

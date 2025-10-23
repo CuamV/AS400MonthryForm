@@ -75,6 +75,8 @@ namespace あすよん月次帳票
             this.btnForm1Back = new System.Windows.Forms.Button();
             this.grpBxBtn = new System.Windows.Forms.GroupBox();
             this.groupBox1 = new System.Windows.Forms.GroupBox();
+            this.txtBxEndYearMonth = new System.Windows.Forms.TextBox();
+            this.txtBxStrYearMonth = new System.Windows.Forms.TextBox();
             this.groupBox2 = new System.Windows.Forms.GroupBox();
             this.listBxSupplier = new System.Windows.Forms.ListBox();
             this.listBxSaller = new System.Windows.Forms.ListBox();
@@ -83,8 +85,6 @@ namespace あすよん月次帳票
             this.chkBxProcess = new System.Windows.Forms.CheckBox();
             this.lbTitleDisplay = new System.Windows.Forms.Label();
             this.pictureBox1 = new System.Windows.Forms.PictureBox();
-            this.txtBxStrYearMonth = new System.Windows.Forms.TextBox();
-            this.txtBxEndYearMonth = new System.Windows.Forms.TextBox();
             this.label2 = new System.Windows.Forms.Label();
             ((System.ComponentModel.ISupportInitialize)(this.dgvDataOhno)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.dgvDataScar)).BeginInit();
@@ -100,6 +100,7 @@ namespace あすよん月次帳票
             // dgvDataOhno
             // 
             this.dgvDataOhno.AllowDrop = true;
+            this.dgvDataOhno.ClipboardCopyMode = System.Windows.Forms.DataGridViewClipboardCopyMode.EnableAlwaysIncludeHeaderText;
             this.dgvDataOhno.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
             this.dgvDataOhno.Location = new System.Drawing.Point(503, 30);
             this.dgvDataOhno.Margin = new System.Windows.Forms.Padding(4);
@@ -110,6 +111,7 @@ namespace あすよん月次帳票
             // 
             // dgvDataScar
             // 
+            this.dgvDataScar.ClipboardCopyMode = System.Windows.Forms.DataGridViewClipboardCopyMode.EnableAlwaysIncludeHeaderText;
             this.dgvDataScar.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
             this.dgvDataScar.Location = new System.Drawing.Point(503, 423);
             this.dgvDataScar.Margin = new System.Windows.Forms.Padding(4);
@@ -120,6 +122,7 @@ namespace あすよん月次帳票
             // 
             // dgvDataSdus
             // 
+            this.dgvDataSdus.ClipboardCopyMode = System.Windows.Forms.DataGridViewClipboardCopyMode.EnableAlwaysIncludeHeaderText;
             this.dgvDataSdus.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
             this.dgvDataSdus.Location = new System.Drawing.Point(503, 228);
             this.dgvDataSdus.Margin = new System.Windows.Forms.Padding(4);
@@ -130,6 +133,7 @@ namespace あすよん月次帳票
             // 
             // dgvDataIV
             // 
+            this.dgvDataIV.ClipboardCopyMode = System.Windows.Forms.DataGridViewClipboardCopyMode.EnableAlwaysIncludeHeaderText;
             this.dgvDataIV.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
             this.dgvDataIV.Location = new System.Drawing.Point(503, 613);
             this.dgvDataIV.Margin = new System.Windows.Forms.Padding(4);
@@ -425,6 +429,22 @@ namespace あすよん月次帳票
             this.groupBox1.TabStop = false;
             this.groupBox1.Text = "〚 表示期間 〛";
             // 
+            // txtBxEndYearMonth
+            // 
+            this.txtBxEndYearMonth.Location = new System.Drawing.Point(170, 26);
+            this.txtBxEndYearMonth.Name = "txtBxEndYearMonth";
+            this.txtBxEndYearMonth.Size = new System.Drawing.Size(106, 27);
+            this.txtBxEndYearMonth.TabIndex = 72;
+            this.txtBxEndYearMonth.KeyPress += new System.Windows.Forms.KeyPressEventHandler(this.TxtBxYearMonth_KeyPress);
+            // 
+            // txtBxStrYearMonth
+            // 
+            this.txtBxStrYearMonth.Location = new System.Drawing.Point(15, 26);
+            this.txtBxStrYearMonth.Name = "txtBxStrYearMonth";
+            this.txtBxStrYearMonth.Size = new System.Drawing.Size(106, 27);
+            this.txtBxStrYearMonth.TabIndex = 71;
+            this.txtBxStrYearMonth.KeyPress += new System.Windows.Forms.KeyPressEventHandler(this.TxtBxYearMonth_KeyPress);
+            // 
             // groupBox2
             // 
             this.groupBox2.Controls.Add(this.listBxSupplier);
@@ -528,22 +548,6 @@ namespace あすよん月次帳票
             this.pictureBox1.SizeMode = System.Windows.Forms.PictureBoxSizeMode.Zoom;
             this.pictureBox1.TabIndex = 70;
             this.pictureBox1.TabStop = false;
-            // 
-            // txtBxStrYearMonth
-            // 
-            this.txtBxStrYearMonth.Location = new System.Drawing.Point(15, 26);
-            this.txtBxStrYearMonth.Name = "txtBxStrYearMonth";
-            this.txtBxStrYearMonth.Size = new System.Drawing.Size(106, 27);
-            this.txtBxStrYearMonth.TabIndex = 71;
-            this.txtBxStrYearMonth.KeyPress += new System.Windows.Forms.KeyPressEventHandler(this.TxtBxYearMonth_KeyPress);
-            // 
-            // txtBxEndYearMonth
-            // 
-            this.txtBxEndYearMonth.Location = new System.Drawing.Point(170, 26);
-            this.txtBxEndYearMonth.Name = "txtBxEndYearMonth";
-            this.txtBxEndYearMonth.Size = new System.Drawing.Size(106, 27);
-            this.txtBxEndYearMonth.TabIndex = 72;
-            this.txtBxEndYearMonth.KeyPress += new System.Windows.Forms.KeyPressEventHandler(this.TxtBxYearMonth_KeyPress);
             // 
             // label2
             // 

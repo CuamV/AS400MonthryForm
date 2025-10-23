@@ -93,6 +93,28 @@ namespace あすよん月次帳票
                 return;
             }
 
+            string sym = txtBxStrYearMonth.Text.Trim();
+            string eym = txtBxEndYearMonth.Text.Trim();
+            string nowym = DateTime.Now.ToString("yyyyMM");
+            // 商品区分(在庫)選択の場合未来月NG
+            if (chkBxSalesAll.Checked || chkBxIv.Checked)
+            {
+                if (string.Compare(sym, nowym) > 0 || string.Compare(eym, nowym) > 0)
+                {
+                    MessageBox.Show("商品区分在庫を選択する場合、未来月は指定できません。",
+                                    "警告", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                    return;
+                }
+            }
+            // 商品区分(在庫)選択と、年月複数月(過去月の複数月はOK,過去月と当月はNG)の選択NG
+            if ((chkBxSalesAll.Checked || chkBxIv.Checked) && sym != eym && (sym == nowym || eym == nowym))
+                {
+                MessageBox.Show("商品区分在庫を選択する場合、年月は当月の場合は単月で指定してください。",
+                                "警告", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                return;
+            }
+
+
             FormAnimation2 anim = null;
 
             // --- FormAnimation スレッド ---
@@ -131,8 +153,7 @@ namespace あすよん月次帳票
                                                           chkBxOhno, chkBxSundus, chkBxSuncar);  // 商品区分(在庫)
 
             // 開始・終了日付取得
-            (string startDate, string endDate) = FormActionMethod.GetStartEndDate(strY, strM);
-            (string _, string end) = FormActionMethod.GetStartEndDate(endY, endM);
+            (string startDate, string endDate) = FormActionMethod.GetStartEndDate(strY, strM, endY, endM);
 
             // 各データ取得(売上,仕入)
             DataTable ohnoSales = null, ohnoPurchase = null, ohnoStock = null;
@@ -350,10 +371,10 @@ namespace あすよん月次帳票
 
             
             // Form1のlistBxSituationに追記
-            if (Application.OpenForms["Form1"] is Form1 form1)
-            {
-                form1.AddLog($"{HIZTIM} データ表示実行完了");
-            }
+            //if (Application.OpenForms["Form1"] is Form1 form1)
+            //{
+            //    form1.AddLog($"{HIZTIM} データ表示実行完了");
+            //}
 
             // --- 終了したらアニメーション閉じる ---
             await Task.Delay(500);

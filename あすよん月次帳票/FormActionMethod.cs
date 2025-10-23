@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.Data;
 using System.IO;
 using System.Linq;
+using System.Security.Cryptography;
 using System.Text.Json;
 using System.Text.RegularExpressions;
 using System.Windows.Forms;
@@ -18,6 +19,8 @@ namespace あすよん月次帳票
         static public string f3 = "[pf3]";  // F3(終了)
         static public string tb = "[tab]"; // Tab(カーソル次送り)
         static public string ent = "[fldext]"; // Enter(カーソル位置以降の入力exit)
+
+        private static string HIZ = DateTime.Now.ToString("yyyyMMdd");
 
         private static List<string> runtimelog = new List<string>();
 
@@ -213,16 +216,18 @@ namespace あすよん月次帳票
         }
 
         // 年月から yyyyMMdd の開始日・終了日を取得
-        public static (string startDate, string endDate) GetStartEndDate(int year, int month)
+        public static (string startDate, string endDate) GetStartEndDate(int syear, int smonth, int eyear, int emonth)
         {
-            string startDate = new DateTime(year, month, 1).ToString("yyyyMMdd");
-            int lastDay = DateTime.DaysInMonth(year, month);
-            string endDate = new DateTime(year, month, lastDay).ToString("yyyyMMdd");
+            string startDate = new DateTime(syear, smonth, 1).ToString("yyyyMMdd");
+            int lastDay = DateTime.DaysInMonth(eyear, emonth);
+            string endDate = new DateTime(eyear, emonth, lastDay).ToString("yyyyMMdd");
             return (startDate, endDate);
         }
 
-        public static bool CheckAndLockSimulation(string currentUID, string lockFilePath, string logFilePath, int lockMinutes)
+        public static bool CheckAndLockSimulation(string currentUID, string lockFilePath, string LogFilePath, int lockMinutes)
         {
+            string logFilePath = Path.Combine(LogFilePath, $@"{HIZ}\LOG_Simulation.txt");
+            string AllLogFilePath = Path.Combine(LogFilePath, $@"{HIZ}\LOG_AllSimulation.txt");
             try
             {
                 // ロックファイルのディレクトリがなければ作成
@@ -232,7 +237,7 @@ namespace あすよん月次帳票
                 if (!File.Exists(lockFilePath))
                 {
                     WriteLockFile(lockFilePath, currentUID);
-                    AppendLog(logFilePath, $"[{DateTime.Now:yyyy/MM/dd HH:mm:ss}] LOCK CREATED by {currentUID}");
+                    AppendLog(logFilePath, $"[{DateTime.Now:yyyy/MM/dd HH:mm:ss}] LOCKED by {currentUID}");
                     return true;
                 }
                 // ファイルが存在する＝他のユーザーが使用中(ロック中)
@@ -288,28 +293,52 @@ namespace あすよん月次帳票
             });
         }
 
-        public static bool ReleaseSimulationLock(string currentUID, string lockFilePath, string logFilePath)
+        public static bool ReleaseSimulationLock(string currentUID, string lockFilePath, string LogFilePath, bool timflg)
         {
+            string logFilePath = Path.Combine(LogFilePath, $@"{HIZ}\LOG_Simulation.txt");
+            string AllLogFilePath = Path.Combine(LogFilePath, $@"{HIZ}\LOG_AllSimulation.txt");
+            string HIZTIM = $"{DateTime.Now:yyyy/MM/dd HH:mm:ss}";
             try
             {
-                if (File.Exists(lockFilePath))
-                {
-                    var lines = File.ReadAllLines(lockFilePath);
-                    string lockUser = lines.FirstOrDefault(l => l.StartsWith("UserID="))?.Split('=')[1];
+                if (!File.Exists(lockFilePath))
+                    return false;
 
-                    // 実行者本人のときだけ「解除状態」に変更
-                    if (lockUser == currentUID)
+                var lines = File.ReadAllLines(lockFilePath);
+                string lockUser = lines.FirstOrDefault(l => l.StartsWith("UserID="))?.Split('=')[1];
+                string timeLine = lines.FirstOrDefault(l => l.StartsWith("Time="))?.Split('=')[1];
+
+                // "Time=" の行に書かれている時刻を取得
+                if (!DateTime.TryParse(timeLine, out DateTime lockTime))
+                    lockTime = DateTime.Now;
+
+                // ロックファイル作成（または更新）から10分経過しているか判定
+                bool isExpired = (DateTime.Now - lockTime) >= TimeSpan.FromMinutes(10);
+
+                // 実行者本人のときだけ「解除状態」に変更
+                if (lockUser == currentUID) 
+                {
+                    if (timflg)
                     {
                         lines[3] = "Status=RELEASED";
                         File.WriteAllLines(lockFilePath, lines);
-
-                        AppendLog(logFilePath, $"RELEASED by {currentUID}");
-
-                        return true;
                     }
-                    return false; // 他人のロックは解除しない
+
+                    AppendLog(logFilePath, $"RELEASED by {currentUID}");
+                    if (Application.OpenForms["Form1"] is Form1 form1) form1.AddLog2($"{HIZTIM} 実行者ID:{currentUID} ロック解除");
+                    return true;
                 }
-                return false; // ロックファイルが存在しない
+                else if (isExpired)
+                {
+                    if (timflg)
+                    {
+                        lines[3] = "Status=RELEASED";
+                        File.WriteAllLines(lockFilePath, lines);
+                    }
+
+                    AppendLog(logFilePath, $"RELEASED by {currentUID}");
+                    if (Application.OpenForms["Form1"] is Form1 form1) form1.AddLog2($"{HIZTIM} 実行者ID:{currentUID} 最終実行から10分経過のためロック解除");
+                }
+                return false; // 他人のロックは解除しない
             }
             catch (Exception ex)
             {
@@ -761,6 +790,7 @@ namespace あすよん月次帳票
                 listBxSituation.Items.Add(logMessage);
             }
         }
+
 
         /// <summary>
         /// 各Formを表示するたびに既存ログもlistBxSituationに表示

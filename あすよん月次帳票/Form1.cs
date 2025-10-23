@@ -1,10 +1,15 @@
-﻿using System;
+﻿//using Microsoft.Office.Interop.Excel;
+using System;
 using System.Drawing;
 using System.IO;
+using System.Linq;
+using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
-using Button = System.Windows.Forms.Button;
+using Action = System.Action;
+using Application = System.Windows.Forms.Application;
+//using Button = System.Windows.Forms.Button;
 using Label = System.Windows.Forms.Label;
 
 namespace あすよん月次帳票
@@ -51,9 +56,22 @@ namespace あすよん月次帳票
             File.AppendAllText(logPath, message + Environment.NewLine);
         }
 
+        public void AddLog2(string message)
+        {
+            string logFilePath = Path.Combine(LogFilePath, $@"{HIZ}\LOG_AllSimulation.txt");
+            // Form1のリストに追加
+            listBxSituation.Items.Add($"{message}");
+            // ファイルに保存
+            File.AppendAllText(logFilePath, message + Environment.NewLine);
+        }
+
         // 過去3日間のログ読込
         private void LoadLogs()
         {
+            listBxSituation.Items.Clear();
+
+            string AllLogFilePath = Path.Combine(LogFilePath, $@"{HIZ}\LOG_AllSimulation.txt");
+            // --- 個人ログの読込 ---
             if (!File.Exists(logPath)) return;
 
             var lines = File.ReadAllLines(logPath);
@@ -62,13 +80,47 @@ namespace あすよん月次帳票
             foreach (var line in lines)
             {
                 // ログの日付部分をバース
-                if(DateTime.TryParse(line.Substring(0,16),out DateTime logDate))
+                if(DateTime.TryParse(line.Substring(0,10),out DateTime logDate))
                 {
                     if (logDate > threshold)
                     {
                         listBxSituation.Items.Add(line);
                     }
                 }
+            }
+            // --- 全体ログの読込 ---
+            if (!File.Exists(AllLogFilePath)) return;
+            var allLines = File.ReadAllLines(AllLogFilePath);
+            foreach (var line in allLines)
+            {
+                // ログの日付部分をバース
+                if (DateTime.TryParse(line.Substring(0, 10), out DateTime logDate))
+                {
+                    if (logDate > threshold)
+                    {
+                        listBxSituation.Items.Add(line);
+                    }
+                }
+            }
+
+            var sorted = listBxSituation.Items.Cast<string>()
+                .OrderBy(line =>
+                {
+                    if (DateTime.TryParse(line.Substring(line.IndexOf('2'), 16), out var dt)) return dt;
+                    return DateTime.MinValue;
+                })
+                .ToList();
+
+            listBxSituation.Items.Clear();
+            foreach (var s in sorted)
+                listBxSituation.Items.Add(s);
+
+            // listBxSituation.Itemsが0件の場合、ログファイルをリネームして空ファイル再作成
+            if (listBxSituation.Items.Count == 0)
+            {
+                string backupLogPath = logPath.Replace("log.txt", $"log_backup_{HIZ}_{TIM}.txt");
+                File.Move(logPath, backupLogPath);
+                File.Create(logPath).Close();
             }
         }
 
@@ -226,17 +278,26 @@ namespace あすよん月次帳票
         private void btnEnd_Click(object sender, EventArgs e)
         {
             string lockFilePath = Path.Combine(LockFilePath, "LOCK_sim.txt");
-            string logFilePath = Path.Combine(LogFilePath, $@"{HIZ}\LOG_Simulation.txt");
             string currentUserID = Properties.Settings.Default.UserID;
 
             if (File.Exists(lockFilePath))
             {
                 // ロックファイルが存在する場合、ロックを解除+削除
-                var flg = FormActionMethod.ReleaseSimulationLock(currentUserID, lockFilePath, logFilePath);
+                var flg = FormActionMethod.ReleaseSimulationLock(currentUserID, lockFilePath, LogFilePath, false);
                 if(flg)
                 File.Delete(lockFilePath);
             }
             Application.Exit();
+        }
+
+        // タイマーの起動
+        private void timerReleaseLock_Tick(object sender, EventArgs e)
+        {
+            string lockFilePath = Path.Combine(LockFilePath, "LOCK_sim.txt");
+            string currentUserID = Properties.Settings.Default.UserID;
+            // 最終起動から10分経過していたらロック解除
+            FormActionMethod.ReleaseSimulationLock(currentUserID, lockFilePath, LogFilePath, true);
+
         }
     }
 }

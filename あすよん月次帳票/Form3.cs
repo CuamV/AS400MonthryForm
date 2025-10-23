@@ -89,14 +89,13 @@ namespace あすよん月次帳票
             string passText = txtBxPASS.Text.Trim();
 
             string lockFilePath = Path.Combine(LockFilePath, "LOCK_sim.txt");
-            string logFilePath = Path.Combine(LogFilePath, $@"{HIZ}\LOG_Simulation.txt");
 
             bool locked = false; // ← ロック取得済みフラグ
 
-            try
-            {
+            //try
+            //{
                 // ロック確認と取得
-                if (!FormActionMethod.CheckAndLockSimulation(currentUID, lockFilePath, logFilePath, lockMinutes))
+                if (!FormActionMethod.CheckAndLockSimulation(currentUID, lockFilePath, LogFilePath, lockMinutes))
                 {
                     return; // 他のユーザーが実行中なら処理を中止
                 }
@@ -142,7 +141,7 @@ namespace あすよん月次帳票
 
                 // --- メインスレッドでシミュレーション実行 ---
                 await Task.Delay(100); // ちょっと待って anim が作られる
-                RunSimulation(idText, passText);
+                RunSimulation(idText, passText, currentUID);
 
                 // --- 終了したらアニメーション閉じる ---
                 await Task.Delay(500);
@@ -169,19 +168,19 @@ namespace あすよん月次帳票
                 //// 終了したらアニメーション閉じる
                 //if (animThread.IsAlive)
                 //    anim.Invoke(new Action(() => anim.CloseForm()));
-            }
-            finally
-            {
-                // ロック解除
-                if (locked)
-                {
-                    FormActionMethod.ReleaseSimulationLock(currentUID, lockFilePath, logFilePath);
-                }
-            }
+            //}
+            //finally
+            //{
+            //    // ロック解除
+            //    if (locked)
+            //    {
+            //        FormActionMethod.ReleaseSimulationLock(currentUID, lockFilePath, logFilePath);
+            //    }
+            //}
         }
         
 
-        public void RunSimulation(string idText, string passText)
+        public void RunSimulation(string idText, string passText, string currentUID)
         {
             HIZTIM = $"{DateTime.Now:yyyy/MM/dd HH:mm:ss}";
 
@@ -202,40 +201,57 @@ namespace あすよん月次帳票
 
             int progress = 0;
 
-                // --- オーノ ---
-                if (chkBxOhno.Checked)
+            // --- オーノ ---
+            if (chkBxOhno.Checked)
+            {
+                if (string.IsNullOrEmpty(selectedBumon))
                 {
-                    if (string.IsNullOrEmpty(selectedBumon))
+                    // 部門未選択 → 全部門でシミュレーション
+                    formActionMethod.SimulateIZAIKO_Ohno(ohuid, ohpass, sumirateYM);
+                    formActionMethod.AddLog("オーノ_シュミレーション実行", listBxSituation);
+                    if (Application.OpenForms["Form1"] is Form1 form1)
                     {
-                        // 部門未選択 → 全部門でシミュレーション
-                        formActionMethod.SimulateIZAIKO_Ohno(ohuid, ohpass, sumirateYM);
-                        formActionMethod.AddLog("オーノ_シュミレーション実行", listBxSituation);
-                        if (Application.OpenForms["Form1"] is Form1 form1) form1.AddLog($"{HIZTIM}　オーノ_シュミレーション実行 実行者ID:{ohuid}");
-
-                    }
-                    else
-                    {
-                        // 部門1つ選択 → 部門指定シミュレーション
-                        formActionMethod.SimulateIZAIKO_Ohno(ohuid, ohpass, sumirateYM, selectedBumon);
-                        formActionMethod.AddLog($"オーノ({selectedBumon}) のシュミレーション実行", listBxSituation);
-                        if (Application.OpenForms["Form1"] is Form1 form1) form1.AddLog($"{HIZTIM}　オーノ({selectedBumon})_シュミレーション実行 実行者ID:{ohuid}");
+                        form1.AddLog($"{HIZTIM} オーノ_シュミレーション実行 実行者ID:{currentUID}");
+                        form1.AddLog2($"{HIZTIM} 実行者ID:{currentUID} が使用中です");
                     }
                 }
+                else
+                {
+                    // 部門1つ選択 → 部門指定シミュレーション
+                    formActionMethod.SimulateIZAIKO_Ohno(ohuid, ohpass, sumirateYM, selectedBumon);
+                    formActionMethod.AddLog($"オーノ({selectedBumon}) のシュミレーション実行", listBxSituation);
+                    if (Application.OpenForms["Form1"] is Form1 form1)
+                    {
+                        form1.AddLog($"{HIZTIM} オーノ({selectedBumon})_シュミレーション実行 実行者ID:{currentUID}");
+                        form1.AddLog2($"{HIZTIM} 実行者ID:{currentUID} が使用中です");
+                    }
+                }
+            }
 
-                // --- サンミック(ダスコン) ---
-                if (chkBxSundus.Checked)
+            // --- サンミック(ダスコン) ---
+            if (chkBxSundus.Checked)
+            {
+                formActionMethod.SimulateIZAIKO_Sun(sundusuid, sunduspass, sumirateYM, "SD");
+                formActionMethod.AddLog("サンミック(ダスコン)のシュミレーション実行", listBxSituation);
+                if (Application.OpenForms["Form1"] is Form1 form1)
                 {
-                    formActionMethod.SimulateIZAIKO_Sun(sundusuid, sunduspass, sumirateYM, "SD");
-                    formActionMethod.AddLog("サンミック(ダスコン)のシュミレーション実行", listBxSituation);
-                    if (Application.OpenForms["Form1"] is Form1 form1) form1.AddLog($"{HIZTIM}　サンミック(ダスコン)_シュミレーション実行 実行者ID:{sundusuid}");
+                    form1.AddLog($"{HIZTIM} サンミック(ダスコン)_シュミレーション実行 実行者ID:{currentUID}");
+                    form1.AddLog2($"{HIZTIM} 実行者ID:{currentUID} が使用中です");
                 }
-                // --- サンミック(カーペット) ---
-                if (chkBxSuncar.Checked)
+
+            }
+            // --- サンミック(カーペット) ---
+            if (chkBxSuncar.Checked)
+            {
+                formActionMethod.SimulateIZAIKO_Sun(suncaruid, suncarpass, sumirateYM, "SC");
+                formActionMethod.AddLog("サンミック(カーペット)のシュミレーション実行", listBxSituation);
+                if (Application.OpenForms["Form1"] is Form1 form1)
                 {
-                    formActionMethod.SimulateIZAIKO_Sun(suncaruid, suncarpass, sumirateYM, "SC");
-                    formActionMethod.AddLog("サンミック(カーペット)のシュミレーション実行", listBxSituation);
-                    if (Application.OpenForms["Form1"] is Form1 form1) form1.AddLog($"{HIZTIM}　サンミック(カーペット)_シュミレーション実行 実行者ID:{suncaruid}");
+                    form1.AddLog($"{HIZTIM} サンミック(カーペット)_シュミレーション実行 実行者ID:{currentUID}");
+                    form1.AddLog2($"{HIZTIM} 実行者ID:{currentUID} が使用中です");
                 }
+
+            }
                 // 設定保存
                 Properties.Settings.Default.UserID = idText;
                 Properties.Settings.Default.Password = passText;
