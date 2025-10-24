@@ -12,7 +12,7 @@ namespace あすよん月次帳票
         /// 売上・仕入をマージして列名を統一する
         /// </summary>
 
-        public DataTable MergeSalesPurchase(DataTable salesDt, DataTable purchaseDt)
+        public DataTable MergeSalesPurchase(DataTable salesDt, DataTable purchaseDt,bool fmFlg)
         {
             if (salesDt == null) salesDt = new DataTable();
             if (purchaseDt == null) purchaseDt = new DataTable();
@@ -24,17 +24,20 @@ namespace あすよん月次帳票
             DataTable merged = normalizedSales.Copy();
             merged.Merge(normalizedPurchase); // 仕入データを追加
 
-            // 必要な列を作る(空でも存在させる)
-            string[] requiredColumns = {
+            // 必要な列を作る(空でも存在させる) Excelエクスポート時のみ
+            if (fmFlg) 
+            {
+                string[] requiredColumns = {
                 "伝票日付", "部門CD", "取引先CD", "取引先名", "クラス名", "品名部門CD",
                 "品名CD", "品名", "品種CD", "品種名", "取引区分", "サブシステム区分",
                 "数量", "単位CD", "単価", "金額"
-            };
+                };
 
-            foreach (var col in requiredColumns)
-            {
-                if (!merged.Columns.Contains(col))
-                    merged.Columns.Add(col, typeof(string));
+                foreach (var col in requiredColumns)
+                {
+                    if (!merged.Columns.Contains(col))
+                        merged.Columns.Add(col, typeof(string));
+                }
             }
 
             // 品種名の null 対策
@@ -185,6 +188,7 @@ namespace あすよん月次帳票
             DataTable formated = new DataTable();
 
             // 列定義
+            formated.Columns.Add("年月", typeof(string));
             formated.Columns.Add("クラス名", typeof(string));
             formated.Columns.Add("取引区分", typeof(string));
             formated.Columns.Add("部門CD", typeof(string));
@@ -210,6 +214,7 @@ namespace あすよん月次帳票
                 DataRow newRow = formated.NewRow();
 
                 // 列が存在するかチェックして代入
+                newRow["年月"] = dt.Columns.Contains("年月") ? row["年月"]?.ToString() : string.Empty;
                 newRow["クラス名"] = dt.Columns.Contains("ZHCSNM") ? row["ZHCSNM"]?.ToString() : string.Empty;
                 newRow["取引区分"] = "在庫";
                 newRow["部門CD"] = dt.Columns.Contains("ZHBMCD") ? row["ZHBMCD"]?.ToString() : string.Empty;
@@ -238,11 +243,11 @@ namespace あすよん月次帳票
             DataView dv = formated.DefaultView;
             if (flg)
             {
-                dv.Sort = "クラス名 ASC, 取引区分 ASC, 部門CD ASC, 取引先/品種CD ASC";
+                dv.Sort = "年月 ASC, クラス名 ASC, 取引区分 ASC, 部門CD ASC, 取引先/品種CD ASC";
             } 
             else
             {
-                dv.Sort = "クラス名 ASC, 取引区分 ASC, 部門CD ASC, 品種 ASC";
+                dv.Sort = "年月 ASC, クラス名 ASC, 取引区分 ASC, 部門CD ASC, 品種 ASC";
             }
             return dv.ToTable();
         }

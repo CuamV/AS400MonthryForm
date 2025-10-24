@@ -96,6 +96,7 @@ namespace あすよん月次帳票
             Hiz = DateTime.Now.ToString("yyyyMMdd");
             Tim = DateTime.Now.ToString("HHmmss");
 
+            // ↓↓--------------エラーチェック--------------↓↓
             // 年月入力チェック
             if (!FormActionMethod.TryParseYearMonth(txtBxStrYearMonth, out int strY, out int strM) ||
                 !FormActionMethod.TryParseYearMonth(txtBxEndYearMonth, out int endY, out int endM))
@@ -138,11 +139,11 @@ namespace あすよん月次帳票
                                 "警告", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 return;
             }
+            // ↑↑--------------エラーチェック--------------↑↑
 
-
+            // ↓↓------- アニメーションフォーム表示 -------↓↓
             FormAnimation3 anim = null;
             
-            // --- FormAnimation スレッド ---
             Thread animThread = new Thread(() =>
             {
                 using (FormAnimation3 a = new FormAnimation3())
@@ -153,8 +154,9 @@ namespace あすよん月次帳票
             });
             animThread.SetApartmentState(ApartmentState.STA);
             animThread.Start();
+            // ↑↑------- アニメーションフォーム表示 -------↑↑
 
-            // --- メインスレッドでシミュレーション実行 ---
+            // ↓↓------- メインスレッドでデータ抽出 -------↓↓
             await Task.Delay(100); // ちょっと待って anim が作られる
 
             // チェック状態取得
@@ -303,7 +305,7 @@ namespace あすよん月次帳票
 
                 if (d.Sales != null && d.Purchase != null)
                 {
-                    result = processor.MergeSalesPurchase(d.Sales, d.Purchase);
+                    result = processor.MergeSalesPurchase(d.Sales, d.Purchase,true);
                 }
                 else if (d.Sales != null)
                 {
@@ -323,7 +325,7 @@ namespace あすよん月次帳票
                 }
             }
 
-            //在庫
+            // ★在庫データ
             if (selSlCategories.Contains("在庫"))
             {
                 foreach (var company in selCompanies)
@@ -417,8 +419,9 @@ namespace あすよん月次帳票
             Excel.Range colRange2 = null;
             Excel.Range start2 = null;
             Excel.Range end2 = null;
+            // ↑↑------- メインスレッドでデータ抽出 -------↑↑
 
-            // --- 終了したらアニメーション閉じる ---
+            // ↓↓---------- アニメーション閉じる ----------↓↓
             await Task.Delay(500);
             if (anim != null && !anim.IsDisposed)
             {
@@ -428,6 +431,10 @@ namespace あすよん月次帳票
             // アニメーションスレッド終了を待つ
             animThread.Join();
 
+            // ↑↑---------- アニメーション閉じる ----------↑↑
+
+
+            // ↓↓----------- Excelエクスポート -----------↓↓
             try
             {
                 // 保存ダイアログ
@@ -491,10 +498,10 @@ namespace あすよん月次帳票
                 for (int c = 0; c < cols; c++)
                 {
                     if (mergedSummary.Columns[c].ColumnName == cdColName) continue; // CD列はスキップ
+                    string colName = mergedSummary.Columns[c].ColumnName;
                     for (int r = 0; r < rows; r++)
                     {
                         var val = mergedSummary.Rows[r][c];
-                        string colName = mergedSummary.Columns[c].ColumnName;
 
                         // 数量計・金額計は数値形式に変換
                         if ((colName == "数量計" || colName == "金額計") && val != null && val != DBNull.Value)
@@ -508,10 +515,25 @@ namespace あすよん月次帳票
                                 dataArray[r, dataCol] = "0";
                             }
                         }
+                        // 年月は文字列形式で
+                        else if (colName == "年月")
+                        {
+                            string ymd = val?.ToString() ?? "";
+                            dataArray[r, dataCol] = "'" + ymd;
+                            //dataArray[r, dataCol] = ymd;
+                        }
                         else
                         {
                             dataArray[r, dataCol] = val?.ToString() ?? "";
                         }
+                    }
+                    // Excel上で文字列扱いにしたい列は NumberFormat = "@"
+                    if (colName == "年月")
+                    {
+                        int excelColIndex = c + 1; // Excel列番号
+                        Excel.Range yearRange = xlSheet.Columns[excelColIndex];
+                        yearRange.NumberFormat = "@"; // 文字列扱い
+                        Marshal.ReleaseComObject(yearRange);
                     }
                     dataCol++;
                 }
@@ -546,8 +568,7 @@ namespace あすよん月次帳票
                         colData[r, 0] = source[r, colIndex];
                     return colData;
                 }
-
-
+                
                 // ==================== 集計シート =====================
                 xlSheet2 = (Excel.Worksheet)xlBook.Sheets.Add(After: xlBook.Sheets[xlBook.Sheets.Count]);
                 xlSheet2.Name = "集計";
@@ -578,6 +599,12 @@ namespace あすよん月次帳票
                                 dataArray2[r, c] = 0m;
                             }
                         }
+                        else if (colName == "年月")
+                        {
+                            string ymd = val?.ToString() ?? "";
+                            dataArray2[r, c] = "'" + ymd; // 文字列として扱うため先頭にシングルクォート追加
+                            //dataArray2[r, dataCol] = ymd;
+                        }
                         else
                         {
                             dataArray2[r, c] = val?.ToString() ?? "";
@@ -590,16 +617,50 @@ namespace あすよん月次帳票
                 end2 = xlSheet2.Cells[rows2 + 1, cols2];
                 xlSheet2.Range[start2, end2].Value = dataArray2;
 
+                // 年月列だけ文字列扱いに設定
+                for (int c = 0; c < cols2; c++)
+                {
+                    string colName = summary2.Columns[c].ColumnName;
+                    if (colName == "年月")
+                    {
+                        int excelColIndex = c + 1;
+                        Excel.Range yearRange = xlSheet2.Columns[excelColIndex];
+                        yearRange.NumberFormat = "@"; // 文字列扱い
+                        Marshal.ReleaseComObject(yearRange);
+                    }
+                }
+
                 // カンマ付き表示をExcel上でも設定
                 for (int c = 0; c < cols2; c++)
                 {
-                    Excel.Range col = xlSheet2.Range[xlSheet2.Cells[2, c + 1], xlSheet2.Cells[rows2 + 1, c + 1]];
-                    col.NumberFormat = "#,##0"; // 数値＋カンマ表示 
-                    Marshal.ReleaseComObject(col);
+                    string colName = summary2.Columns[c].ColumnName;
+                    if (colName == "数量計" || colName == "金額計")
+                    {
+                        Excel.Range col = xlSheet2.Range[xlSheet2.Cells[2, c + 1], xlSheet2.Cells[rows2 + 1, c + 1]];
+                        col.NumberFormat = "#,##0"; // 数値＋カンマ表示 
+                        Marshal.ReleaseComObject(col);
+                    }
                 }
 
                 xlSheet.Columns.AutoFit();
                 xlSheet2.Columns.AutoFit();
+                xlSheet.Select();
+
+                // 既存のフィルターをクリア
+                if (xlSheet.AutoFilterMode) xlSheet.AutoFilterMode = false;
+
+                // ヘッダー範囲を取得（1行目）
+                Excel.Range headerRange = xlSheet.Range[xlSheet.Cells[1, 1], xlSheet.Cells[1, cols]];
+                // 太文字
+                headerRange.Font.Bold = true;
+                // 下線＋枠線（外枠＋内部の罫線）
+                headerRange.Borders.LineStyle = Excel.XlLineStyle.xlContinuous;
+                // 背景色（任意）
+                headerRange.Interior.Color = System.Drawing.ColorTranslator.ToOle(System.Drawing.Color.LightGray);
+                // フィルターを有効化
+                headerRange.AutoFilter(1);
+                // COMオブジェクト解放
+                Marshal.ReleaseComObject(headerRange);
 
                 // マクロ有効形式で保存
                 xlBook.SaveAs(filePath, Excel.XlFileFormat.xlOpenXMLWorkbookMacroEnabled);
@@ -639,6 +700,7 @@ namespace あすよん月次帳票
             // ログ追加             
             formActionMethod.AddLog("Excelエクスポート完了", listBxSituation);
             if (Application.OpenForms["Form1"] is Form1 form1) form1.AddLog($"{HIZTIM}　Excelエクスポート完了");
+            // ↑↑----------- Excelエクスポート -----------↑↑
 
         }
         private void btnForm1Back_Click(object sender, EventArgs e)

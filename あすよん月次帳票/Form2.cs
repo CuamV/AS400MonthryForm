@@ -51,8 +51,9 @@ namespace あすよん月次帳票
         {
             ApplySnowManColors();
 
-            //// デフォルト値は前月
-            //formActionMethod.UpdateStartEndDate(txtBxStrYearMonth, txtBxEndYearMonth);
+            this.MouseDown += Form2_MouseDown;
+            this.MouseMove += Form2_MouseMove;
+            this.MouseUp += Form2_MouseUp;
 
             // ★アニメーション登録
             SetButtonAnimation(btnDisplay);
@@ -292,7 +293,7 @@ namespace あすよん月次帳票
 
                 if (d.Sales != null && d.Purchase != null)
                 {
-                    result = processor.MergeSalesPurchase(d.Sales, d.Purchase);
+                    result = processor.MergeSalesPurchase(d.Sales, d.Purchase, false);
                 }
                 else if (d.Sales != null)
                 {
@@ -562,7 +563,41 @@ namespace あすよん月次帳票
 
 
         }
+        // フィールドに追加
+        private Point mouseOffset;
+        private bool isMouseDown = false;
 
+        // MouseDown
+        private void Form2_MouseDown(object sender, MouseEventArgs e)
+        {
+            if (e.Button == MouseButtons.Left)
+            {
+                isMouseDown = true;
+                mouseOffset = new Point(-e.X, -e.Y);
+            }
+        }
 
+        // MouseMove
+        private void Form2_MouseMove(object sender, MouseEventArgs e)
+        {
+            if (isMouseDown)
+            {
+                Point mousePos = Control.MousePosition;
+                mousePos.Offset(mouseOffset.X, mouseOffset.Y);
+                this.Location = mousePos;
+            }
+        }
+
+        // MouseUp
+        private void Form2_MouseUp(object sender, MouseEventArgs e)
+        {
+            if (e.Button == MouseButtons.Left)
+                isMouseDown = false;
+        }
+
+        private void btnMin_Click(object sender, EventArgs e)
+        {
+            this.WindowState = FormWindowState.Minimized;
+        }
     }
 }

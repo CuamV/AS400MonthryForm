@@ -14,6 +14,7 @@ namespace あすよん月次帳票
         public static DataTable SummarizeSalesPurchase(DataTable dt)
         {
             DataTable summary = new DataTable();
+            summary.Columns.Add("年月", typeof(string));
             summary.Columns.Add("クラス名", typeof(string));
             summary.Columns.Add("取引区分", typeof(string));
             summary.Columns.Add("部門CD", typeof(string));
@@ -33,6 +34,9 @@ namespace あすよん月次帳票
 
             var grouped = dt.AsEnumerable().GroupBy(r => new
             {
+                YearMonth = r["伝票日付"]?.ToString()?.Length >=6
+                            ? r["伝票日付"].ToString().Substring(0, 6)
+                            : "",
                 ClassName = r["クラス名"]?.ToString()?.Trim(),
                 SystemType = r["サブシステム区分"]?.ToString()?.Trim(),
                 DeptCD = r["部門CD"]?.ToString()?.Trim(),
@@ -43,6 +47,7 @@ namespace あすよん月次帳票
             foreach (var g in grouped)
             {
                 DataRow newRow = summary.NewRow();
+                newRow["年月"] = g.Key.YearMonth;
                 newRow["クラス名"] = g.Key.ClassName;
                 string systemTypeCode = g.Key.SystemType;
                 newRow["取引区分"] = systemTypeMap.ContainsKey(systemTypeCode) ? systemTypeMap[systemTypeCode] : systemTypeCode;
@@ -61,6 +66,7 @@ namespace あすよん月次帳票
             DataTable mergedSummary = new DataTable();
 
             // 列名を統一
+            mergedSummary.Columns.Add("年月", typeof(string));
             mergedSummary.Columns.Add("クラス名", typeof(string));
             mergedSummary.Columns.Add("取引区分", typeof(string));
             mergedSummary.Columns.Add("部門CD", typeof(string));
@@ -76,6 +82,10 @@ namespace あすよん月次帳票
                 {
                     DataRow newRow = mergedSummary.NewRow();
 
+                    if(dt.Columns.Contains("年月"))
+                        newRow["年月"] = row["年月"]?.ToString()?.Trim();
+                    else
+                        newRow["年月"] = "";
                     newRow["クラス名"] = row["クラス名"];
                     newRow["取引区分"] = row["取引区分"];
                     newRow["部門CD"] = row["部門CD"];
@@ -90,13 +100,14 @@ namespace あすよん月次帳票
 
             // ソート
             DataView dv = mergedSummary.DefaultView;
-            dv.Sort = "クラス名 ASC, 取引区分 ASC, 部門CD ASC, 取引先/品種CD ASC";
+            dv.Sort = "年月 ASC, クラス名 ASC, 取引区分 ASC, 部門CD ASC, 取引先/品種CD ASC";
             return dv.ToTable();
         }
 
         public static DataTable SummarizeByCategoryTypeDept(DataTable mergedSummary)
         {
             DataTable summary = new DataTable();
+            summary.Columns.Add("年月", typeof(string));
             summary.Columns.Add("分類名", typeof(string));
             summary.Columns.Add("部門グループ", typeof(string));
             summary.Columns.Add("数量合計", typeof(decimal));
@@ -172,30 +183,42 @@ namespace あすよん月次帳票
                         .Select(r => mapCategory(r["クラス名"]?.ToString(), r["取引区分"]?.ToString()))
                         .Distinct();
 
+            // --- ★ 年月単位でのループ ---
+            var months = mergedSummary.AsEnumerable()
+                .Select(r => r["年月"]?.ToString()?.Trim())
+                .Where(y => !string.IsNullOrEmpty(y))
+                .Distinct()
+                .OrderBy(y => y);
 
-            // 3. 分類ごとにグループ集計
-            foreach (var cls in classTypes)
+            foreach (var ym in months)
             {
-                if (!categoryDeptGroups.ContainsKey(cls)) continue;
-
-                foreach (var group in categoryDeptGroups[cls])
+                // 3. 分類ごとにグループ集計
+                foreach (var cls in classTypes)
                 {
-                    var rows = mergedSummary.AsEnumerable()
-                                .Where(r => mapCategory(r["クラス名"]?.ToString() , r["取引区分"]?.ToString()) == cls
-                                            && group.Predicate(r["部門CD"]?.ToString()));
+                    if (!categoryDeptGroups.ContainsKey(cls)) continue;
 
-                    decimal sumQty = rows.Sum(r => r.Field<decimal?>("数量計") ?? 0m);
-                    decimal sumAmt = rows.Sum(r => r.Field<decimal?>("金額計") ?? 0m);
+                    foreach (var group in categoryDeptGroups[cls])
+                    {
+                        var rows = mergedSummary.AsEnumerable()
+                                    .Where(r =>
+                                    (r["年月"]?.ToString()?.Trim() == ym) &&
+                                    mapCategory(r["クラス名"]?.ToString(), r["取引区分"]?.ToString()) == cls
+                                                && group.Predicate(r["部門CD"]?.ToString()));
 
-                    // IncludeZeroフラグで表示制御
-                    if (!rows.Any() && !group.IncludeZero) continue;
+                        decimal sumQty = rows.Sum(r => r.Field<decimal?>("数量計") ?? 0m);
+                        decimal sumAmt = rows.Sum(r => r.Field<decimal?>("金額計") ?? 0m);
 
-                    DataRow newRow = summary.NewRow();
-                    newRow["分類名"] = cls;
-                    newRow["部門グループ"] = group.Name;
-                    newRow["数量合計"] = sumQty;
-                    newRow["金額合計"] = sumAmt;
-                    summary.Rows.Add(newRow);
+                        // IncludeZeroフラグで表示制御
+                        if (!rows.Any() && !group.IncludeZero) continue;
+
+                        DataRow newRow = summary.NewRow();
+                        newRow["年月"] = ym;
+                        newRow["分類名"] = cls;
+                        newRow["部門グループ"] = group.Name;
+                        newRow["数量合計"] = sumQty;
+                        newRow["金額合計"] = sumAmt;
+                        summary.Rows.Add(newRow);
+                    }
                 }
             }
 
@@ -222,7 +245,7 @@ namespace あすよん月次帳票
 
             // ソート
             DataView dv = summary.DefaultView;
-            dv.Sort = "ソート順 ASC, 部門グループ ASC";
+            dv.Sort = "年月 ASC, ソート順 ASC, 部門グループ ASC";
 
             DataTable result = dv.ToTable();
             result.Columns.Remove("ソート順");

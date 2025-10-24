@@ -119,7 +119,8 @@ namespace あすよん月次帳票
             // 1:クラス 2:ZGBMCD(部門コード) 3:品名 4:ZGHMCD(品名コード) 5:ZGHSCD(品種コード)
             // 6:ZGTZQT(当月残数量) 7:ZGTGZA(当月残金額) ZHTZQT
             string sql = $@"
-                        SELECT M4.SHCLAS AS ZHCSNM, ZGBMCD AS ZHBMCD,
+                        SELECT ZGNEND, ZGMOTH,
+                               M4.SHCLAS AS ZHCSNM, ZGBMCD AS ZHBMCD,
                                M5.HNHNSM AS ZHHNNM, ZGHMCD AS ZHHMCD, ZGHSCD AS ZHHSCD, 
                                ZGTZQT AS ZHTZQT, ZGTGZA AS ZHTGZA
                         FROM {lib}.MOZGETP AS IV

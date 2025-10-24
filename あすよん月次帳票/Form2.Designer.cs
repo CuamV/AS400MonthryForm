@@ -86,6 +86,7 @@ namespace あすよん月次帳票
             this.lbTitleDisplay = new System.Windows.Forms.Label();
             this.pictureBox1 = new System.Windows.Forms.PictureBox();
             this.label2 = new System.Windows.Forms.Label();
+            this.btnMin = new System.Windows.Forms.Button();
             ((System.ComponentModel.ISupportInitialize)(this.dgvDataOhno)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.dgvDataScar)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.dgvDataSdus)).BeginInit();
@@ -559,11 +560,23 @@ namespace あすよん月次帳票
             this.label2.TabIndex = 71;
             this.label2.Text = "●表示期間はyyyymmの6桁年月で指定してください";
             // 
+            // btnMin
+            // 
+            this.btnMin.Font = new System.Drawing.Font("Meiryo UI", 8.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(128)));
+            this.btnMin.Location = new System.Drawing.Point(1358, 6);
+            this.btnMin.Name = "btnMin";
+            this.btnMin.Size = new System.Drawing.Size(54, 20);
+            this.btnMin.TabIndex = 72;
+            this.btnMin.Text = "―";
+            this.btnMin.UseVisualStyleBackColor = true;
+            this.btnMin.Click += new System.EventHandler(this.btnMin_Click);
+            // 
             // Form2
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 14F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(1425, 793);
+            this.Controls.Add(this.btnMin);
             this.Controls.Add(this.label2);
             this.Controls.Add(this.pictureBox1);
             this.Controls.Add(this.lbTitleDisplay);
@@ -844,5 +857,6 @@ namespace あすよん月次帳票
         private TextBox txtBxStrYearMonth;
         private TextBox txtBxEndYearMonth;
         private Label label2;
+        private Button btnMin;
     }
 }

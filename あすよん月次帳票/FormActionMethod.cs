@@ -9,6 +9,7 @@ using System.Security.Cryptography;
 using System.Text.Json;
 using System.Text.RegularExpressions;
 using System.Windows.Forms;
+using System.Xml.Linq;
 
 namespace あすよん月次帳票
 {
@@ -104,42 +105,75 @@ namespace あすよん月次帳票
                         break;
                 }
 
-                string yy = startDate.Substring(0, 4);
-                string mm = startDate.Substring(4, 2);
-                var IVdata = GetDataMethod.GetStockData(lib, yy, mm);
+                // まずループ用の DateTime に変換
+                DateTime start = DateTime.ParseExact(startDate, "yyyyMMdd", null);
+                DateTime end = DateTime.ParseExact(endDate, "yyyyMMdd", null);
 
-                if (IVdata != null && IVdata.Rows.Count > 0)
+                DataTable IVdataAll = null;
+
+                for (DateTime dtMonth = start; dtMonth <= end; dtMonth = dtMonth.AddMonths(1))
                 {
-                    // クラスコード → 日本語変換
-                    Dictionary<string, string> classMap = new Dictionary<string, string>
-                    {
-                        { "1", "原材料" },
-                        { "2", "タフト半製品" },
-                        { "3", "コーティング半製品" },
-                        { "4", "製品" },
-                        { "5", "加工" }
-                    };
+                    string yy = dtMonth.Year.ToString();
+                    string mm = dtMonth.Month.ToString("D2");
+                    var IVdata = GetDataMethod.GetStockData(lib, yy, mm);
 
-                    foreach (DataRow r in IVdata.Rows)
+                    if (IVdata != null && IVdata.Rows.Count > 0)
                     {
-                        string code = r["ZHCSNM"]?.ToString()?.Trim();
-                        if (classMap.ContainsKey(code))
+                        // クラスコード → 日本語変換
+                        Dictionary<string, string> classMap = new Dictionary<string, string>
                         {
-                            r["ZHCSNM"] = classMap[code];
-                        }
-                        else
+                            { "1", "原材料" },
+                            { "2", "タフト半製品" },
+                            { "3", "コーティング半製品" },
+                            { "4", "製品" },
+                            { "5", "加工" }
+                        };
+
+                        foreach (DataRow r in IVdata.Rows)
                         {
-                            // マッピングが見つからない場合はコードをそのまま使用
+                            string code = r["ZHCSNM"]?.ToString()?.Trim();
+                            if (classMap.ContainsKey(code))
+                            {
+                                r["ZHCSNM"] = classMap[code];
+                            }
+                            else
+                            {
+                                // マッピングが見つからない場合はコードをそのまま使用
+                            }
                         }
+
+                        // 年月列連結
+                        if (!IVdata.Columns.Contains("年月"))
+                            IVdata.Columns.Add("年月", typeof(string));
+
+                        foreach (DataRow r in IVdata.Rows)
+                        {
+                            r["年月"] = $"{yy}{mm}";
+                        }
+
+                        // 縦連結
+                        if (IVdataAll == null)
+                            IVdataAll = IVdata.Clone(); // スキーマコピー
+                        foreach (DataRow r in IVdata.Rows)
+                            IVdataAll.ImportRow(r);
                     }
-                    
-                    dt = DataSummarizeMethod.SumOldStockData(IVdata); // データありの場合
                 }
-                else
-                {
-                    dt = IVdata; // データなしの場合
-                }
+                dt = IVdataAll ?? new DataTable(); // データなしは空テーブル
             }
+
+            // 🔸 共通：年月列を追加
+            if (dt != null && !dt.Columns.Contains("年月"))
+            {
+                dt.Columns.Add("年月", typeof(string));
+                foreach (DataRow r in dt.Rows)
+                    r["年月"] = startYM;
+            }
+            // 不要列を削除
+            if (dt.Columns.Contains("ZGNEND")) dt.Columns.Remove("ZGNEND");
+            if (dt.Columns.Contains("ZGMOTH")) dt.Columns.Remove("ZGMOTH");
+
+            // 年月列を先頭へ移動
+            dt.Columns["年月"].SetOrdinal(0);
             return dt;
         }
 
