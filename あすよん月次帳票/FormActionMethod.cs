@@ -565,7 +565,7 @@ namespace あすよん月次帳票
                         SELECT SL.URBMCD, SL.URHBSC, MIN(PM.TOTHNM), MIN(PM.TOKANM)
                         FROM {lib}.SLURIMP AS SL
                         LEFT JOIN SM1MLB01.MMTORIP AS PM ON SL.URHBSC = PM.TOTHCD
-                        WHERE SL.URDNDT >= 20100101
+                        WHERE SL.URDNDT >= 20030701
                         GROUP BY SL.URBMCD, SL.URHBSC
                         ORDER BY SL.URBMCD, MIN(PM.TOKANM)";
 
@@ -770,7 +770,7 @@ namespace あすよん月次帳票
                         SELECT PR.SRBMCD, PR.SRSRCD, MIN(PM.TOTHNM), MIN(PM.TOKANM)
                         FROM {lib}.PRSREMP AS PR
                         LEFT JOIN SM1MLB01.MMTORIP AS PM ON PR.SRSRCD = PM.TOTHCD
-                        WHERE PR.SRDNDT >= 20100101
+                        WHERE PR.SRDNDT >= 20030701
                         GROUP BY PR.SRBMCD, PR.SRSRCD
                         ORDER BY PR.SRBMCD, MIN(PM.TOKANM)";
 
