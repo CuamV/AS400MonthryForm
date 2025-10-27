@@ -52,6 +52,7 @@ namespace あすよん月次帳票
             this.cmbxBumon = new System.Windows.Forms.ComboBox();
             this.pictureBox1 = new System.Windows.Forms.PictureBox();
             this.lbTitleSimulation = new System.Windows.Forms.Label();
+            this.btnMin = new System.Windows.Forms.Button();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).BeginInit();
             this.SuspendLayout();
             // 
@@ -219,11 +220,23 @@ namespace あすよん月次帳票
             this.lbTitleSimulation.TabIndex = 72;
             this.lbTitleSimulation.Text = "< シュミレーション >";
             // 
+            // btnMin
+            // 
+            this.btnMin.Font = new System.Drawing.Font("Meiryo UI", 8.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(128)));
+            this.btnMin.Location = new System.Drawing.Point(554, 10);
+            this.btnMin.Name = "btnMin";
+            this.btnMin.Size = new System.Drawing.Size(39, 20);
+            this.btnMin.TabIndex = 73;
+            this.btnMin.Text = "―";
+            this.btnMin.UseVisualStyleBackColor = true;
+            this.btnMin.Click += new System.EventHandler(this.btnMin_Click);
+            // 
             // Form3
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 12F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(604, 386);
+            this.Controls.Add(this.btnMin);
             this.Controls.Add(this.lbTitleSimulation);
             this.Controls.Add(this.pictureBox1);
             this.Controls.Add(this.cmbxBumon);
@@ -487,5 +500,6 @@ namespace あすよん月次帳票
 
         private PictureBox pictureBox1;
         private Label lbTitleSimulation;
+        private Button btnMin;
     }
 }

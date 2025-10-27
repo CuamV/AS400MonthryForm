@@ -563,9 +563,9 @@ namespace あすよん月次帳票
             // btnMin
             // 
             this.btnMin.Font = new System.Drawing.Font("Meiryo UI", 8.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(128)));
-            this.btnMin.Location = new System.Drawing.Point(1358, 6);
+            this.btnMin.Location = new System.Drawing.Point(1372, 6);
             this.btnMin.Name = "btnMin";
-            this.btnMin.Size = new System.Drawing.Size(54, 20);
+            this.btnMin.Size = new System.Drawing.Size(40, 20);
             this.btnMin.TabIndex = 72;
             this.btnMin.Text = "―";
             this.btnMin.UseVisualStyleBackColor = true;

@@ -46,6 +46,10 @@ namespace あすよん月次帳票
             // ログ読み込み
             formActionMethod.LoadRuntimeLog(listBxSituation);
 
+            this.MouseDown += Form4_MouseDown;
+            this.MouseMove += Form4_MouseMove;
+            this.MouseUp += Form4_MouseUp;
+
             ApplySnowManColors();
         }
 
@@ -897,6 +901,43 @@ namespace あすよん月次帳票
                     e.Graphics.DrawString(box.Text, box.Font, brush, 8, 0);
                 }
             }
+        }
+
+        // フィールドに追加
+        private Point mouseOffset;
+        private bool isMouseDown = false;
+
+        // MouseDown
+        private void Form4_MouseDown(object sender, MouseEventArgs e)
+        {
+            if (e.Button == MouseButtons.Left)
+            {
+                isMouseDown = true;
+                mouseOffset = new Point(-e.X, -e.Y);
+            }
+        }
+
+        // MouseMove
+        private void Form4_MouseMove(object sender, MouseEventArgs e)
+        {
+            if (isMouseDown)
+            {
+                Point mousePos = Control.MousePosition;
+                mousePos.Offset(mouseOffset.X, mouseOffset.Y);
+                this.Location = mousePos;
+            }
+        }
+
+        // MouseUp
+        private void Form4_MouseUp(object sender, MouseEventArgs e)
+        {
+            if (e.Button == MouseButtons.Left)
+                isMouseDown = false;
+        }
+
+        private void btnMin_Click(object sender, EventArgs e)
+        {
+            this.WindowState = FormWindowState.Minimized;
         }
     }
 }

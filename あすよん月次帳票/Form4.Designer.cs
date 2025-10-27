@@ -39,6 +39,11 @@ namespace あすよん月次帳票
             this.lbSituation = new System.Windows.Forms.Label();
             this.listBxSituation = new System.Windows.Forms.ListBox();
             this.grpBxCondition = new System.Windows.Forms.GroupBox();
+            this.label2 = new System.Windows.Forms.Label();
+            this.groupBox1 = new System.Windows.Forms.GroupBox();
+            this.txtBxEndYearMonth = new System.Windows.Forms.TextBox();
+            this.txtBxStrYearMonth = new System.Windows.Forms.TextBox();
+            this.label1 = new System.Windows.Forms.Label();
             this.grpBxData = new System.Windows.Forms.GroupBox();
             this.chkBxProcess = new System.Windows.Forms.CheckBox();
             this.chkBxProAll = new System.Windows.Forms.CheckBox();
@@ -66,16 +71,12 @@ namespace あすよん月次帳票
             this.btnForm1Back = new System.Windows.Forms.Button();
             this.lbTitleExportExcel = new System.Windows.Forms.Label();
             this.pictureBox1 = new System.Windows.Forms.PictureBox();
-            this.groupBox1 = new System.Windows.Forms.GroupBox();
-            this.txtBxEndYearMonth = new System.Windows.Forms.TextBox();
-            this.txtBxStrYearMonth = new System.Windows.Forms.TextBox();
-            this.label1 = new System.Windows.Forms.Label();
-            this.label2 = new System.Windows.Forms.Label();
+            this.btnMin = new System.Windows.Forms.Button();
             this.grpBxCondition.SuspendLayout();
+            this.groupBox1.SuspendLayout();
             this.grpBxData.SuspendLayout();
             this.grpBxOrganization.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).BeginInit();
-            this.groupBox1.SuspendLayout();
             this.SuspendLayout();
             // 
             // btnExportExcel
@@ -122,6 +123,55 @@ namespace あすよん月次帳票
             this.grpBxCondition.TabIndex = 29;
             this.grpBxCondition.TabStop = false;
             this.grpBxCondition.Text = "条件";
+            // 
+            // label2
+            // 
+            this.label2.AutoSize = true;
+            this.label2.Font = new System.Drawing.Font("Meiryo UI", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(128)));
+            this.label2.Location = new System.Drawing.Point(568, 76);
+            this.label2.Name = "label2";
+            this.label2.Size = new System.Drawing.Size(287, 17);
+            this.label2.TabIndex = 68;
+            this.label2.Text = "●取得期間はyyyymmの6桁年月で指定してください";
+            // 
+            // groupBox1
+            // 
+            this.groupBox1.Controls.Add(this.txtBxEndYearMonth);
+            this.groupBox1.Controls.Add(this.txtBxStrYearMonth);
+            this.groupBox1.Controls.Add(this.label1);
+            this.groupBox1.Font = new System.Drawing.Font("Meiryo UI", 11.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(128)));
+            this.groupBox1.Location = new System.Drawing.Point(571, 96);
+            this.groupBox1.Name = "groupBox1";
+            this.groupBox1.Size = new System.Drawing.Size(290, 62);
+            this.groupBox1.TabIndex = 67;
+            this.groupBox1.TabStop = false;
+            this.groupBox1.Text = "〚 取得期間 〛";
+            // 
+            // txtBxEndYearMonth
+            // 
+            this.txtBxEndYearMonth.Location = new System.Drawing.Point(170, 26);
+            this.txtBxEndYearMonth.Name = "txtBxEndYearMonth";
+            this.txtBxEndYearMonth.Size = new System.Drawing.Size(106, 27);
+            this.txtBxEndYearMonth.TabIndex = 72;
+            this.txtBxEndYearMonth.KeyPress += new System.Windows.Forms.KeyPressEventHandler(this.TxtBxYearMonth_KeyPress);
+            // 
+            // txtBxStrYearMonth
+            // 
+            this.txtBxStrYearMonth.Location = new System.Drawing.Point(15, 26);
+            this.txtBxStrYearMonth.Name = "txtBxStrYearMonth";
+            this.txtBxStrYearMonth.Size = new System.Drawing.Size(106, 27);
+            this.txtBxStrYearMonth.TabIndex = 71;
+            this.txtBxStrYearMonth.KeyPress += new System.Windows.Forms.KeyPressEventHandler(this.TxtBxYearMonth_KeyPress);
+            // 
+            // label1
+            // 
+            this.label1.AutoSize = true;
+            this.label1.Font = new System.Drawing.Font("Meiryo UI", 11.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(128)));
+            this.label1.Location = new System.Drawing.Point(135, 32);
+            this.label1.Name = "label1";
+            this.label1.Size = new System.Drawing.Size(24, 19);
+            this.label1.TabIndex = 40;
+            this.label1.Text = "～";
             // 
             // grpBxData
             // 
@@ -445,60 +495,23 @@ namespace あすよん月次帳票
             this.pictureBox1.TabIndex = 72;
             this.pictureBox1.TabStop = false;
             // 
-            // groupBox1
+            // btnMin
             // 
-            this.groupBox1.Controls.Add(this.txtBxEndYearMonth);
-            this.groupBox1.Controls.Add(this.txtBxStrYearMonth);
-            this.groupBox1.Controls.Add(this.label1);
-            this.groupBox1.Font = new System.Drawing.Font("Meiryo UI", 11.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(128)));
-            this.groupBox1.Location = new System.Drawing.Point(571, 96);
-            this.groupBox1.Name = "groupBox1";
-            this.groupBox1.Size = new System.Drawing.Size(290, 62);
-            this.groupBox1.TabIndex = 67;
-            this.groupBox1.TabStop = false;
-            this.groupBox1.Text = "〚 取得期間 〛";
-            // 
-            // txtBxEndYearMonth
-            // 
-            this.txtBxEndYearMonth.Location = new System.Drawing.Point(170, 26);
-            this.txtBxEndYearMonth.Name = "txtBxEndYearMonth";
-            this.txtBxEndYearMonth.Size = new System.Drawing.Size(106, 27);
-            this.txtBxEndYearMonth.TabIndex = 72;
-            this.txtBxEndYearMonth.KeyPress += new System.Windows.Forms.KeyPressEventHandler(this.TxtBxYearMonth_KeyPress);
-            // 
-            // txtBxStrYearMonth
-            // 
-            this.txtBxStrYearMonth.Location = new System.Drawing.Point(15, 26);
-            this.txtBxStrYearMonth.Name = "txtBxStrYearMonth";
-            this.txtBxStrYearMonth.Size = new System.Drawing.Size(106, 27);
-            this.txtBxStrYearMonth.TabIndex = 71;
-            this.txtBxStrYearMonth.KeyPress += new System.Windows.Forms.KeyPressEventHandler(this.TxtBxYearMonth_KeyPress);
-            // 
-            // label1
-            // 
-            this.label1.AutoSize = true;
-            this.label1.Font = new System.Drawing.Font("Meiryo UI", 11.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(128)));
-            this.label1.Location = new System.Drawing.Point(135, 32);
-            this.label1.Name = "label1";
-            this.label1.Size = new System.Drawing.Size(24, 19);
-            this.label1.TabIndex = 40;
-            this.label1.Text = "～";
-            // 
-            // label2
-            // 
-            this.label2.AutoSize = true;
-            this.label2.Font = new System.Drawing.Font("Meiryo UI", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(128)));
-            this.label2.Location = new System.Drawing.Point(568, 76);
-            this.label2.Name = "label2";
-            this.label2.Size = new System.Drawing.Size(287, 17);
-            this.label2.TabIndex = 68;
-            this.label2.Text = "●取得期間はyyyymmの6桁年月で指定してください";
+            this.btnMin.Font = new System.Drawing.Font("Meiryo UI", 8.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(128)));
+            this.btnMin.Location = new System.Drawing.Point(899, 12);
+            this.btnMin.Name = "btnMin";
+            this.btnMin.Size = new System.Drawing.Size(39, 20);
+            this.btnMin.TabIndex = 74;
+            this.btnMin.Text = "―";
+            this.btnMin.UseVisualStyleBackColor = true;
+            this.btnMin.Click += new System.EventHandler(this.btnMin_Click);
             // 
             // Form4
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 12F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(950, 680);
+            this.Controls.Add(this.btnMin);
             this.Controls.Add(this.lbTitleExportExcel);
             this.Controls.Add(this.pictureBox1);
             this.Controls.Add(this.lbYearMonth);
@@ -515,13 +528,13 @@ namespace あすよん月次帳票
             this.Text = "エクスポート";
             this.grpBxCondition.ResumeLayout(false);
             this.grpBxCondition.PerformLayout();
+            this.groupBox1.ResumeLayout(false);
+            this.groupBox1.PerformLayout();
             this.grpBxData.ResumeLayout(false);
             this.grpBxData.PerformLayout();
             this.grpBxOrganization.ResumeLayout(false);
             this.grpBxOrganization.PerformLayout();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).EndInit();
-            this.groupBox1.ResumeLayout(false);
-            this.groupBox1.PerformLayout();
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -742,5 +755,6 @@ namespace あすよん月次帳票
         private TextBox txtBxStrYearMonth;
         private Label label1;
         private Label label2;
+        private Button btnMin;
     }
 }

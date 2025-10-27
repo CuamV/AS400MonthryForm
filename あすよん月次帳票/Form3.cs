@@ -51,6 +51,10 @@ namespace あすよん月次帳票
 
             LoadRuntimeLog();
 
+            this.MouseDown += Form3_MouseDown;
+            this.MouseMove += Form3_MouseMove;
+            this.MouseUp += Form3_MouseUp;
+
             ApplySnowManColors();
             // LOG直下にHIZフォルダがなければ作成
             string logFilePath = Path.Combine(LogFilePath, $@"{HIZ}\sim_log.txt");
@@ -343,6 +347,43 @@ namespace あすよん月次帳票
 
             StyleButton(btnSimulation, "saku", ColorManager.SakuBase, borderColor: ColorManager.SakuDark1, Color.White);
             StyleButton(btnForm1Back, "saku", ColorManager.SakuLight1, borderColor: ColorManager.SakuDark2, Color.White);
+        }
+
+        // フィールドに追加
+        private Point mouseOffset;
+        private bool isMouseDown = false;
+
+        // MouseDown
+        private void Form3_MouseDown(object sender, MouseEventArgs e)
+        {
+            if (e.Button == MouseButtons.Left)
+            {
+                isMouseDown = true;
+                mouseOffset = new Point(-e.X, -e.Y);
+            }
+        }
+
+        // MouseMove
+        private void Form3_MouseMove(object sender, MouseEventArgs e)
+        {
+            if (isMouseDown)
+            {
+                Point mousePos = Control.MousePosition;
+                mousePos.Offset(mouseOffset.X, mouseOffset.Y);
+                this.Location = mousePos;
+            }
+        }
+
+        // MouseUp
+        private void Form3_MouseUp(object sender, MouseEventArgs e)
+        {
+            if (e.Button == MouseButtons.Left)
+                isMouseDown = false;
+        }
+
+        private void btnMin_Click(object sender, EventArgs e)
+        {
+            this.WindowState = FormWindowState.Minimized;
         }
     }
 }
