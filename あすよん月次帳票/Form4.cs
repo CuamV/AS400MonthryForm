@@ -84,11 +84,13 @@ namespace あすよん月次帳票
             bool showSemi = chkBxSemiFinProducts.Checked || showAll;
             bool showProd = chkBxProduct.Checked || showAll;
             bool showProc = chkBxProcess.Checked || showAll;
+            bool showCustody = chkBxCustody.Checked || showAll;
             // ALL選択時は他チェック無効化
             chkBxRawMaterials.Enabled = !showAll;
             chkBxSemiFinProducts.Enabled = !showAll;
             chkBxProduct.Enabled = !showAll;
             chkBxProcess.Enabled = !showAll;
+            chkBxCustody.Enabled = !showAll;
         }
 
 
@@ -168,9 +170,9 @@ namespace あすよん月次帳票
             var selBumons = FormActionMethod.GetSelectedBumons(listBxBumon);  // 部門（先頭空白行は無視して取得）
             var selSelleres = FormActionMethod.GetSallerOrSupplier(listBxSaller);  // 販売先
             var selSupplieres = FormActionMethod.GetSallerOrSupplier(listBxSupplier);  // 仕入先
-            var selSlCategories = FormActionMethod.GetSalseProduct(chkBxSl, chkBxPr, chkBxIv, chkBxSalesAll);  // 販売区分
+            var selSlCategories = FormActionMethod.GetSalseProduct(chkBxSl, chkBxPr, chkBxIv);  // 販売区分
             var (selSlPrProducts, selIvProducts) = FormActionMethod.GetProduct(chkBxRawMaterials, chkBxSemiFinProducts,
-                                                          chkBxProduct, chkBxProcess, chkBxProAll,
+                                                          chkBxProduct, chkBxProcess, chkBxCustody,
                                                           chkBxOhno, chkBxSundus, chkBxSuncar);  // 商品区分(在庫)
 
             // 開始・終了日付取得
@@ -227,7 +229,7 @@ namespace あすよん月次帳票
                     }
 
                     // 商品区分選択
-                    if (selSlPrProducts.Count > 0)
+                    if (selSlPrProducts.Count < 5)
                     {
                         filtered = processor.ProductFileter(filtered, classProduct, selSlPrProducts);
                     }
@@ -277,7 +279,7 @@ namespace あすよん月次帳票
                     }
 
                     // 商品区分選択
-                    if (selSlPrProducts.Count > 0)
+                    if (selSlPrProducts.Count < 5)
                     {
                         filtered = processor.ProductFileter(filtered, classProduct, selSlPrProducts);
                     }
@@ -354,7 +356,7 @@ namespace あすよん月次帳票
                     filtered = d.Table;
 
                     // 商品区分選択
-                    if (selIvProducts.Count > 0)
+                    if (selIvProducts.Count < 5)
                     {
                         filtered = processor.ProductFileter(filtered, selIvProducts, selIvProducts);
                     }
@@ -373,7 +375,7 @@ namespace あすよん月次帳票
                 bool flg = true;
                 if (stockList.Count > 1)
                 {
-                    stockDt = processor.MergeStockData(stockList.ToArray());
+                    stockDt = processor.MergeData(stockList.ToArray());
                     stockDt = processor.FormatStockTable(stockDt, flg);
                 }
                 else

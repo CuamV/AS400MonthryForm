@@ -72,6 +72,7 @@ namespace あすよん月次帳票
             this.lbTitleExportExcel = new System.Windows.Forms.Label();
             this.pictureBox1 = new System.Windows.Forms.PictureBox();
             this.btnMin = new System.Windows.Forms.Button();
+            this.chkBxCustody = new System.Windows.Forms.CheckBox();
             this.grpBxCondition.SuspendLayout();
             this.groupBox1.SuspendLayout();
             this.grpBxData.SuspendLayout();
@@ -175,6 +176,7 @@ namespace あすよん月次帳票
             // 
             // grpBxData
             // 
+            this.grpBxData.Controls.Add(this.chkBxCustody);
             this.grpBxData.Controls.Add(this.chkBxProcess);
             this.grpBxData.Controls.Add(this.chkBxProAll);
             this.grpBxData.Controls.Add(this.chkBxSemiFinProducts);
@@ -210,7 +212,7 @@ namespace あすよん月次帳票
             // 
             this.chkBxProAll.AutoSize = true;
             this.chkBxProAll.Font = new System.Drawing.Font("Meiryo UI", 11.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(128)));
-            this.chkBxProAll.Location = new System.Drawing.Point(33, 234);
+            this.chkBxProAll.Location = new System.Drawing.Point(120, 242);
             this.chkBxProAll.Name = "chkBxProAll";
             this.chkBxProAll.Size = new System.Drawing.Size(54, 23);
             this.chkBxProAll.TabIndex = 29;
@@ -352,7 +354,6 @@ namespace あすよん月次帳票
             this.listBxSupplier.SelectionMode = System.Windows.Forms.SelectionMode.MultiExtended;
             this.listBxSupplier.Size = new System.Drawing.Size(219, 140);
             this.listBxSupplier.TabIndex = 63;
-            this.listBxSupplier.SelectedIndexChanged += new System.EventHandler(this.listBoxBumon_SelectedIndexChanged);
             // 
             // listBxSaller
             // 
@@ -364,7 +365,6 @@ namespace あすよん月次帳票
             this.listBxSaller.SelectionMode = System.Windows.Forms.SelectionMode.MultiExtended;
             this.listBxSaller.Size = new System.Drawing.Size(220, 140);
             this.listBxSaller.TabIndex = 62;
-            this.listBxSaller.SelectedIndexChanged += new System.EventHandler(this.listBoxBumon_SelectedIndexChanged);
             // 
             // listBxBumon
             // 
@@ -505,6 +505,17 @@ namespace あすよん月次帳票
             this.btnMin.Text = "―";
             this.btnMin.UseVisualStyleBackColor = true;
             this.btnMin.Click += new System.EventHandler(this.btnMin_Click);
+            // 
+            // chkBxCustody
+            // 
+            this.chkBxCustody.AutoSize = true;
+            this.chkBxCustody.Font = new System.Drawing.Font("Meiryo UI", 11.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(128)));
+            this.chkBxCustody.Location = new System.Drawing.Point(33, 242);
+            this.chkBxCustody.Name = "chkBxCustody";
+            this.chkBxCustody.Size = new System.Drawing.Size(52, 23);
+            this.chkBxCustody.TabIndex = 57;
+            this.chkBxCustody.Text = "預り";
+            this.chkBxCustody.UseVisualStyleBackColor = true;
             // 
             // Form4
             // 
@@ -756,5 +767,6 @@ namespace あすよん月次帳票
         private Label label1;
         private Label label2;
         private Button btnMin;
+        private CheckBox chkBxCustody;
     }
 }

@@ -59,7 +59,7 @@ namespace あすよん月次帳票
                 switch (company)
                 {
                     case "オーノ":
-                        files = new string[] { "OIZAIKOG", "OIZAIKOS", "OIZAIKOK" };
+                        files = new string[] { "OIZAIKOG", "OIZAIKOS", "OIZAIKOK","OIZAIKOA" };
                         break;
                     case "サンミックダスコン":
                         files = new string[] { "SDIZAIKOG", "SDIZAIKOCH", "SDIZAIKOS" };
@@ -85,7 +85,7 @@ namespace あすよん月次帳票
                     stockList.Add(dt);
                 }
 
-                dt = processor.MergeStockData(stockList.ToArray());
+                dt = processor.MergeData(stockList.ToArray());
             }
             else
             {
@@ -126,7 +126,8 @@ namespace あすよん月次帳票
                             { "2", "タフト半製品" },
                             { "3", "コーティング半製品" },
                             { "4", "製品" },
-                            { "5", "加工" }
+                            { "5", "加工在庫" },
+                            { "6", "預り在庫" }
                         };
 
                         foreach (DataRow r in IVdata.Rows)
@@ -175,28 +176,6 @@ namespace あすよん月次帳票
             // 年月列を先頭へ移動
             dt.Columns["年月"].SetOrdinal(0);
             return dt;
-        }
-
-        public void ShowYearMonth(ComboBox cmbxStrYearMonth,ComboBox cmbxEndYearMonth)
-        {
-            // 過去2年分と未来2か月分の表示
-            DateTime sYearMonth = new DateTime(DateTime.Now.Year - 2, 1, 1);
-            DateTime eYearMonth = DateTime.Now.AddMonths(2);  // 未来2か月分 
-
-            DateTime current = sYearMonth;
-            while (current <= eYearMonth)
-            {
-                string ym = $"{current.Year}年{current.Month:D2}月";
-                cmbxStrYearMonth.Items.Add(ym);
-                cmbxEndYearMonth.Items.Add(ym);
-                current = current.AddMonths(1);
-            }
-
-            // デフォルトは前月
-            DateTime prevMonth = DateTime.Now.AddMonths(-1);
-            string beforeYm = $"{prevMonth.Year}年{prevMonth.Month:D2}月";
-            cmbxStrYearMonth.SelectedItem = beforeYm;
-            cmbxEndYearMonth.SelectedItem = beforeYm;
         }
 
         public (string sd, string ed) UpdateStartEndDate(TextBox txtBxStrYearMonth,TextBox txtBxEndYearMonth)
@@ -410,6 +389,12 @@ namespace あすよん月次帳票
             PrintIZAIKO(ym, "5");
             // オーノ加工在庫のライブラリ作成
             MakeLibrary("OIZAIKOK");
+
+            // オーノ預り在庫印刷
+            PrintIZAIKO(ym, "6");
+            // オーノ預り在庫のライブラリ作成
+            MakeLibrary("OIZAIKOA");
+
             PCommOperator.SendKeys(f3, 20, 7);
             PCommOperator.SendKeys("24", 20, 7);
             PCommOperator.SignOff();
@@ -437,6 +422,11 @@ namespace あすよん月次帳票
             PrintIZAIKO(ym, "5", bumon);
             // オーノ加工在庫のライブラリ作成
             MakeLibrary("OIZAIKOK");
+
+            // オーノ預り在庫印刷
+            PrintIZAIKO(ym, "6", bumon);
+            // オーノ預り在庫のライブラリ作成
+            MakeLibrary("OIZAIKOA");
 
             PCommOperator.SendKeys(f3, 20, 7);
             PCommOperator.SendKeys("24", 20, 7);
@@ -600,7 +590,7 @@ namespace あすよん月次帳票
             return selectedCompanies;
         }
         public static (List<string> selectedSlPrProduct, List<string> selectedIvProduct) GetProduct(CheckBox chkBxRawMaterials, CheckBox chkBxSemiFinProducts,
-                                              CheckBox chkBxProduct, CheckBox chkBxProcess, CheckBox chkBxProAll,
+                                              CheckBox chkBxProduct, CheckBox chkBxProcess, CheckBox chkBxCustody,
                                               CheckBox chkBxOhno, CheckBox chkBxSundus, CheckBox chkBxSuncar)
         {
             // 売上・仕入の製品区分選択
@@ -609,7 +599,7 @@ namespace あすよん月次帳票
             if (chkBxSemiFinProducts.Checked) selectedSlPrProduct.Add("半製品");
             if (chkBxProduct.Checked) selectedSlPrProduct.Add("製品");
             if (chkBxProcess.Checked) selectedSlPrProduct.Add("加工");
-            if (chkBxProAll.Checked) selectedSlPrProduct.AddRange(new string[] { "原材料", "半製品", "製品", "加工" });
+            if (chkBxCustody.Checked) selectedSlPrProduct.Add("預り");
 
             // 在庫の製品区分選択
             var selectedIvProduct = new List<string>();
@@ -627,18 +617,16 @@ namespace あすよん月次帳票
             else if (chkBxSundus.Checked && chkBxSemiFinProducts.Checked) selectedIvProduct.Add("コーティング半製品");
             if (chkBxProduct.Checked) selectedIvProduct.Add("製品");
             if (chkBxProcess.Checked) selectedIvProduct.Add("加工在庫");
-            if (chkBxProAll.Checked) selectedIvProduct.AddRange(new string[] { "原材料", "タフト半製品", "コーティング半製品", "製品", "加工在庫" });
+            if (chkBxCustody.Checked) selectedIvProduct.Add("預り在庫");
             return (selectedSlPrProduct, selectedIvProduct);
         }
 
-        public static List<string> GetSalseProduct(CheckBox chkBxSl, CheckBox chkBxPr,
-                                                   CheckBox chkBxIv, CheckBox chkBxSalesAll)
+        public static List<string> GetSalseProduct(CheckBox chkBxSl, CheckBox chkBxPr, CheckBox chkBxIv)
         {
             var selectedSlProduct = new List<string>();
             if (chkBxSl.Checked) selectedSlProduct.Add("売上");
             if (chkBxPr.Checked) selectedSlProduct.Add("仕入");
             if (chkBxIv.Checked) selectedSlProduct.Add("在庫");
-            if (chkBxSalesAll.Checked) selectedSlProduct.AddRange(new string[] { "売上", "仕入", "在庫" });
             return selectedSlProduct;
         }
 

@@ -45,10 +45,6 @@ namespace あすよん月次帳票
         private void InitializeComponent()
         {
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(Form2));
-            this.dgvDataOhno = new System.Windows.Forms.DataGridView();
-            this.dgvDataScar = new System.Windows.Forms.DataGridView();
-            this.dgvDataSdus = new System.Windows.Forms.DataGridView();
-            this.dgvDataIV = new System.Windows.Forms.DataGridView();
             this.chkBxSuncar = new System.Windows.Forms.CheckBox();
             this.chkBxOhno = new System.Windows.Forms.CheckBox();
             this.chkBxSundus = new System.Windows.Forms.CheckBox();
@@ -67,10 +63,6 @@ namespace あすよん月次帳票
             this.chkBxSalesAll = new System.Windows.Forms.CheckBox();
             this.lbSupplier = new System.Windows.Forms.Label();
             this.lbSaller = new System.Windows.Forms.Label();
-            this.lbDataOhno = new System.Windows.Forms.Label();
-            this.lbDataSuncar = new System.Windows.Forms.Label();
-            this.lbDataSundus = new System.Windows.Forms.Label();
-            this.lbDataIV = new System.Windows.Forms.Label();
             this.btnDisplay = new System.Windows.Forms.Button();
             this.btnForm1Back = new System.Windows.Forms.Button();
             this.grpBxBtn = new System.Windows.Forms.GroupBox();
@@ -82,66 +74,30 @@ namespace あすよん月次帳票
             this.listBxSaller = new System.Windows.Forms.ListBox();
             this.listBxBumon = new System.Windows.Forms.ListBox();
             this.groupBox3 = new System.Windows.Forms.GroupBox();
+            this.chkBxCustody = new System.Windows.Forms.CheckBox();
             this.chkBxProcess = new System.Windows.Forms.CheckBox();
             this.lbTitleDisplay = new System.Windows.Forms.Label();
-            this.pictureBox1 = new System.Windows.Forms.PictureBox();
             this.label2 = new System.Windows.Forms.Label();
             this.btnMin = new System.Windows.Forms.Button();
-            ((System.ComponentModel.ISupportInitialize)(this.dgvDataOhno)).BeginInit();
-            ((System.ComponentModel.ISupportInitialize)(this.dgvDataScar)).BeginInit();
-            ((System.ComponentModel.ISupportInitialize)(this.dgvDataSdus)).BeginInit();
-            ((System.ComponentModel.ISupportInitialize)(this.dgvDataIV)).BeginInit();
+            this.pictureBox1 = new System.Windows.Forms.PictureBox();
+            this.lbDataOhno = new System.Windows.Forms.Label();
+            this.dgvDataOhno = new System.Windows.Forms.DataGridView();
+            this.lbDataSundus = new System.Windows.Forms.Label();
+            this.dgvDataSdus = new System.Windows.Forms.DataGridView();
+            this.lbDataSuncar = new System.Windows.Forms.Label();
+            this.dgvDataScar = new System.Windows.Forms.DataGridView();
+            this.label1 = new System.Windows.Forms.Label();
+            this.dgvDataIV = new System.Windows.Forms.DataGridView();
             this.grpBxBtn.SuspendLayout();
             this.groupBox1.SuspendLayout();
             this.groupBox2.SuspendLayout();
             this.groupBox3.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.dgvDataOhno)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.dgvDataSdus)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.dgvDataScar)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.dgvDataIV)).BeginInit();
             this.SuspendLayout();
-            // 
-            // dgvDataOhno
-            // 
-            this.dgvDataOhno.AllowDrop = true;
-            this.dgvDataOhno.ClipboardCopyMode = System.Windows.Forms.DataGridViewClipboardCopyMode.EnableAlwaysIncludeHeaderText;
-            this.dgvDataOhno.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
-            this.dgvDataOhno.Location = new System.Drawing.Point(503, 30);
-            this.dgvDataOhno.Margin = new System.Windows.Forms.Padding(4);
-            this.dgvDataOhno.Name = "dgvDataOhno";
-            this.dgvDataOhno.RowTemplate.Height = 21;
-            this.dgvDataOhno.Size = new System.Drawing.Size(909, 165);
-            this.dgvDataOhno.TabIndex = 2;
-            // 
-            // dgvDataScar
-            // 
-            this.dgvDataScar.ClipboardCopyMode = System.Windows.Forms.DataGridViewClipboardCopyMode.EnableAlwaysIncludeHeaderText;
-            this.dgvDataScar.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
-            this.dgvDataScar.Location = new System.Drawing.Point(503, 423);
-            this.dgvDataScar.Margin = new System.Windows.Forms.Padding(4);
-            this.dgvDataScar.Name = "dgvDataScar";
-            this.dgvDataScar.RowTemplate.Height = 21;
-            this.dgvDataScar.Size = new System.Drawing.Size(909, 165);
-            this.dgvDataScar.TabIndex = 13;
-            // 
-            // dgvDataSdus
-            // 
-            this.dgvDataSdus.ClipboardCopyMode = System.Windows.Forms.DataGridViewClipboardCopyMode.EnableAlwaysIncludeHeaderText;
-            this.dgvDataSdus.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
-            this.dgvDataSdus.Location = new System.Drawing.Point(503, 228);
-            this.dgvDataSdus.Margin = new System.Windows.Forms.Padding(4);
-            this.dgvDataSdus.Name = "dgvDataSdus";
-            this.dgvDataSdus.RowTemplate.Height = 21;
-            this.dgvDataSdus.Size = new System.Drawing.Size(909, 165);
-            this.dgvDataSdus.TabIndex = 14;
-            // 
-            // dgvDataIV
-            // 
-            this.dgvDataIV.ClipboardCopyMode = System.Windows.Forms.DataGridViewClipboardCopyMode.EnableAlwaysIncludeHeaderText;
-            this.dgvDataIV.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
-            this.dgvDataIV.Location = new System.Drawing.Point(503, 613);
-            this.dgvDataIV.Margin = new System.Windows.Forms.Padding(4);
-            this.dgvDataIV.Name = "dgvDataIV";
-            this.dgvDataIV.RowTemplate.Height = 21;
-            this.dgvDataIV.Size = new System.Drawing.Size(909, 165);
-            this.dgvDataIV.TabIndex = 17;
             // 
             // chkBxSuncar
             // 
@@ -213,7 +169,7 @@ namespace あすよん月次帳票
             // 
             this.chkBxProAll.AutoSize = true;
             this.chkBxProAll.Font = new System.Drawing.Font("Meiryo UI", 11.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(128)));
-            this.chkBxProAll.Location = new System.Drawing.Point(359, 89);
+            this.chkBxProAll.Location = new System.Drawing.Point(339, 118);
             this.chkBxProAll.Name = "chkBxProAll";
             this.chkBxProAll.Size = new System.Drawing.Size(54, 23);
             this.chkBxProAll.TabIndex = 51;
@@ -225,7 +181,7 @@ namespace あすよん月次帳票
             // 
             this.chkBxSemiFinProducts.AutoSize = true;
             this.chkBxSemiFinProducts.Font = new System.Drawing.Font("Meiryo UI", 11.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(128)));
-            this.chkBxSemiFinProducts.Location = new System.Drawing.Point(245, 89);
+            this.chkBxSemiFinProducts.Location = new System.Drawing.Point(339, 59);
             this.chkBxSemiFinProducts.Name = "chkBxSemiFinProducts";
             this.chkBxSemiFinProducts.Size = new System.Drawing.Size(73, 23);
             this.chkBxSemiFinProducts.TabIndex = 50;
@@ -249,7 +205,7 @@ namespace あすよん月次帳票
             // 
             this.chkBxProduct.AutoSize = true;
             this.chkBxProduct.Font = new System.Drawing.Font("Meiryo UI", 11.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(128)));
-            this.chkBxProduct.Location = new System.Drawing.Point(245, 118);
+            this.chkBxProduct.Location = new System.Drawing.Point(245, 89);
             this.chkBxProduct.Name = "chkBxProduct";
             this.chkBxProduct.Size = new System.Drawing.Size(58, 23);
             this.chkBxProduct.TabIndex = 48;
@@ -344,46 +300,6 @@ namespace あすよん月次帳票
             this.lbSaller.Size = new System.Drawing.Size(61, 17);
             this.lbSaller.TabIndex = 55;
             this.lbSaller.Text = "【販売先】";
-            // 
-            // lbDataOhno
-            // 
-            this.lbDataOhno.AutoSize = true;
-            this.lbDataOhno.Font = new System.Drawing.Font("Meiryo UI", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(128)));
-            this.lbDataOhno.Location = new System.Drawing.Point(500, 9);
-            this.lbDataOhno.Name = "lbDataOhno";
-            this.lbDataOhno.Size = new System.Drawing.Size(103, 17);
-            this.lbDataOhno.TabIndex = 59;
-            this.lbDataOhno.Text = "<オーノ(売・仕)>";
-            // 
-            // lbDataSuncar
-            // 
-            this.lbDataSuncar.AutoSize = true;
-            this.lbDataSuncar.Font = new System.Drawing.Font("Meiryo UI", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(128)));
-            this.lbDataSuncar.Location = new System.Drawing.Point(500, 402);
-            this.lbDataSuncar.Name = "lbDataSuncar";
-            this.lbDataSuncar.Size = new System.Drawing.Size(167, 17);
-            this.lbDataSuncar.TabIndex = 60;
-            this.lbDataSuncar.Text = "<サンミックカーペット(売・仕)>";
-            // 
-            // lbDataSundus
-            // 
-            this.lbDataSundus.AutoSize = true;
-            this.lbDataSundus.Font = new System.Drawing.Font("Meiryo UI", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(128)));
-            this.lbDataSundus.Location = new System.Drawing.Point(500, 206);
-            this.lbDataSundus.Name = "lbDataSundus";
-            this.lbDataSundus.Size = new System.Drawing.Size(157, 17);
-            this.lbDataSundus.TabIndex = 61;
-            this.lbDataSundus.Text = "<サンミックダスコン(売・仕)>";
-            // 
-            // lbDataIV
-            // 
-            this.lbDataIV.AutoSize = true;
-            this.lbDataIV.Font = new System.Drawing.Font("Meiryo UI", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(128)));
-            this.lbDataIV.Location = new System.Drawing.Point(500, 592);
-            this.lbDataIV.Name = "lbDataIV";
-            this.lbDataIV.Size = new System.Drawing.Size(54, 17);
-            this.lbDataIV.TabIndex = 62;
-            this.lbDataIV.Text = "<在庫>";
             // 
             // btnDisplay
             // 
@@ -499,6 +415,7 @@ namespace あすよん月次帳票
             // 
             // groupBox3
             // 
+            this.groupBox3.Controls.Add(this.chkBxCustody);
             this.groupBox3.Controls.Add(this.chkBxProcess);
             this.groupBox3.Controls.Add(this.lbSalesCategory);
             this.groupBox3.Controls.Add(this.chkBxSalesAll);
@@ -513,16 +430,27 @@ namespace あすよん月次帳票
             this.groupBox3.Font = new System.Drawing.Font("Meiryo UI", 11.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(128)));
             this.groupBox3.Location = new System.Drawing.Point(12, 598);
             this.groupBox3.Name = "groupBox3";
-            this.groupBox3.Size = new System.Drawing.Size(474, 180);
+            this.groupBox3.Size = new System.Drawing.Size(474, 161);
             this.groupBox3.TabIndex = 68;
             this.groupBox3.TabStop = false;
             this.groupBox3.Text = "〚 データ 〛";
+            // 
+            // chkBxCustody
+            // 
+            this.chkBxCustody.AutoSize = true;
+            this.chkBxCustody.Font = new System.Drawing.Font("Meiryo UI", 11.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(128)));
+            this.chkBxCustody.Location = new System.Drawing.Point(245, 118);
+            this.chkBxCustody.Name = "chkBxCustody";
+            this.chkBxCustody.Size = new System.Drawing.Size(52, 23);
+            this.chkBxCustody.TabIndex = 56;
+            this.chkBxCustody.Text = "預り";
+            this.chkBxCustody.UseVisualStyleBackColor = true;
             // 
             // chkBxProcess
             // 
             this.chkBxProcess.AutoSize = true;
             this.chkBxProcess.Font = new System.Drawing.Font("Meiryo UI", 11.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(128)));
-            this.chkBxProcess.Location = new System.Drawing.Point(245, 147);
+            this.chkBxProcess.Location = new System.Drawing.Point(339, 89);
             this.chkBxProcess.Name = "chkBxProcess";
             this.chkBxProcess.Size = new System.Drawing.Size(58, 23);
             this.chkBxProcess.TabIndex = 55;
@@ -540,16 +468,6 @@ namespace あすよん月次帳票
             this.lbTitleDisplay.TabIndex = 69;
             this.lbTitleDisplay.Text = "< データ表示 >";
             // 
-            // pictureBox1
-            // 
-            this.pictureBox1.Image = global::あすよん月次帳票.Properties.Resources.ic_all_csm02;
-            this.pictureBox1.Location = new System.Drawing.Point(15, 10);
-            this.pictureBox1.Name = "pictureBox1";
-            this.pictureBox1.Size = new System.Drawing.Size(33, 27);
-            this.pictureBox1.SizeMode = System.Windows.Forms.PictureBoxSizeMode.Zoom;
-            this.pictureBox1.TabIndex = 70;
-            this.pictureBox1.TabStop = false;
-            // 
             // label2
             // 
             this.label2.AutoSize = true;
@@ -563,7 +481,7 @@ namespace あすよん月次帳票
             // btnMin
             // 
             this.btnMin.Font = new System.Drawing.Font("Meiryo UI", 8.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(128)));
-            this.btnMin.Location = new System.Drawing.Point(1372, 6);
+            this.btnMin.Location = new System.Drawing.Point(1213, 7);
             this.btnMin.Name = "btnMin";
             this.btnMin.Size = new System.Drawing.Size(40, 20);
             this.btnMin.TabIndex = 72;
@@ -571,11 +489,114 @@ namespace あすよん月次帳票
             this.btnMin.UseVisualStyleBackColor = true;
             this.btnMin.Click += new System.EventHandler(this.btnMin_Click);
             // 
+            // pictureBox1
+            // 
+            this.pictureBox1.Image = global::あすよん月次帳票.Properties.Resources.ic_all_csm02;
+            this.pictureBox1.Location = new System.Drawing.Point(15, 10);
+            this.pictureBox1.Name = "pictureBox1";
+            this.pictureBox1.Size = new System.Drawing.Size(33, 27);
+            this.pictureBox1.SizeMode = System.Windows.Forms.PictureBoxSizeMode.Zoom;
+            this.pictureBox1.TabIndex = 70;
+            this.pictureBox1.TabStop = false;
+            // 
+            // lbDataOhno
+            // 
+            this.lbDataOhno.AutoSize = true;
+            this.lbDataOhno.Font = new System.Drawing.Font("Meiryo UI", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(128)));
+            this.lbDataOhno.Location = new System.Drawing.Point(490, 10);
+            this.lbDataOhno.Name = "lbDataOhno";
+            this.lbDataOhno.Size = new System.Drawing.Size(103, 17);
+            this.lbDataOhno.TabIndex = 74;
+            this.lbDataOhno.Text = "<オーノ(売・仕)>";
+            // 
+            // dgvDataOhno
+            // 
+            this.dgvDataOhno.AllowDrop = true;
+            this.dgvDataOhno.ClipboardCopyMode = System.Windows.Forms.DataGridViewClipboardCopyMode.EnableAlwaysIncludeHeaderText;
+            this.dgvDataOhno.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
+            this.dgvDataOhno.Location = new System.Drawing.Point(493, 30);
+            this.dgvDataOhno.Margin = new System.Windows.Forms.Padding(4);
+            this.dgvDataOhno.Name = "dgvDataOhno";
+            this.dgvDataOhno.RowTemplate.Height = 21;
+            this.dgvDataOhno.Size = new System.Drawing.Size(760, 160);
+            this.dgvDataOhno.TabIndex = 73;
+            // 
+            // lbDataSundus
+            // 
+            this.lbDataSundus.AutoSize = true;
+            this.lbDataSundus.Font = new System.Drawing.Font("Meiryo UI", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(128)));
+            this.lbDataSundus.Location = new System.Drawing.Point(492, 198);
+            this.lbDataSundus.Name = "lbDataSundus";
+            this.lbDataSundus.Size = new System.Drawing.Size(157, 17);
+            this.lbDataSundus.TabIndex = 76;
+            this.lbDataSundus.Text = "<サンミックダスコン(売・仕)>";
+            // 
+            // dgvDataSdus
+            // 
+            this.dgvDataSdus.ClipboardCopyMode = System.Windows.Forms.DataGridViewClipboardCopyMode.EnableAlwaysIncludeHeaderText;
+            this.dgvDataSdus.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
+            this.dgvDataSdus.Location = new System.Drawing.Point(493, 218);
+            this.dgvDataSdus.Margin = new System.Windows.Forms.Padding(4);
+            this.dgvDataSdus.Name = "dgvDataSdus";
+            this.dgvDataSdus.RowTemplate.Height = 21;
+            this.dgvDataSdus.Size = new System.Drawing.Size(760, 160);
+            this.dgvDataSdus.TabIndex = 75;
+            // 
+            // lbDataSuncar
+            // 
+            this.lbDataSuncar.AutoSize = true;
+            this.lbDataSuncar.Font = new System.Drawing.Font("Meiryo UI", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(128)));
+            this.lbDataSuncar.Location = new System.Drawing.Point(492, 388);
+            this.lbDataSuncar.Name = "lbDataSuncar";
+            this.lbDataSuncar.Size = new System.Drawing.Size(167, 17);
+            this.lbDataSuncar.TabIndex = 78;
+            this.lbDataSuncar.Text = "<サンミックカーペット(売・仕)>";
+            // 
+            // dgvDataScar
+            // 
+            this.dgvDataScar.ClipboardCopyMode = System.Windows.Forms.DataGridViewClipboardCopyMode.EnableAlwaysIncludeHeaderText;
+            this.dgvDataScar.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
+            this.dgvDataScar.Location = new System.Drawing.Point(493, 409);
+            this.dgvDataScar.Margin = new System.Windows.Forms.Padding(4);
+            this.dgvDataScar.Name = "dgvDataScar";
+            this.dgvDataScar.RowTemplate.Height = 21;
+            this.dgvDataScar.Size = new System.Drawing.Size(760, 160);
+            this.dgvDataScar.TabIndex = 77;
+            // 
+            // label1
+            // 
+            this.label1.AutoSize = true;
+            this.label1.Font = new System.Drawing.Font("Meiryo UI", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(128)));
+            this.label1.Location = new System.Drawing.Point(490, 578);
+            this.label1.Name = "label1";
+            this.label1.Size = new System.Drawing.Size(54, 17);
+            this.label1.TabIndex = 80;
+            this.label1.Text = "<在庫>";
+            // 
+            // dgvDataIV
+            // 
+            this.dgvDataIV.ClipboardCopyMode = System.Windows.Forms.DataGridViewClipboardCopyMode.EnableAlwaysIncludeHeaderText;
+            this.dgvDataIV.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
+            this.dgvDataIV.Location = new System.Drawing.Point(493, 599);
+            this.dgvDataIV.Margin = new System.Windows.Forms.Padding(4);
+            this.dgvDataIV.Name = "dgvDataIV";
+            this.dgvDataIV.RowTemplate.Height = 21;
+            this.dgvDataIV.Size = new System.Drawing.Size(760, 160);
+            this.dgvDataIV.TabIndex = 79;
+            // 
             // Form2
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 14F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(1425, 793);
+            this.ClientSize = new System.Drawing.Size(1270, 770);
+            this.Controls.Add(this.label1);
+            this.Controls.Add(this.dgvDataIV);
+            this.Controls.Add(this.lbDataSuncar);
+            this.Controls.Add(this.dgvDataScar);
+            this.Controls.Add(this.lbDataSundus);
+            this.Controls.Add(this.dgvDataSdus);
+            this.Controls.Add(this.lbDataOhno);
+            this.Controls.Add(this.dgvDataOhno);
             this.Controls.Add(this.btnMin);
             this.Controls.Add(this.label2);
             this.Controls.Add(this.pictureBox1);
@@ -584,14 +605,6 @@ namespace あすよん月次帳票
             this.Controls.Add(this.groupBox2);
             this.Controls.Add(this.groupBox1);
             this.Controls.Add(this.grpBxBtn);
-            this.Controls.Add(this.lbDataIV);
-            this.Controls.Add(this.lbDataSundus);
-            this.Controls.Add(this.lbDataSuncar);
-            this.Controls.Add(this.lbDataOhno);
-            this.Controls.Add(this.dgvDataIV);
-            this.Controls.Add(this.dgvDataSdus);
-            this.Controls.Add(this.dgvDataScar);
-            this.Controls.Add(this.dgvDataOhno);
             this.Font = new System.Drawing.Font("Meiryo UI", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(128)));
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.None;
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
@@ -600,10 +613,6 @@ namespace あすよん月次帳票
             this.Opacity = 0.95D;
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
             this.Text = "データ表示";
-            ((System.ComponentModel.ISupportInitialize)(this.dgvDataOhno)).EndInit();
-            ((System.ComponentModel.ISupportInitialize)(this.dgvDataScar)).EndInit();
-            ((System.ComponentModel.ISupportInitialize)(this.dgvDataSdus)).EndInit();
-            ((System.ComponentModel.ISupportInitialize)(this.dgvDataIV)).EndInit();
             this.grpBxBtn.ResumeLayout(false);
             this.groupBox1.ResumeLayout(false);
             this.groupBox1.PerformLayout();
@@ -612,17 +621,16 @@ namespace あすよん月次帳票
             this.groupBox3.ResumeLayout(false);
             this.groupBox3.PerformLayout();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.dgvDataOhno)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.dgvDataSdus)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.dgvDataScar)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.dgvDataIV)).EndInit();
             this.ResumeLayout(false);
             this.PerformLayout();
 
         }
 
         #endregion
-
-        private System.Windows.Forms.DataGridView dgvDataOhno;
-        private System.Windows.Forms.DataGridView dgvDataScar;
-        private System.Windows.Forms.DataGridView dgvDataSdus;
-        private System.Windows.Forms.DataGridView dgvDataIV;
 
         // DataGridView のスタイル
         private void StyleDataGrid(DataGridView dgv, Color header, Color row, Color altRow)
@@ -659,10 +667,6 @@ namespace あすよん月次帳票
         private CheckBox chkBxSalesAll;
         private Label lbSupplier;
         private Label lbSaller;
-        private Label lbDataOhno;
-        private Label lbDataSuncar;
-        private Label lbDataSundus;
-        private Label lbDataIV;
         private Button btnDisplay;
         private Button btnForm1Back;
         private GroupBox grpBxBtn;
@@ -858,5 +862,14 @@ namespace あすよん月次帳票
         private TextBox txtBxEndYearMonth;
         private Label label2;
         private Button btnMin;
+        private CheckBox chkBxCustody;
+        private Label lbDataOhno;
+        private DataGridView dgvDataOhno;
+        private Label lbDataSundus;
+        private DataGridView dgvDataSdus;
+        private Label lbDataSuncar;
+        private DataGridView dgvDataScar;
+        private Label label1;
+        private DataGridView dgvDataIV;
     }
 }

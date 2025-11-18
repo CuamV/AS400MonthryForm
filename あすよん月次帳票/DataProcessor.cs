@@ -161,7 +161,7 @@ namespace あすよん月次帳票
         }
 
         // 複数DataTableを縦にマージ
-        public DataTable MergeStockData(params DataTable[] tables)
+        public DataTable MergeData(params DataTable[] tables)
         {
             if (tables == null || tables.Length == 0)
                 return new DataTable();
@@ -243,11 +243,11 @@ namespace あすよん月次帳票
             DataView dv = formated.DefaultView;
             if (flg)
             {
-                dv.Sort = "年月 ASC, クラス名 ASC, 取引区分 ASC, 部門CD ASC, 取引先/品種CD ASC";
+                dv.Sort = "年月 ASC, クラス名 ASC, 部門CD ASC, 取引先/品種CD ASC";
             } 
             else
             {
-                dv.Sort = "年月 ASC, クラス名 ASC, 取引区分 ASC, 部門CD ASC, 品種 ASC";
+                dv.Sort = "年月 ASC, クラス名 ASC, 部門CD ASC, 品種 ASC";
             }
             return dv.ToTable();
         }

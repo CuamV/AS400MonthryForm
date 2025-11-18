@@ -26,7 +26,7 @@
     <MinimumRequiredVersion>1.0.0.1</MinimumRequiredVersion>
     <WebPage>publish.htm</WebPage>
     <OpenBrowserOnPublish>false</OpenBrowserOnPublish>
-    <ApplicationRevision>11</ApplicationRevision>
+    <ApplicationRevision>12</ApplicationRevision>
     <ApplicationVersion>1.0.0.%2a</ApplicationVersion>
     <UseApplicationTrust>false</UseApplicationTrust>
     <PublishWizardCompleted>true</PublishWizardCompleted>
@@ -182,11 +182,11 @@
     <Compile Include="Form1.Designer.cs">
       <DependentUpon>Form1.cs</DependentUpon>
     </Compile>
-    <Compile Include="Form2.cs">
+    <Compile Include="Form2_DataView.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="Form2.Designer.cs">
-      <DependentUpon>Form2.cs</DependentUpon>
+    <Compile Include="Form2_DataView.Designer.cs">
+      <DependentUpon>Form2_DataView.cs</DependentUpon>
     </Compile>
     <Compile Include="Form3.cs">
       <SubType>Form</SubType>
@@ -223,12 +223,30 @@
     <Compile Include="mf.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="RplForm2.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="RplForm2.Designer.cs">
+      <DependentUpon>RplForm2.cs</DependentUpon>
+    </Compile>
     <Compile Include="XXX.cs" />
+    <Compile Include="販売仕入先Form.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="販売仕入先Form.Designer.cs">
+      <DependentUpon>販売仕入先Form.cs</DependentUpon>
+    </Compile>
+    <Compile Include="部門Form.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="部門Form.Designer.cs">
+      <DependentUpon>部門Form.cs</DependentUpon>
+    </Compile>
     <EmbeddedResource Include="Form1.resx">
       <DependentUpon>Form1.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="Form2.resx">
-      <DependentUpon>Form2.cs</DependentUpon>
+    <EmbeddedResource Include="Form2_DataView.resx">
+      <DependentUpon>Form2_DataView.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Form3.resx">
       <DependentUpon>Form3.cs</DependentUpon>
@@ -255,6 +273,15 @@
       <DependentUpon>Resources.resx</DependentUpon>
       <DesignTime>True</DesignTime>
     </Compile>
+    <EmbeddedResource Include="RplForm2.resx">
+      <DependentUpon>RplForm2.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="販売仕入先Form.resx">
+      <DependentUpon>販売仕入先Form.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="部門Form.resx">
+      <DependentUpon>部門Form.cs</DependentUpon>
+    </EmbeddedResource>
     <None Include="packages.config" />
     <None Include="Properties\Settings.settings">
       <Generator>SettingsSingleFileGenerator</Generator>
@@ -272,6 +299,7 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include="ic_all_csm02.ico" />
+    <Content Include="memo.txt" />
     <None Include="Resources\Infiter_Small.gif" />
     <None Include="Resources\free_snowman.gif" />
     <None Include="Resources\鶏-1.gif" />

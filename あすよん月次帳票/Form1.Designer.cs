@@ -112,7 +112,7 @@ namespace あすよん月次帳票
             this.lnkLbDisplay.Size = new System.Drawing.Size(93, 19);
             this.lnkLbDisplay.TabIndex = 73;
             this.lnkLbDisplay.TabStop = true;
-            this.lnkLbDisplay.Text = "● データ表示";
+            this.lnkLbDisplay.Text = "● データ抽出";
             this.lnkLbDisplay.LinkClicked += new System.Windows.Forms.LinkLabelLinkClickedEventHandler(this.lnkLbDisplay_LinkClicked);
             // 
             // lnkLbMaster

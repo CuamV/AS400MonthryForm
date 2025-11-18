@@ -30,11 +30,11 @@ namespace あすよん月次帳票
 
             this.Load += Form2_Load;
 
-            // DataGridViewスタイル設定
-            StyleDataGrid(dgvDataOhno, Color.DarkBlue, Color.White, Color.LightGray);
-            StyleDataGrid(dgvDataSdus, Color.DarkGreen, Color.White, Color.LightGray);
-            StyleDataGrid(dgvDataScar, Color.DarkRed, Color.White, Color.LightGray);
-            StyleDataGrid(dgvDataIV, Color.Gray, Color.White, Color.LightGray);
+            //// DataGridViewスタイル設定
+            //StyleDataGrid(dgvDataOhno, Color.DarkBlue, Color.White, Color.LightGray);
+            //StyleDataGrid(dgvDataSdus, Color.DarkGreen, Color.White, Color.LightGray);
+            //StyleDataGrid(dgvDataScar, Color.DarkRed, Color.White, Color.LightGray);
+            //StyleDataGrid(dgvDataIV, Color.Gray, Color.White, Color.LightGray);
 
             
 
@@ -150,7 +150,7 @@ namespace あすよん月次帳票
             var selSupplieres = FormActionMethod.GetSallerOrSupplier(listBxSupplier);  // 仕入先 （先頭空白行は無視）
             var selSlCategories = FormActionMethod.GetSalseProduct(chkBxSl, chkBxPr, chkBxIv, chkBxSalesAll);  // 販売区分
             var (selSlPrProducts, selIvProducts) = FormActionMethod.GetProduct(chkBxRawMaterials, chkBxSemiFinProducts,
-                                                          chkBxProduct, chkBxProcess, chkBxProAll,
+                                                          chkBxProduct, chkBxProcess, chkBxCustody, chkBxProAll,
                                                           chkBxOhno, chkBxSundus, chkBxSuncar);  // 商品区分(在庫)
 
             // 開始・終了日付取得
@@ -167,7 +167,8 @@ namespace あすよん月次帳票
                                 { "2", "半製品" },
                                 { "3", "半製品" },
                                 { "4", "製品" },
-                                { "5", "加工" }
+                                { "5", "加工" },
+                                { "6", "預り" }
                             };
 
             DataTable ohnoDt = null;
@@ -206,7 +207,7 @@ namespace あすよん月次帳票
                     }
 
                     // 商品区分選択
-                    if (selSlPrProducts.Count > 0)
+                    if (selSlPrProducts.Count < 5)
                     {
                         filtered = processor.ProductFileter(filtered, classProduct, selSlPrProducts);
                     }
@@ -258,7 +259,7 @@ namespace あすよん月次帳票
                     }
 
                     // 商品区分選択
-                    if (selSlPrProducts.Count > 0)
+                    if (selSlPrProducts.Count < 5)
                     {
                         filtered = processor.ProductFileter(filtered, classProduct, selSlPrProducts);
                     }
@@ -338,7 +339,7 @@ namespace あすよん月次帳票
                     DataTable filtered = current;
 
                     // 商品区分選択
-                    if (selIvProducts.Count > 0)
+                    if (selIvProducts.Count < 5)
                     {
                         filtered = processor.ProductFileter(filtered, selIvProducts, selIvProducts);
                     }
@@ -364,13 +365,26 @@ namespace あすよん月次帳票
                 stockDt = processor.FormatStockTable(stockDt);
             }
 
-            // 売上・仕入・在庫データをDataGridViewにバインド
             dgvDataOhno.DataSource = ohnoDt;
             dgvDataSdus.DataSource = sundusDt;
             dgvDataScar.DataSource = suncarDt;
             dgvDataIV.DataSource = stockDt;
+            // 売上・仕入・在庫データをDataGridViewにバインド
+            Form2_DataView dataViewForm = new Form2_DataView
+            {
+                //dgvDataOhno.DataSource = ohnoDt;
+                //dgvDataSdus.DataSource = sundusDt;
+                //dgvDataScar.DataSource = suncarDt;
+                //dgvDataIV.DataSource = stockDt;
+                OhnoData = ohnoDt,
+                SundusData = sundusDt,
+                SuncarData = suncarDt,
+                StockData = stockDt
 
-            
+            };
+            // Form2_DataView をモードレスで開く場合（閉じてもForm2が残る）
+            dataViewForm.Show();
+
             // Form1のlistBxSituationに追記
             //if (Application.OpenForms["Form1"] is Form1 form1)
             //{
@@ -437,11 +451,13 @@ namespace あすよん月次帳票
             bool showSemi = chkBxSemiFinProducts.Checked || showAll;
             bool showProd = chkBxProduct.Checked || showAll;
             bool showProc = chkBxProcess.Checked || showAll;
+            bool showCust = chkBxCustody.Checked || showAll;
             // ALL選択時は他チェック無効化
             chkBxRawMaterials.Enabled = !showAll;
             chkBxSemiFinProducts.Enabled = !showAll;
             chkBxProduct.Enabled = !showAll;
             chkBxProcess.Enabled = !showAll;
+            chkBxCustody.Enabled = !showAll;
         }
 
         private void TxtBxYearMonth_KeyPress(object sender, KeyPressEventArgs e)

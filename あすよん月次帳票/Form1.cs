@@ -1,5 +1,4 @@
-﻿//using Microsoft.Office.Interop.Excel;
-using System;
+﻿using System;
 using System.Drawing;
 using System.IO;
 using System.Linq;
@@ -227,7 +226,7 @@ namespace あすよん月次帳票
         private void lnkLbDisplay_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
         {
             // Form2を作成
-            var form2 = new Form2();
+            var form2 = new RplForm2();
             // Form2を表示
             form2.Show();
             // Form1を非表示

@@ -116,8 +116,8 @@ namespace あすよん月次帳票
             // 36:ZGURAM(売上金額)       37:ZGHWAM(引渡金額)       38:ZGHWAR(引渡粗利)       39:ZGURAR(売上粗利)           40:ZGADAT(作成日)
             // 41:ZGATIM(作成時刻)       42:ZGUDAT(更新日)         43:ZGUTIM(更新時刻)       44:ZGUPGM(更新ＰＧＭ)
             //-----------------------------------------------------------------------------
-            // 1:クラス 2:ZGBMCD(部門コード) 3:品名 4:ZGHMCD(品名コード) 5:ZGHSCD(品種コード)
-            // 6:ZGTZQT(当月残数量) 7:ZGTGZA(当月残金額) ZHTZQT
+            // 1:ZGNEND(年度)       2:ZGMOTH(月)         3:クラス             4:ZGBMCD(部門コード)  5:品名
+            // 6:ZGHMCD(品名コード) 7:ZGHSCD(品種コード) 8:ZGTZQT(当月残数量) 9:ZGTGZA(当月残金額) 
             string sql = $@"
                         SELECT ZGNEND, ZGMOTH,
                                M4.SHCLAS AS ZHCSNM, ZGBMCD AS ZHBMCD,
