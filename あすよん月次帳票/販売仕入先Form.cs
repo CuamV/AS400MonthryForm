@@ -115,20 +115,30 @@ namespace あすよん月次帳票
             // 部門ごとにアイテムを追加
             foreach (var cc in jsonData.Keys)
             {
-                var items = filteredItems ?? jsonData[cc];
+                List<dynamic> items;
+
+                if (filteredItems != null)
+                    // フィルタリングされたアイテムのみ使用
+                    items = filteredItems
+                        .Where(x => deptCodeToCompany.ContainsKey(x.DeptCode) &&
+                                       deptCodeToCompany[x.DeptCode] == cc)
+                        .ToList();
+                else
+                    items = jsonData[cc];
+
                 foreach (var item in items)
                 {
                     string deptCode = item.DeptCode;
-                    if (!deptCodeToCompany.TryGetValue(deptCode, out string company)) continue;
+                    //if (!deptCodeToCompany.TryGetValue(deptCode, out string company)) continue;
 
-                    var compNode = companyNodes[company];
+                    var compNode = companyNodes[cc];
 
                     // 部門ノード取得または作成
                     TreeNode deptNode = compNode.Nodes.Cast<TreeNode>()
                         .FirstOrDefault(n => (string)n.Tag == deptCode);
                     if (deptNode == null)
                     {
-                        string deptName = JsonLoader.GetBUMONs(company)
+                        string deptName = JsonLoader.GetBUMONs(cc)
                             .FirstOrDefault(b => b.Code == deptCode)?.Name ?? deptCode;
                         deptNode = new TreeNode($"{deptCode} {deptName}") { Tag = deptCode, Checked = false };
                         compNode.Nodes.Add(deptNode);
@@ -162,7 +172,6 @@ namespace あすよん月次帳票
                     // 子ノードのチェック状態に応じて親ノードの見た目チェック更新
                     if (node.Parent != null)
                         UpdateParentRecursive(node.Parent, node);
-
                 }
                 // 子ノードも再帰
                 if (node.Nodes.Count > 0)
@@ -183,14 +192,13 @@ namespace あすよん月次帳票
             treeView販売仕入.AfterCheck -= TreeView販売仕入_AfterCheck; // 無限ループ防止
 
 
-            // 親ノード(会社・部門)は操作禁止 → チェックを強制的に元に戻す
+            //// 親ノード(会社・部門)は操作禁止 → チェックを強制的に元に戻す
             if (e.Node.Nodes.Count > 0)
             {
-                bool original = e.Node.Nodes.Cast<TreeNode>().Any(n => n.Checked);
-                e.Node.Checked = original;
-
-                treeView販売仕入.AfterCheck += TreeView販売仕入_AfterCheck;
-                return;
+                // 子が1つでもチェックされていればChecked,それ以外はUnchecked   
+                e.Node.Checked = e.Node.Nodes.Cast<TreeNode>().Any(n => n.Checked);
+                //treeView販売仕入.AfterCheck += TreeView販売仕入_AfterCheck;
+                //return;
             }
 
             // 子ノードのチェック状態に応じて親ノードの状態を更新
@@ -209,31 +217,42 @@ namespace あすよん月次帳票
                     // 子に1つでもチェックがあれば親をチェック
                     parent.Checked = true;
                     // 上位の親も再帰的に更新
-                    UpdateParentRecursive(parent.Parent, parent);
+                    UpdateParentRecursive(parent.Parent,parent);
                 }
                 else
                 {
                     // 子にチェックが1つもなければ親のチェックを外す
                     bool anyChecked = parent.Nodes.Cast<TreeNode>().Any(n => n.Checked);
                     parent.Checked = anyChecked;
-                    
+
                     // 上位の親も再帰的に更新
                     UpdateParentRecursive(parent.Parent, parent);
 
                 }
+                // 子ノードのどれか一つでもChecked → 親もChecked
+                parent.Checked = parent.Nodes.Cast<TreeNode>().Any(n => n.Checked);
+
+                // 再帰で上の親も更新
+                UpdateParentRecursive(parent.Parent, parent);
             }
         }
 
         public void btn検索_Click(object sender, EventArgs e)
         {
+            // 現在のチェック状態を保持
+            var selectedCodes = GetSelectedItems().Select(s => s.Split(' ')[0]).ToList();
+
             string codeSearch = txtBxコード.Text.Trim();
             string nameSearch = txtBx名称.Text.Trim();
 
+            // 何も検索条件がなければ全件表示
             if (string.IsNullOrEmpty(codeSearch) && string.IsNullOrEmpty(nameSearch))
             {
                 InitTreeView();
+                RestoreTreeViewChecked(treeView販売仕入.Nodes);
                 return;
             }
+
             var filtered = new List<dynamic>();
             foreach (var list in jsonData.Values)
             {
@@ -243,12 +262,17 @@ namespace あすよん月次帳票
                     if(!string.IsNullOrEmpty(codeSearch))
                         match &= item.Code == codeSearch;
                     if (!string.IsNullOrEmpty(nameSearch))
-                        match &= item.Name.Contains(nameSearch, StringComparison.OrdinalIgnoreCase);
+                        match &= item.Name.IndexOf(nameSearch, StringComparison.OrdinalIgnoreCase) >= 0;
 
                     if (match)filtered.Add(item);
                 }
             }
+            // TreeView再構築
             InitTreeView(filtered);
+
+            // チェック状態復元
+            initialSelected = selectedCodes;
+            RestoreTreeViewChecked(treeView販売仕入.Nodes);
         }
 
         public void btn追加_Click(object sender, EventArgs e)

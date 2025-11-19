@@ -20,7 +20,11 @@ namespace あすよん月次帳票
 
         FormActionMethod formActionMethod = new FormActionMethod();
 
-        public List<string> SelectedDeptItems { get; set; } = new List<string>();
+        // 選択された会社と部門
+        private List<string> selCompanies = new List<string>();
+        private List<Department> selBumons = new List<Department>();
+
+        public List<Department> SelectedDeptItems { get; set; } = new List<Department>();
 
         public RplForm2()
         {
@@ -33,7 +37,7 @@ namespace あすよん月次帳票
             grpBxBtn.Paint += GroupBoxCustomBorder;
             grpBxデータ区分.Paint += GroupBoxCustomBorder;
             grpBxクラス区分.Paint += GroupBoxCustomBorder;
-            grpBx集計区分.Paint += GroupBoxCustomBorder;
+            grpBx売仕集計区分.Paint += GroupBoxCustomBorder;
 
             this.Load += Form2_Load;
 
@@ -86,10 +90,12 @@ namespace あすよん月次帳票
                 MessageBox.Show("年月は6桁の数字(yyyyMM)で入力してください。", "警告", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 return;
             }
-            // 会社未選択NG
-            if (!chkBxOhno.Checked && !chkBxSuncar.Checked && !chkBxSundus.Checked)
+            // 組織未選択NG
+            if (!chkBxOhno.Checked && !chkBxSuncar.Checked && !chkBxSundus.Checked 
+                && listBx販売先.Items.Count == 0 && listBx仕入先.Items.Count == 0
+                && listBx部門.Items.Count == 0)
             {
-                MessageBox.Show("会社を選択してください。",
+                MessageBox.Show("会社～取引先のいずれかを選択してください。",
                                 "警告", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 return;
             }
@@ -151,10 +157,34 @@ namespace あすよん月次帳票
             await Task.Delay(100); // ちょっと待って anim が作られる
 
             // チェック状態取得
-            var selCompanies = FormActionMethod.GetCompany(chkBxOhno, chkBxSundus, chkBxSuncar); // 会社
-            var selBumons = FormActionMethod.GetSelectedBumons(listBx部門);  // 部門（先頭空白行は無視して取得）
-            var selSelleres = FormActionMethod.GetSallerOrSupplier(listBx販売先);  // 販売先 （先頭空白行は無視）
-            var selSupplieres = FormActionMethod.GetSallerOrSupplier(listBx仕入先);  // 仕入先 （先頭空白行は無視）
+            if (listBx販売先.Items.Count == 0 
+                && listBx仕入先.Items.Count == 0
+                && listBx部門.Items.Count == 0)
+            {
+                var selCompanies = FormActionMethod.GetCompany(chkBxOhno, chkBxSundus, chkBxSuncar); // 会社
+            }
+            else if (listBx販売先.Items.Count == 0
+                && listBx仕入先.Items.Count == 0
+                && listBx部門.Items.Count > 0)
+            {
+                var (selCompanies, selBumons) = FormActionMethod.GetSelectedBumons(listBx部門);  // 部門（先頭空白行は無視して取得）
+            }
+            else if (listBx販売先.Items.Count > 0 || listBx仕入先.Items.Count == 0)
+            {
+                var (selCompanies, selBumons, selSelleres) = FormActionMethod.GetSallerOrSupplier(listBx販売先);  // 販売先 （先頭空白行は無視）
+            }
+            else if(listBx販売先.Items.Count == 0 || listBx仕入先.Items.Count > 0)
+            {
+                var (selCompanies, selBumons, selSupplieres) = FormActionMethod.GetSallerOrSupplier(listBx仕入先);  // 仕入先 （先頭空白行は無視）
+            }
+            else
+            {
+
+            }
+            //    var selCompanies = FormActionMethod.GetCompany(chkBxOhno, chkBxSundus, chkBxSuncar); // 会社
+            //var selBumons = FormActionMethod.GetSelectedBumons(listBx部門);  // 部門（先頭空白行は無視して取得）
+            //var selSelleres = FormActionMethod.GetSallerOrSupplier(listBx販売先);  // 販売先 （先頭空白行は無視）
+            //var selSupplieres = FormActionMethod.GetSallerOrSupplier(listBx仕入先);  // 仕入先 （先頭空白行は無視）
             var selSlCategories = FormActionMethod.GetSalseProduct(chkBxSl, chkBxPr, chkBxIv);  // データ区分
             var (selSlPrProducts, selIvProducts) = FormActionMethod.GetProduct(chkBx原材料, chkBx半製品,
                                                           chkBx製品, chkBx加工, chkBx預り,
@@ -581,7 +611,7 @@ namespace あすよん月次帳票
             grpBx取引先.BackColor = Color.FromArgb(255, 220, 150);
             grpBxデータ区分.BackColor = Color.FromArgb(255, 220, 150);
             grpBxクラス区分.BackColor = Color.FromArgb(255, 220, 150);
-            grpBx集計区分.BackColor = Color.FromArgb(255, 220, 150);
+            grpBx売仕集計区分.BackColor = Color.FromArgb(255, 220, 150);
             grpBxBtn.BackColor = Color.FromArgb(255, 220, 150);
 
             // ボタンの色

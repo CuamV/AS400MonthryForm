@@ -17,13 +17,14 @@ namespace あすよん月次帳票
         public string Code { get; set; }
         public string Name { get; set; }
 
-        private List<string> initialSelected;  // ★ RplForm2 から受け取る
-        public 部門Form(List<string> selectedItems)
+        private List<Department> initialSelected;  // ★ RplForm2 から受け取る
+
+        public 部門Form(List<Department> selectedItems)
         {
             InitializeComponent();
             this.Load += 部門Form_Load;
 
-            initialSelected = selectedItems ?? new List<string>();
+            initialSelected = selectedItems ?? new List<Department>();
             // フォーム初期化時にイベント登録
             treeView部門.NodeMouseClick += TreeView部門_NodeMouseClick;
         }
@@ -91,16 +92,24 @@ namespace あすよん月次帳票
         {
             foreach (TreeNode node in nodes)
             {
-                if (initialSelected.Any(s => s.StartsWith(node.Tag.ToString())))
+                if(node.Parent != null)
                 {
-                    node.Checked = true;
-                }
+                    string company = node.Parent.Tag.ToString();
+                    string code = node.Tag.ToString();
 
+                    //if (initialSelected.Any(s => s.StartsWith(node.Tag.ToString())))
+                    if (initialSelected.Any(d => d.Code == code && d.Company == company))
+                    {
+                        node.Checked = true;
+                        // 子ノードのチェック状態に応じて親ノードの見た目チェック更新
+                        //if (node.Parent != null)
+                        UpdateParentRecursive(node.Parent, node);
+                    }
+                }
+                // 子ノードも再帰
                 if (node.Nodes.Count > 0)
                     RestoreTreeViewChecked(node.Nodes);
 
-                if (node.Parent != null)
-                    UpdateParentRecursive(node.Parent,node);
             }
         }
 
@@ -116,29 +125,40 @@ namespace あすよん月次帳票
         {
             treeView部門.AfterCheck -= TreeView部門_AfterCheck; // 無限ループ防止
 
-            // 子ノードのみ親を更新
-            if (e.Node.Parent != null)
+            // 親ノード(会社)は操作禁止 → チェックを強制的に元に戻す
+            if (e.Node.Nodes.Count > 0)
             {
-                UpdateParentRecursive(e.Node.Parent, e.Node);
+                bool original = e.Node.Nodes.Cast<TreeNode>().Any(n => n.Checked);
+                e.Node.Checked = original;
+
+                treeView部門.AfterCheck += TreeView部門_AfterCheck;
+                return;
             }
+            // 子ノードのみ親を更新
+            if (e.Node.Nodes.Count == 0 && e.Node.Parent != null)
+                UpdateParentRecursive(e.Node.Parent, e.Node);
 
             treeView部門.AfterCheck += TreeView部門_AfterCheck;
         }
 
         private void UpdateParentRecursive(TreeNode parent, TreeNode node)
         {
-            if (parent != null) return;
+            if (parent != null)
             {
                 if (node.Checked)
                 {
                     // 子に1つでもチェックがあれば親をチェック
                     parent.Checked = true;
+                    // 上位の親も再帰的に更新
+                    UpdateParentRecursive(parent.Parent, parent);
                 }
                 else
                 {
                     // 子にチェックが1つもなければ親のチェックを外す
                     bool anyChecked = parent.Nodes.Cast<TreeNode>().Any(n => n.Checked);
                     parent.Checked = anyChecked;
+                    // 上位の親も再帰的に更新
+                    UpdateParentRecursive(parent.Parent, parent);
                 }
             }
         }
@@ -154,9 +174,16 @@ namespace あすよん月次帳票
         {
             if (node.Checked && node.Parent != null) // 子ノードのみ対象
             {
-                string text = node.Text;
-                if (!listBx部門.Items.Contains(text))
-                    listBx部門.Items.Add(text);
+                string[] parts = node.Text.Split(' ');
+                var dept = new Department
+                {
+                    Code = parts[0],
+                    Name = parts.Length > 1 ? parts[1] : "",
+                    Company = node.Parent.Tag.ToString()
+                };
+
+                if (!listBx部門.Items.Cast<Department>().Any(d => d.Code == dept.Code && d.Company == dept.Company))
+                    listBx部門.Items.Add(dept);
             }
 
             foreach (TreeNode child in node.Nodes)
@@ -183,9 +210,19 @@ namespace あすよん月次帳票
         }
 
         // Form2に返すための選択部門取得
-        public List<string> GetSelectedBumons()
+        public List<Department> GetSelectedBumons()
         {
-            return listBx部門.Items.Cast<string>().ToList();
+            return listBx部門.Items.Cast<Department>().ToList();
         }
+    }
+
+    // 部門オブジェクト
+    public class Department
+    {
+        public string Code { get; set; }
+        public string Name { get; set; }
+        public string Company { get; set; }
+
+        public override string ToString() => $"{Code} {Name}";
     }
 }
