@@ -37,11 +37,24 @@ namespace あすよん月次帳票
             }
             LoadAllJson();
             InitTreeView();
-            RestoreTreeViewChecked(treeView販売仕入.Nodes);
 
-            // 最初のノードを選択してスクロール
-            if (treeView販売仕入.Nodes.Count > 0)
-                treeView販売仕入.SelectedNode = treeView販売仕入.Nodes[0];
+            // ListBoxに復元
+            foreach (var item in initialSelected)
+                listBx販売仕入.Items.Add(item);
+
+            // ← TreeView 構築完了後、UIが整ってから復元をかける
+            this.BeginInvoke(new Action(() =>
+            {
+                // AfterCheck を止めてから
+                treeView販売仕入.AfterCheck -= TreeView販売仕入_AfterCheck;
+                // TreeViewのチェック状態を復元
+                RestoreTreeViewChecked(treeView販売仕入.Nodes);
+                treeView販売仕入.AfterCheck += TreeView販売仕入_AfterCheck;
+
+                // 最初のノードに選択を合わせる
+                if (treeView販売仕入.Nodes.Count > 0)
+                    treeView販売仕入.SelectedNode = treeView販売仕入.Nodes[0];
+            }));
         }
 
         // 全会社のJSONデータを読み込み
@@ -125,32 +138,35 @@ namespace あすよん月次帳票
                     TreeNode itemNode = new TreeNode($"{item.Code} {item.Name}")
                     {
                         Tag = item.Code,
-                        Checked = initialSelected.Contains(item.Code)
+                        Checked = false
                     };
                     deptNode.Nodes.Add(itemNode);
                 }
             }
             treeView販売仕入.ExpandAll();
+
+            if (treeView販売仕入.Nodes.Count > 0)
+            {
+                treeView販売仕入.SelectedNode = treeView販売仕入.Nodes[0];
+                treeView販売仕入.Nodes[0].EnsureVisible();
+            }
         }
 
         private void RestoreTreeViewChecked(TreeNodeCollection nodes)
         {
             foreach (TreeNode node in nodes)
             {
-                if (node.Nodes.Count == 0 && initialSelected.Contains(node.Tag.ToString()))
+                if (initialSelected.Any(s => s.StartsWith(node.Tag.ToString())))
                 {
                     node.Checked = true;
-                }
+                    // 子ノードのチェック状態に応じて親ノードの見た目チェック更新
+                    if (node.Parent != null)
+                        UpdateParentRecursive(node.Parent, node);
 
+                }
+                // 子ノードも再帰
                 if (node.Nodes.Count > 0)
                     RestoreTreeViewChecked(node.Nodes);
-
-                //// 子ノードのチェック状態に応じて親ノードの見た目チェック更新
-                //if (node.Nodes.Count > 0)
-                //{
-                //    bool anyChecked = node.Nodes.Cast<TreeNode>().Any(n => n.Checked);
-                //    node.Checked = anyChecked;
-                //}
             }
         }
 
@@ -166,24 +182,47 @@ namespace あすよん月次帳票
         {
             treeView販売仕入.AfterCheck -= TreeView販売仕入_AfterCheck; // 無限ループ防止
 
-            // 親ノードはチェック操作不可
-            if (e.Node.Nodes.Count > 0 && e.Node.Checked)
-                e.Node.Checked = false;
 
-            //// 子ノードのチェック状態に応じて親ノードの状態を更新
-            //if ( e.Node.Nodes.Count == 0 && e.Node.Parent != null)
-            //    UpdateParentCheck(e.Node);
+            // 親ノード(会社・部門)は操作禁止 → チェックを強制的に元に戻す
+            if (e.Node.Nodes.Count > 0)
+            {
+                bool original = e.Node.Nodes.Cast<TreeNode>().Any(n => n.Checked);
+                e.Node.Checked = original;
+
+                treeView販売仕入.AfterCheck += TreeView販売仕入_AfterCheck;
+                return;
+            }
+
+            // 子ノードのチェック状態に応じて親ノードの状態を更新
+            if (e.Node.Nodes.Count == 0 && e.Node.Parent != null)
+                UpdateParentRecursive(e.Node.Parent, e.Node);
 
             treeView販売仕入.AfterCheck += TreeView販売仕入_AfterCheck;
         }
 
-        //private void UpdateParentCheck(TreeNode parent)
-        //{
-        //    if (parent != null) return;
+        private void UpdateParentRecursive(TreeNode parent, TreeNode node)
+        {
+            if (parent != null)
+            {
+                if (node.Checked)
+                {
+                    // 子に1つでもチェックがあれば親をチェック
+                    parent.Checked = true;
+                    // 上位の親も再帰的に更新
+                    UpdateParentRecursive(parent.Parent, parent);
+                }
+                else
+                {
+                    // 子にチェックが1つもなければ親のチェックを外す
+                    bool anyChecked = parent.Nodes.Cast<TreeNode>().Any(n => n.Checked);
+                    parent.Checked = anyChecked;
+                    
+                    // 上位の親も再帰的に更新
+                    UpdateParentRecursive(parent.Parent, parent);
 
-        //    bool anyChecked = parent.Nodes.Cast<TreeNode>().Any(n => n.Checked);
-        //    parent.Checked = anyChecked;
-        //}
+                }
+            }
+        }
 
         public void btn検索_Click(object sender, EventArgs e)
         {
@@ -232,8 +271,9 @@ namespace あすよん月次帳票
 
         public void btn削除_Click(object sender, EventArgs e)
         {
-            var selected = listBx販売仕入.Items.Cast<string>().ToList();
-            foreach (var s in selected) listBx販売仕入.Items.Remove(s);
+            var selected = listBx販売仕入.SelectedItems.Cast<string>().ToList();
+            foreach (var s in selected) 
+                listBx販売仕入.Items.Remove(s);
         }
 
         public List<string> GetSelectedItems()
