@@ -631,30 +631,21 @@ namespace あすよん月次帳票
         }
 
         // 部門リスト用（空白行ガード付き）
-        public static List<string> GetSelectedBumons(ListBox listBxBumon)
+        public static List<string> GetSelectedBumons(ListBox listBxB)
         {
-            return listBxBumon.SelectedItems
-                               .Cast<string>()
-                               .Where(x => !string.IsNullOrWhiteSpace(x)) // 空白行を除外
-                               .Select(x => x.Split(':')[0]) // "コード:名前" → コード抽出
-                               .ToList();
+            return listBxB.Items
+                           .Cast<string>()
+                           .Where(x => !string.IsNullOrWhiteSpace(x)) // 空白行を除外
+                           .Select(x => x.Split(' ')[0])  // "コード 名前" → スペースで分割して最初の要素をコードとして取得
+                           .ToList();
         }
 
         public static List<string> GetSallerOrSupplier(ListBox listbx)
         {
-            return listbx.SelectedItems
+            return listbx.Items
                         .Cast<string>()
                         .Where(x => !string.IsNullOrWhiteSpace(x)) // 空白行を除外
-                        .Select(x =>
-                        {
-                            // 形式チェック：空白行や [ ] が正しくない場合はスキップ
-                            if (!x.StartsWith("[") || !x.Contains("]")) return null;
-
-                            var start = x.IndexOf('[') + 1;
-                            var end = x.IndexOf(']');
-                            return x.Substring(start, end - start);
-                        })
-                        .Where(code => !string.IsNullOrEmpty(code)) // null も除外
+                        .Select(x => x.Split(' ')[0])  // "コード 名前" → スペースで分割して最初の要素をコードとして取得
                         .ToList();
         }
 

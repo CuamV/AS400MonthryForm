@@ -23,21 +23,33 @@ namespace あすよん月次帳票
         // 選択された会社と部門
         private List<string> selCompanies = new List<string>();
         private List<Department> selBumons = new List<Department>();
+        private List<Torihiki> selSelleres = new List<Torihiki>();
+        private List<Torihiki> selSupplieres = new List<Torihiki>(); 
 
-        public List<Department> SelectedDeptItems { get; set; } = new List<Department>();
+        //public List<Department> SelectedDeptItems { get; set; } = new List<Department>();
 
         public RplForm2()
         {
             InitializeComponent();
 
-            grpBx抽出期間.Paint += GroupBoxCustomBorder;
-            grpBx組織.Paint += GroupBoxCustomBorder;
-            grpBxクラス区分.Paint += GroupBoxCustomBorder;
-            grpBx取引先.Paint += GroupBoxCustomBorder;
-            grpBxBtn.Paint += GroupBoxCustomBorder;
-            grpBxデータ区分.Paint += GroupBoxCustomBorder;
-            grpBxクラス区分.Paint += GroupBoxCustomBorder;
-            grpBx売仕集計区分.Paint += GroupBoxCustomBorder;
+            // RplForm2の全グループボックスを配列化して共通のPaintイベントを設定
+            foreach (Control ctrl in this.Controls)
+            {
+                if (ctrl is GroupBox groupBox)
+                {
+                    groupBox.Paint += GroupBoxCustomBorder;
+                }
+            }
+
+            //grpBx抽出期間.Paint += GroupBoxCustomBorder;
+            //grpBx組織.Paint += GroupBoxCustomBorder;
+            //grpBxクラス区分.Paint += GroupBoxCustomBorder;
+            //grpBx取引先.Paint += GroupBoxCustomBorder;
+            //grpBxBtn.Paint += GroupBoxCustomBorder;
+            //grpBxデータ区分.Paint += GroupBoxCustomBorder;
+            //grpBxクラス区分.Paint += GroupBoxCustomBorder;
+            //grpBx売仕集計区分.Paint += GroupBoxCustomBorder;
+            //grpBx在集計区分.Paint += GroupBoxCustomBorder;
 
             this.Load += Form2_Load;
 
@@ -46,8 +58,6 @@ namespace あすよん月次帳票
             //StyleDataGrid(dgvDataSdus, Color.DarkGreen, Color.White, Color.LightGray);
             //StyleDataGrid(dgvDataScar, Color.DarkRed, Color.White, Color.LightGray);
             //StyleDataGrid(dgvDataIV, Color.Gray, Color.White, Color.LightGray);
-
-
 
             this.Region = System.Drawing.Region.FromHrgn(
                 CreateRoundRectRgn(0, 0, this.Width, this.Height, 40, 40));
@@ -157,34 +167,10 @@ namespace あすよん月次帳票
             await Task.Delay(100); // ちょっと待って anim が作られる
 
             // チェック状態取得
-            if (listBx販売先.Items.Count == 0 
-                && listBx仕入先.Items.Count == 0
-                && listBx部門.Items.Count == 0)
-            {
-                var selCompanies = FormActionMethod.GetCompany(chkBxOhno, chkBxSundus, chkBxSuncar); // 会社
-            }
-            else if (listBx販売先.Items.Count == 0
-                && listBx仕入先.Items.Count == 0
-                && listBx部門.Items.Count > 0)
-            {
-                var (selCompanies, selBumons) = FormActionMethod.GetSelectedBumons(listBx部門);  // 部門（先頭空白行は無視して取得）
-            }
-            else if (listBx販売先.Items.Count > 0 || listBx仕入先.Items.Count == 0)
-            {
-                var (selCompanies, selBumons, selSelleres) = FormActionMethod.GetSallerOrSupplier(listBx販売先);  // 販売先 （先頭空白行は無視）
-            }
-            else if(listBx販売先.Items.Count == 0 || listBx仕入先.Items.Count > 0)
-            {
-                var (selCompanies, selBumons, selSupplieres) = FormActionMethod.GetSallerOrSupplier(listBx仕入先);  // 仕入先 （先頭空白行は無視）
-            }
-            else
-            {
-
-            }
-            //    var selCompanies = FormActionMethod.GetCompany(chkBxOhno, chkBxSundus, chkBxSuncar); // 会社
-            //var selBumons = FormActionMethod.GetSelectedBumons(listBx部門);  // 部門（先頭空白行は無視して取得）
-            //var selSelleres = FormActionMethod.GetSallerOrSupplier(listBx販売先);  // 販売先 （先頭空白行は無視）
-            //var selSupplieres = FormActionMethod.GetSallerOrSupplier(listBx仕入先);  // 仕入先 （先頭空白行は無視）
+            var selCompanies = FormActionMethod.GetCompany(chkBxOhno, chkBxSundus, chkBxSuncar); // 会社
+            var selBumons = FormActionMethod.GetSelectedBumons(listBx部門);  // 部門（先頭空白行は無視して取得）
+            var selSelleres = FormActionMethod.GetSallerOrSupplier(listBx販売先);  // 販売先 （先頭空白行は無視）
+            var selSupplieres = FormActionMethod.GetSallerOrSupplier(listBx仕入先);  // 仕入先 （先頭空白行は無視）
             var selSlCategories = FormActionMethod.GetSalseProduct(chkBxSl, chkBxPr, chkBxIv);  // データ区分
             var (selSlPrProducts, selIvProducts) = FormActionMethod.GetProduct(chkBx原材料, chkBx半製品,
                                                           chkBx製品, chkBx加工, chkBx預り,
@@ -444,50 +430,75 @@ namespace あすよん月次帳票
         public void linkLb部門_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
         {
             // 部門Formを作成
-            using (var BuForm = new 部門Form(SelectedDeptItems))
+            using (var BuForm = new 部門Form(selBumons))
             {
                 // モーダル表示
                 if (BuForm.ShowDialog() == DialogResult.OK)
                 {
                     // returnされた部門リストに更新
-                    SelectedDeptItems = BuForm.GetSelectedBumons();
+                    selBumons = BuForm.GetSelectedBumons();
 
                     // BuFormで選択された部門リストを取得して listBx部門 に反映
-                    listBx部門.Items.Clear();
-                    foreach (var b in SelectedDeptItems)
-                        listBx部門.Items.Add(b);
+                    UpdateCompanyCheckboxesFromBumon(selBumons);
+                    RefreshListBx(listBx部門,selBumons.Select(b => $"{b.Code} {b.Name}").ToList());
                 }
             }
         }
 
         private void linkLb販売先_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
         {
-            using (var frm = new 販売仕入先Form("HANBAI", listBx販売先.Items.Cast<string>().ToList()))
+            using (var frm = new 販売仕入先Form("HANBAI", selSelleres))
             {
                 if (frm.ShowDialog() == DialogResult.OK)
                 {
-                    var selected = frm.GetSelectedItems();
-
-                    listBx販売先.Items.Clear();
-                    foreach (var s in selected)
-                        listBx販売先.Items.Add(s);
+                    selSelleres = frm.GetSelectedItems();
+                    UpdateBumonAndCompanyFromTorihiki(selSelleres);
+                    RefreshListBx(listBx販売先, selSelleres.Select(t => $"{t.Code} {t.Name}").ToList());
                 }
             }
         }
 
         private void linkLb仕入先_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
         {
-            using (var frm = new 販売仕入先Form("SHIIRE", listBx仕入先.Items.Cast<string>().ToList()))
+            using (var frm = new 販売仕入先Form("SHIIRE", selSupplieres)) 
             {
                 if (frm.ShowDialog() == DialogResult.OK)
                 {
-                    var selected = frm.GetSelectedItems();
-
-                    listBx仕入先.Items.Clear();
-                    foreach (var s in selected)
-                        listBx仕入先.Items.Add(s);
+                    selSupplieres = frm.GetSelectedItems();
+                    UpdateBumonAndCompanyFromTorihiki(selSupplieres);
+                    RefreshListBx(listBx仕入先,selSupplieres.Select(t => $"{t.Code} {t.Name}").ToList());
                 }
             }
+        }
+
+        private void UpdateCompanyCheckboxesFromBumon(List<Department> bumons)
+        {
+            // 部門に基づいて会社のチェックボックスを更新
+            chkBxOhno.Checked = bumons.Any(d => d.Company == "オーノ");
+            chkBxSuncar.Checked = bumons.Any(d => d.Company == "サンミックカーペット");
+            chkBxSundus.Checked = bumons.Any(d => d.Company == "サンミックダスコン");
+        }
+
+        private void UpdateBumonAndCompanyFromTorihiki(List<Torihiki> torihikis)
+        {
+            // 取引先に基づいて会社のチェックボックスを更新
+            chkBxOhno.Checked = torihikis.Any(t => t.Company == "オーノ");
+            chkBxSuncar.Checked = torihikis.Any(t => t.Company == "サンミックカーペット");
+            chkBxSundus.Checked = torihikis.Any(t => t.Company == "サンミックダスコン");
+            // 取引先に基づいて部門リストを更新
+            selBumons = torihikis
+                .Select(t => new Department { Code = t.DeptCode, Name = t.DeptName, Company = t.Company })
+                .GroupBy(d => d.Code + d.Company)
+                .Select(g => g.First())
+                .ToList();
+            RefreshListBx(listBx部門, selBumons.Select(b => $"{b.Code} {b.Name}").ToList());
+        }
+
+        private void RefreshListBx(ListBox listBox, List<string> items)
+        {
+            listBox.Items.Clear();
+            foreach (var item in items)
+                listBox.Items.Add(item);
         }
 
         /// <summary>
