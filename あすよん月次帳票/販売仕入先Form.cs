@@ -14,14 +14,16 @@ namespace あすよん月次帳票
         private List<Torihiki> initialSelected;  // RplForm2 から受け取る
         private Dictionary<string, string> deptCodeToCompany; // 部門コードから会社名へのマッピング
         private Dictionary<string, List<dynamic>> jsonData;  // JSON読込結果
+        private Dictionary<string, HashSet<string>> preselectedMap; // RplForm2 から受け取る事前選択データマップ
 
-        public 販売仕入先Form(string mode, List<Torihiki> selectedItems)
+        public 販売仕入先Form(string mode, List<Torihiki> selectedItems, Dictionary<string, HashSet<string>> existingMap)
         {
             InitializeComponent();
             this.Load += 販売仕入先Form_Load;
 
             this.mode = mode;  // モード保持
             this.initialSelected = selectedItems ?? new List<Torihiki>();
+            this.preselectedMap = existingMap ?? new Dictionary<string, HashSet<string>>();
 
             treeView販売仕入.NodeMouseClick += TreeView販売仕入_NodeMouseClick;
         }
@@ -62,38 +64,45 @@ namespace あすよん月次帳票
         {
             jsonData = new Dictionary<string, List<dynamic>>();
             string[] companyCodes = { "オーノ", "サンミックダスコン", "サンミックカーペット" };
+
             foreach (var cc in companyCodes)
             {
                 var items = new List<dynamic>();
+                var validBumons = JsonLoader.GetBUMONs(cc).Select(b => b.Code).ToHashSet(); // BUMON.json に存在する部門
 
-                if (mode == "HANBAI")
+                IEnumerable<string> keys = mode == "HANBAI"
+                    ? JsonLoader.GetHanbaiKeys(cc)
+                    : JsonLoader.GetShiireKeys(cc);
+
+                foreach (var bumonCode in keys)
                 {
-                    foreach (var bumonCode in JsonLoader.GetHanbaiKeys(cc))
+                    if (!validBumons.Contains(bumonCode)) continue;
+
+                    List<MfItem> itemsToAdd = new List<MfItem>();
+
+                    if (mode == "HANBAI")
                     {
                         var list = JsonLoader.GetMf_HANBAIs(cc, new[] { bumonCode });
-                        items.AddRange(list.Select(x => new MfItem
+                        itemsToAdd.AddRange(list.Select(x => new MfItem
                         {
                             Code = x.Code,
                             Name = x.Name,
                             Kana = x.Kana,
-                            DeptCode = bumonCode  // 部門コードを追加
+                            DeptCode = bumonCode
                         }));
                     }
-                }
-                else
-                {
-                    foreach (var bumonCode in JsonLoader.GetShiireKeys(cc))
+                    else
                     {
                         var list = JsonLoader.GetMf_SHIIREs(cc, new[] { bumonCode });
-                        foreach (var item in list)
-                            items.AddRange(list.Select(x => new MfItem
-                            {
-                                Code = x.Code,
-                                Name = x.Name,
-                                Kana = x.Kana,
-                                DeptCode = bumonCode  // 部門コードを追加
-                            }));
+                        itemsToAdd.AddRange(list.Select(x => new MfItem
+                        {
+                            Code = x.Code,
+                            Name = x.Name,
+                            Kana = x.Kana,
+                            DeptCode = bumonCode
+                        }));
                     }
+                    items.AddRange(itemsToAdd);
                 }
                 jsonData[cc] = items;
             }
@@ -115,16 +124,9 @@ namespace あすよん月次帳票
             // 部門ごとにアイテムを追加
             foreach (var cc in jsonData.Keys)
             {
-                List<dynamic> items;
-
-                if (filteredItems != null)
-                    // フィルタリングされたアイテムのみ使用
-                    items = filteredItems
-                        .Where(x => deptCodeToCompany.ContainsKey(x.DeptCode) &&
-                                       deptCodeToCompany[x.DeptCode] == cc)
-                        .ToList();
-                else
-                    items = jsonData[cc];
+                List<dynamic> items = filteredItems != null
+                    ? filteredItems.Where(x => deptCodeToCompany.ContainsKey(x.DeptCode) && deptCodeToCompany[x.DeptCode] == cc).ToList()
+                    : jsonData[cc];
 
                 foreach (var item in items)
                 {
@@ -166,12 +168,22 @@ namespace あすよん月次帳票
         {
             foreach (TreeNode node in nodes)
             {
-                // 修正: Torihiki型のリストなので、Codeプロパティで比較する
-                if (initialSelected.Any(s => s.Code == node.Tag.ToString()))
+                if (node.Nodes.Count == 0 && node.Parent != null) // 子ノードのみ
                 {
-                    node.Checked = true;
+                    string deptCode = node.Parent.Tag.ToString();
+                    string company = node.Parent.Parent.Tag.ToString();
+                    string code = node.Tag.ToString();
+
+                    bool shouldCheck = false;
+
+                    // preselectedMap を参照して、部門ごとにチェック
+                    if (preselectedMap.TryGetValue(code, out var deptSet))
+                    {
+                        shouldCheck = deptSet.Contains(deptCode);
+                    }
+                    node.Checked = shouldCheck;
                     // 子ノードのチェック状態に応じて親ノードの見た目チェック更新
-                    if (node.Parent != null)
+                    if (shouldCheck)
                         UpdateParentRecursive(node.Parent, node);
                 }
                 // 子ノードも再帰
@@ -254,20 +266,11 @@ namespace あすよん月次帳票
                 return;
             }
 
-            var filtered = new List<dynamic>();
-            foreach (var list in jsonData.Values)
-            {
-                foreach (var item in list)
-                {
-                    bool match = true;
-                    if (!string.IsNullOrEmpty(codeSearch))
-                        match &= item.Code == codeSearch;
-                    if (!string.IsNullOrEmpty(nameSearch))
-                        match &= item.Name.IndexOf(nameSearch, StringComparison.OrdinalIgnoreCase) >= 0;
-
-                    if (match) filtered.Add(item);
-                }
-            }
+            var filtered = jsonData.Values.SelectMany(list => list)
+                .Where(item =>
+                    (string.IsNullOrEmpty(codeSearch) || item.Code == codeSearch) &&
+                    (string.IsNullOrEmpty(nameSearch) || item.Name.IndexOf(nameSearch, StringComparison.OrdinalIgnoreCase) >= 0))
+                .ToList();
             // TreeView再構築
             InitTreeView(filtered);
 
@@ -295,6 +298,7 @@ namespace あすよん月次帳票
                 string code = node.Tag.ToString();
                 string name = node.Text.Contains(' ') ? node.Text.Split(' ')[1] : node.Text;
 
+                // ListBox に入れる Torihiki オブジェクトを作成
                 var torihiki = new Torihiki
                 {
                     Code = code,
@@ -303,8 +307,13 @@ namespace あすよん月次帳票
                     DeptCode = deptCode,
                     DeptName = deptName
                 };
-                if (!listBx販売仕入.Items.Cast<Torihiki>().Any(t =>    t.Code == torihiki.Code && t.Company == torihiki.Company))
+                // --- 重複チェック（同じ Code & Company のものは1行だけ表示） ---
+                bool exists = listBx販売仕入.Items.Cast<Torihiki>()
+                    .Any(t => t.Code == torihiki.Code && t.Company == torihiki.Company);
+
+                if (!exists)
                     listBx販売仕入.Items.Add(torihiki);
+
             }
             foreach (TreeNode child in node.Nodes)
                 AddCheckedNodesToListBox(child);
@@ -312,14 +321,41 @@ namespace あすよん月次帳票
 
         public void btn削除_Click(object sender, EventArgs e)
         {
-            var selected = listBx販売仕入.SelectedItems.Cast<string>().ToList();
+            var selected = listBx販売仕入.SelectedItems.Cast<Torihiki>().ToList();
             foreach (var s in selected)
                 listBx販売仕入.Items.Remove(s);
         }
 
         public List<Torihiki> GetSelectedItems()
         {
-            return listBx販売仕入.Items.Cast<Torihiki>().ToList();
+            var result = new List<Torihiki>();
+
+            foreach (TreeNode compNode in treeView販売仕入.Nodes)
+            {
+                string company = compNode.Tag.ToString();
+                foreach (TreeNode deptNode in compNode.Nodes)
+                {
+                    string deptCode = deptNode.Tag.ToString();
+                    string deptName = deptNode.Text.Contains(' ') ? deptNode.Text.Split(' ')[1] : "";
+                    foreach (TreeNode itemNode in deptNode.Nodes)
+                    {
+                        if (itemNode.Checked)
+                        {
+                            string code = itemNode.Tag.ToString();
+                            string name = itemNode.Text.Contains(' ') ? itemNode.Text.Split(' ')[1] : itemNode.Text;
+                            result.Add(new Torihiki
+                            {
+                                Code = code,
+                                Name = name,
+                                Company = company,
+                                DeptCode = deptCode,
+                                DeptName = deptName
+                            });
+                        }
+                    }
+                }
+            }
+            return result;
         }
 
         private void btnOK_Click(object sender, EventArgs e)
