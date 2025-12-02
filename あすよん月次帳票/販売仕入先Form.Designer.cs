@@ -28,6 +28,7 @@
         /// </summary>
         private void InitializeComponent()
         {
+            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(販売仕入先Form));
             this.btnCancel = new System.Windows.Forms.Button();
             this.btnOK = new System.Windows.Forms.Button();
             this.btn削除 = new System.Windows.Forms.Button();
@@ -189,6 +190,7 @@
             this.Controls.Add(this.listBx販売仕入);
             this.Controls.Add(this.label1);
             this.Controls.Add(this.treeView販売仕入);
+            this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
             this.Name = "販売仕入先Form";
             this.Text = "販売仕入先Form";
             this.grpBx検索.ResumeLayout(false);

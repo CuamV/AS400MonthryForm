@@ -323,7 +323,37 @@ namespace あすよん月次帳票
         {
             var selected = listBx販売仕入.SelectedItems.Cast<Torihiki>().ToList();
             foreach (var s in selected)
+            {
                 listBx販売仕入.Items.Remove(s);
+
+                // TreeView 上のチェックも外す
+                foreach (TreeNode compNode in treeView販売仕入.Nodes)
+                {
+                    if (compNode.Tag.ToString() != s.Company) continue;
+
+                    foreach (TreeNode deptNode in compNode.Nodes)
+                    {
+                        if (deptNode.Tag.ToString() != s.DeptCode) continue;
+
+                        foreach (TreeNode itemNode in deptNode.Nodes)
+                        {
+                            if (itemNode.Tag.ToString() == s.Code)
+                            {
+                                itemNode.Checked = false;
+
+                                // preselectedMap の更新（削除）
+                                if (preselectedMap.TryGetValue(s.Code, out var set))
+                                {
+                                    set.Remove(s.DeptCode);
+                                    if (set.Count == 0)
+                                        preselectedMap.Remove(s.Code); // Dept がなくなったら Key 自体も削除
+                                }
+                            }
+
+                        }
+                    }
+                }
+            }
         }
 
         public List<Torihiki> GetSelectedItems()

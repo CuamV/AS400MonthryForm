@@ -17,16 +17,18 @@ namespace あすよん月次帳票
         // 売上データ取得
         public static DataTable GetSalesData(string symd, string eymd, string lib)
         {
-            //  1:[6]URDNDT(伝票日付)  2:[1]URBMCD(部門CD)      3:[8]URHBSC(販売先CD) 4:PM1.TOTHNM(販売先名)
-            //  5:[4]M4.SHCLAS(クラス) 6:[14]URHBCD(品名部門CD) 7:[15]URHMCD(品名CD)  8:[42]URHNNM(品名)
-            //  9:[16]URHSCD(品種CD)  10:[43]URHSNM(品種名)    11:URTRKB(取引区分)   12:[5]URSBKB(サブシステム区分)
-            // 13:[20]URQNTY(数量)    14:[21]URUNCD(単位CD)    15:[22]URUNPR(単価)   16:[23]URAMNT(金額)
+            //  1:[2]URNHNO(納品書No)   2:[3]URNHEB(納品書枝番    3:[5]URSBKB(サブシステム区分) 4:URTRKB(取引区分)
+            //  5:[6]URDNDT(伝票日付)   6:[1]URBMCD(部門CD)       7:[4]M4.SHCLAS(クラス)        8:[8]URHBSC(販売先CD)
+            //  9:PM1.TOTHNM(販売先名) 10:[14]URHBCD(品名部門CD) 11:[15]URHMCD(品名CD)         13:[16]URHSCD(品種CD)
+            //  15:[17]URCLCD(色CD)　　12:[42]URHNNM(品名)       14:[43]URHSNM(品種名)         16:[44]URCLNM(色名)         
+            // 17:[20]URQNTY(数量)   18:[21]URUNCD(単位CD)       19:[22]URUNPR(単価)           20:[23]URAMNT(金額)
             var dbManager = (DbManager_Db2)DbManager.CreateDbManager(OhnoSysDBName.Db2);
             string sql = $@"
-                        SELECT URDNDT, URBMCD, SL.URHBSC, 
-                               COALESCE(PM1.TOTHNM, '') AS TOTHNM, 
-                               M4.SHCLAS, URHBCD, URHMCD, URHNNM, URHSCD, URHSNM, 
-                               URTRKB, URSBKB, URQNTY, URUNCD, URUNPR, URAMNT 
+                        SELECT URNHNO, URNHEB, URSBKB, URTRKB, 
+                               URDNDT, URBMCD, M4.SHCLAS, SL.URHBSC, 
+                               COALESCE(PM1.TOTHNM, '') AS TOTHNM, URHBCD, URHMCD, URHSCD,
+                               URCLCD, URHNNM, URHSNM, URCLNM, 
+                               URQNTY, URUNCD, URUNPR, URAMNT 
                         FROM {lib}.SLURIMP AS SL 
                         LEFT JOIN SM1MLB01.MMSHUP AS M4
                             ON SL.URHSCD = M4.SHHSCD
@@ -49,16 +51,18 @@ namespace あすよん月次帳票
         // 仕入データ取得
         public static DataTable GetPurchaseData(string symd, string eymd, string lib, string code = "")
         {
-            //  1:[9]SRDNDT(伝票日付)  2:[1]SRBMCD(部門CD)      3:[3]SRSRCD(仕入先CD) 4:PM1.TOTHNM(販売先名)
-            //  5:[4]M4.SHCLAS(クラス) 6:[10]SRHBCD(品名部門CD) 7:[11]SRHMCD(品名CD)  8:[26]SRHNNM(品名)
-            //  9:[12]SRHSCD(品種CD)  10:[27]SRHSNM(品種名)    11:SRTRKB(取引区分)   12:[7]SRSBKB(サブシステム区分)
-            // 13:[16]SRQNTY(数量)    14:[17]SRUNCD(単位CD)    15:[18]SRUNPR(単価)   16:[19]SRAMNT(金額)
+            //  1:[5]SRSRNO(仕入No)     2:[6]SRSREB(仕入枝番)     3:[7]SRSBKB(サブシステム区分) 4:SRTRKB(取引区分)
+            //  5:[9]SRDNDT(伝票日付)   6:[1]SRBMCD(部門CD)       7:[4]M4.SHCLAS(クラス)        8:[3]SRSRCD(仕入先CD)
+            //  9:PM1.TOTHNM(仕入先名) 10:[10]SRHBCD(品名部門CD) 11:[11]SRHMCD(品名CD)         12:[12]SRHSCD(品種CD)   
+            // 13:[13]SRCLCD(色CD)     14:[26]SRHNNM(品名)       15:[27]SRHSNM(品種名)         16:[28]SRCLNM(色名)        
+            // 17:[16]SRQNTY(数量)     18:[17]SRUNCD(単位CD)     19:[18]SRUNPR(単価)           20:[19]SRAMNT(金額)
             var dbManager = (DbManager_Db2)DbManager.CreateDbManager(OhnoSysDBName.Db2);
             string sql = $@"
-                        SELECT SRDNDT, SRBMCD, PR.SRSRCD, 
-                               COALESCE(PM1.TOTHNM, '') AS TOTHNM, 
-                               M4.SHCLAS, SRHBCD, SRHMCD, SRHNNM, SRHSCD, SRHSNM, 
-                               SRTRKB, SRSBKB, SRQNTY, SRUNCD, SRUNPR, SRAMNT 
+                        SELECT SRSRNO, SRSREB, SRSBKB, SRTRKB,
+                               SRDNDT, SRBMCD, M4.SHCLAS, PR.SRSRCD, 
+                               COALESCE(PM1.TOTHNM, '') AS TOTHNM, SRHBCD, SRHMCD, SRHSCD, 
+                               SRCLCD, SRHNNM, SRHSNM, SRCLNM,
+                               SRQNTY, SRUNCD, SRUNPR, SRAMNT 
                         FROM {lib}.PRSREMP AS PR 
                         LEFT JOIN SM1MLB01.MMSHUP AS M4
                             ON PR.SRHSCD = M4.SHHSCD
@@ -116,18 +120,22 @@ namespace あすよん月次帳票
             // 36:ZGURAM(売上金額)       37:ZGHWAM(引渡金額)       38:ZGHWAR(引渡粗利)       39:ZGURAR(売上粗利)           40:ZGADAT(作成日)
             // 41:ZGATIM(作成時刻)       42:ZGUDAT(更新日)         43:ZGUTIM(更新時刻)       44:ZGUPGM(更新ＰＧＭ)
             //-----------------------------------------------------------------------------
-            // 1:ZGNEND(年度)       2:ZGMOTH(月)         3:クラス             4:ZGBMCD(部門コード)  5:品名
-            // 6:ZGHMCD(品名コード) 7:ZGHSCD(品種コード) 8:ZGTZQT(当月残数量) 9:ZGTGZA(当月残金額) 
+            //  1:ZGNEND(年度)       2:ZGMOTH(月)           3:ZGZKSB(在庫種別)     4:SHCLAS(クラス)      5:ZGBMCD(部門コード)
+            //  6:ZGWHCD(倉庫コード) 7:TOTHNM1(倉庫名)      8:ZGAZCD(預り先コード) 9:TOTHNM2(預り先名)  10:ZHHNNM(品名)
+            // 11:ZHHMCD(品名コード) 12:ZHHSCD(品種コード) 13:ZGCLCD(色コード)    14:ZGTZQT(当月残数量) 15:ZGTGZA(当月残金額) 
             string sql = $@"
-                        SELECT ZGNEND, ZGMOTH,
-                               M4.SHCLAS AS ZHCSNM, ZGBMCD AS ZHBMCD,
-                               M5.HNHNSM AS ZHHNNM, ZGHMCD AS ZHHMCD, ZGHSCD AS ZHHSCD, 
-                               ZGTZQT AS ZHTZQT, ZGTGZA AS ZHTGZA
+                        SELECT ZGNEND, ZGMOTH, ZGZKSB, M4.SHCLAS, ZGBMCD AS ZHBMCD,
+                               ZGWHCD, COALESCE(PM1.TOTHNM, '') AS TOTHNM1, ZGAZCD, COALESCE(PM2.TOTHNM, '') AS TOTHNM2, M5.HNHNSM AS ZHHNNM,
+                               ZGHMCD AS ZHHMCD, ZGHSCD AS ZHHSCD, ZGCLCD, ZGTZQT AS ZHTZQT, ZGTGZA AS ZHTGZA
                         FROM {lib}.MOZGETP AS IV
                         LEFT JOIN SM1MLB01.MMSHUP AS M4
                             ON IV.ZGHSCD = M4.SHHSCD
                         LEFT JOIN SM1MLB01.MMHNAMP AS M5
                             ON IV.ZGHBCD = M5.HNHBCD AND IV.ZGHMCD = M5.HNHMCD
+                        LEFT JOIN SM1MLB01.MMTORIP AS PM1
+                            ON IV.ZGWHCD = PM1.TOTHCD
+                        LEFT JOIN SM1MLB01.MMTORIP AS PM2
+                            ON IV.ZGAZCD = PM2.TOTHCD
                         WHERE ZGNEND = ? AND ZGMOTH = ?
                         AND (ZGZZQT<> 0 OR ZGNKQS<> 0 
                          OR ZGNKQH<> 0 OR ZGNKQF<> 0 
@@ -144,6 +152,8 @@ namespace あすよん月次帳票
 
             return dt;
         }
+
+        
 
     }
 }

@@ -1,14 +1,16 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.ComponentModel;
 using System.Data;
 using System.Drawing;
+using System.IO;
 using System.Linq;
+//using System.Reflection;
 using System.Runtime.InteropServices;
-using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using static System.Windows.Forms.VisualStyles.VisualStyleElement.TaskbarClock;
+using Excel = Microsoft.Office.Interop.Excel;
 
 namespace あすよん月次帳票
 {
@@ -17,8 +19,11 @@ namespace あすよん月次帳票
         private string HIZTIM;
         private string startDate;
         private string endDate;
+        private string Hiz;
+        private string Tim;
 
         FormActionMethod formActionMethod = new FormActionMethod();
+        DataProcessor processor = new DataProcessor();
 
         // 選択された会社と部門
         private List<string> selCompanies = new List<string>();
@@ -30,21 +35,31 @@ namespace あすよん月次帳票
         private Dictionary<string, HashSet<string>> salesDeptMap = new Dictionary<string, HashSet<string>>();
         private Dictionary<string, HashSet<string>> supplierDeptMap = new Dictionary<string, HashSet<string>>();
 
+        private List<GroupBox> cBoxList;
+           
+
         public RplForm2()
         {
             InitializeComponent();
 
-            // RplForm2の全グループボックスを配列化して共通のPaintイベントを設定
+            cBoxList = new List<GroupBox>
+            {
+                grpBx抽出期間,
+                grpBx組織,
+                grpBx取引先,
+                grpBxBtn,
+                grpBxデータ区分,
+                grpBxクラス区分,
+                grpBx在庫種別,
+                grpBx売仕集計区分,
+                grpBx在集計区分,
+            };
 
-            grpBx抽出期間.Paint += GroupBoxCustomBorder;
-            grpBx組織.Paint += GroupBoxCustomBorder;
-            grpBxクラス区分.Paint += GroupBoxCustomBorder;
-            grpBx取引先.Paint += GroupBoxCustomBorder;
-            grpBxBtn.Paint += GroupBoxCustomBorder;
-            grpBxデータ区分.Paint += GroupBoxCustomBorder;
-            grpBxクラス区分.Paint += GroupBoxCustomBorder;
-            grpBx売仕集計区分.Paint += GroupBoxCustomBorder;
-            grpBx在集計区分.Paint += GroupBoxCustomBorder;
+            // RplForm2の全グループボックスを配列化して共通のPaintイベントを設定
+            foreach (var gb in cBoxList)
+            {
+                gb.Paint += GroupBoxCustomBorder;
+            }
 
             this.Load += Form2_Load;
 
@@ -74,74 +89,49 @@ namespace あすよん月次帳票
             // ★アニメーション登録
             SetButtonAnimation(btnDisplay);
             SetButtonAnimation(btnForm1Back);
+
+            // デフォルトで明細にしておく
+            rdBtn売仕なし.Checked = true;
+            rdBtn在なし.Checked = true;
         }
 
+        private void btnForm1Back_Click(object sender, EventArgs e)
+        {
+            // Form1 のインスタンスを取得して表示
+            if (Application.OpenForms["Form1"] is Form1 form1)
+            {
+                form1.Show();
+            }
+            // Form2 を閉じる
+            this.Close();
+        }
 
         /// <summary>
         /// データ表示実行ボタンクリック
         /// </summary>
         /// <param name="sender"></param>
         /// <param name="e"></param>
-        // 
         private async void btnReadData_Click(object sender, EventArgs e)
         {
-            DataProcessor processor = new DataProcessor();
+            
             HIZTIM = $"{DateTime.Now:yyyy/MM/dd HH:mm:ss}";
 
-            // 年月入力チェック
-            if (!FormActionMethod.TryParseYearMonth(txtBxStrYearMonth, out int strY, out int strM) ||
-                !FormActionMethod.TryParseYearMonth(txtBxEndYearMonth, out int endY, out int endM))
-            {
-                MessageBox.Show("年月は6桁の数字(yyyyMM)で入力してください。", "警告", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+            // =====================================================================================
+            // ★ エラーチェック
+            // =====================================================================================
+            if (ErrCheck())
                 return;
-            }
-            // 組織未選択NG
-            if (!chkBxOhno.Checked && !chkBxSuncar.Checked && !chkBxSundus.Checked 
-                && listBx販売先.Items.Count == 0 && listBx仕入先.Items.Count == 0
-                && listBx部門.Items.Count == 0)
-            {
-                MessageBox.Show("会社～取引先のいずれかを選択してください。",
-                                "警告", MessageBoxButtons.OK, MessageBoxIcon.Warning);
-                return;
-            }
-            // データ区分未選択NG
-            if (!chkBxSl.Checked && !chkBxPr.Checked && !chkBxIv.Checked)
-            {
-                MessageBox.Show("データ区分を選択してください。",
-                                "警告", MessageBoxButtons.OK, MessageBoxIcon.Warning);
-                return;
-            }
+            
 
-            string sym = txtBxStrYearMonth.Text.Trim();
-            string eym = txtBxEndYearMonth.Text.Trim();
-            string nowym = DateTime.Now.ToString("yyyyMM");
-            // データ区分"在庫"選択の場合未来月NG
-            if (chkBxIv.Checked)
-            {
-                if (string.Compare(sym, nowym) > 0 || string.Compare(eym, nowym) > 0)
-                {
-                    MessageBox.Show("データ区分在庫を選択する場合、未来月は指定できません。",
-                                    "警告", MessageBoxButtons.OK, MessageBoxIcon.Warning);
-                    return;
-                }
-            }
-            // データ区分"在庫"選択と、年月複数月(過去月の複数月はOK,過去月と当月はNG)の選択NG
-            if (chkBxIv.Checked && sym != eym && (sym == nowym || eym == nowym))
-            {
-                MessageBox.Show("データ区分在庫を選択する場合、当月の場合は単月で指定してください。",
-                                "警告", MessageBoxButtons.OK, MessageBoxIcon.Warning);
-                return;
-            }
-
-
-            FormAnimation2 anim = null;
-
+            // =====================================================================================
+            // ★アニメーションフォーム表示
+            // =====================================================================================
             // --- FormAnimation スレッド ---
+            FormAnimation2 anim = null;
             Thread animThread = new Thread(() =>
             {
                 using (FormAnimation2 a = new FormAnimation2())
                 {
-
                     anim = a; // 外部参照用
 
                     a.Shown += (s, i) =>
@@ -158,254 +148,115 @@ namespace あすよん月次帳票
             animThread.SetApartmentState(ApartmentState.STA);
             animThread.Start();
 
-            // --- メインスレッドでシミュレーション実行 ---
             await Task.Delay(100); // ちょっと待って anim が作られる
 
-            // チェック状態取得
-            var selCompanies = FormActionMethod.GetCompany(chkBxOhno, chkBxSundus, chkBxSuncar); // 会社
-            var selBumons = FormActionMethod.GetSelectedBumons(listBx部門);  // 部門（先頭空白行は無視して取得）
-            var selSelleres = FormActionMethod.GetSallerOrSupplier(listBx販売先);  // 販売先 （先頭空白行は無視）
-            var selSupplieres = FormActionMethod.GetSallerOrSupplier(listBx仕入先);  // 仕入先 （先頭空白行は無視）
-            var selSlCategories = FormActionMethod.GetSalseProduct(chkBxSl, chkBxPr, chkBxIv);  // データ区分
-            var (selSlPrProducts, selIvProducts) = FormActionMethod.GetProduct(chkBx原材料, chkBx半製品,
-                                                          chkBx製品, chkBx加工, chkBx預り,
-                                                          chkBxOhno, chkBxSundus, chkBxSuncar);  // 商品区分(在庫)
+            // =====================================================================================
+            // ★メインデータ作成処理(メインスレッドでデータ抽出)
+            // =====================================================================================
+            var (slprResult, stockDtNow, stockDtOld, selDatas, selAggregte, selBookName) = MakeMainData();
 
-            // 開始・終了日付取得
-            (string startDate, string endDate) = FormActionMethod.GetStartEndDate(strY, strM, endY, endM);
+            // =====================================================================================
+            // ★集計処理
+            // =====================================================================================
+            var displayData = DoSummary(slprResult, stockDtNow, stockDtOld, selDatas, selAggregte);
 
-            // 各データ取得(売上,仕入)
-            DataTable ohnoSales = null, ohnoPurchase = null, ohnoStock = null;
-            DataTable suncarSales = null, suncarPurchase = null, suncarStock = null;
-            DataTable sundusSales = null, sundusPurchase = null, sundusStock = null;
-
-            var classProduct = new Dictionary<string, string>
-                            {
-                                { "1", "原材料" },
-                                { "2", "半製品" },
-                                { "3", "半製品" },
-                                { "4", "製品" },
-                                { "5", "加工" },
-                                { "6", "預り" }
-                            };
-
-            DataTable ohnoDt = null;
-            DataTable suncarDt = null;
-            DataTable sundusDt = null;
-            DataTable stockDt = null;
-            Form2_DataView view = new Form2_DataView();
-
-            // ★売上データ
-            if (selSlCategories.Contains("売上"))
+            // =====================================================================================
+            // ★表示用フォーム起動
+            // =====================================================================================
+            if (displayData != null)
             {
-                foreach (var company in selCompanies)
-                {
-                    if (company == "オーノ") ohnoSales = FormActionMethod.MakeReadData_SLPR(startDate, endDate, company, "SL");
-                    else if (company == "サンミックカーペット") suncarSales = FormActionMethod.MakeReadData_SLPR(startDate, endDate, company, "SL");
-                    else if (company == "サンミックダスコン") sundusSales = FormActionMethod.MakeReadData_SLPR(startDate, endDate, company, "SL");
-                }
-
-                var datasetsS = new[]
-                {
-                    new { Name = "オーノ", Table = ohnoSales },
-                    new { Name = "サンミックカーペット", Table = suncarSales },
-                    new { Name = "サンミックダスコン", Table = sundusSales }
-                };
-
-                // ▼▼条件フィルター
-
-                foreach (var d in datasetsS)
-                {
-                    if (d.Table == null) continue;
-
-                    DataTable filtered = d.Table;
-                    // 販売先
-                    if (selSelleres.Count > 0)
-                    {
-                        filtered = processor.CustFilter(filtered, d.Table, selSelleres, "URHBSC");
-                    }
-
-                    // 商品区分選択
-                    if (selSlPrProducts.Count < 5)
-                    {
-                        filtered = processor.ProductFileter(filtered, classProduct, selSlPrProducts);
-                    }
-
-                    // 部門選択
-                    if (d.Name == "オーノ" && selBumons.Count > 0)
-                    {
-                        filtered = processor.BumonFilter(filtered, selBumons, "URBMCD");
-                    }
-
-                    var salesList = new List<DataTable>();
-                    if (ohnoSales != null) salesList.Add(ohnoSales);
-                    if (suncarSales != null) salesList.Add(suncarSales);
-                    if (sundusSales != null) salesList.Add(sundusSales);
-
-                    if (d.Name == "オーノ") ohnoSales = filtered;
-                    else if (d.Name == "サンミックカーペット") suncarSales = filtered;
-                    else if (d.Name == "サンミックダスコン") sundusSales = filtered;
-                }
+                // Form2_DataView をモードレスで開く場合（閉じてもForm2が残る）
+                Form2_DataView view = new Form2_DataView();
+                view.DisplayData = displayData;
+                view.Show();
+            }
+            else
+            {
+                MessageBox.Show("該当データがありませんでした。", "情報", MessageBoxButtons.OK, MessageBoxIcon.Information);
             }
 
-            // ★仕入データ
-            if (selSlCategories.Contains("仕入"))
-            {
-                foreach (var company in selCompanies)
-                {
-                    if (company == "オーノ") ohnoPurchase = FormActionMethod.MakeReadData_SLPR(startDate, endDate, company, "PR");
-                    else if (company == "サンミックカーペット") suncarPurchase = FormActionMethod.MakeReadData_SLPR(startDate, endDate, company, "PR");
-                    else if (company == "サンミックダスコン") sundusPurchase = FormActionMethod.MakeReadData_SLPR(startDate, endDate, company, "PR");
-                }
-
-                var datasetsP = new[]
-                {
-                    new { Name = "オーノ", Table = ohnoPurchase },
-                    new { Name = "サンミックカーペット", Table = suncarPurchase },
-                    new { Name = "サンミックダスコン", Table = sundusPurchase }
-                };
-
-                // ▼▼条件フィルター
-                foreach (var d in datasetsP)
-                {
-                    if (d.Table == null) continue;
-
-                    DataTable filtered = d.Table;
-                    // 仕入先選択
-                    if (selSupplieres.Count > 0)
-                    {
-                        filtered = processor.CustFilter(filtered, d.Table, selSupplieres, "SRSRCD");
-                    }
-
-                    // 商品区分選択
-                    if (selSlPrProducts.Count < 5)
-                    {
-                        filtered = processor.ProductFileter(filtered, classProduct, selSlPrProducts);
-                    }
-
-                    // 部門選択
-                    if (d.Name == "オーノ" && selBumons.Count > 0)
-                    {
-                        filtered = processor.BumonFilter(filtered, selBumons, "SRBMCD");
-                    }
-
-                    var purchaseList = new List<DataTable>();
-                    if (ohnoPurchase != null) purchaseList.Add(ohnoPurchase);
-                    if (suncarPurchase != null) purchaseList.Add(suncarPurchase);
-                    if (sundusPurchase != null) purchaseList.Add(sundusPurchase);
-
-                    if (d.Name == "オーノ") ohnoPurchase = filtered;
-                    else if (d.Name == "サンミックカーペット") suncarPurchase = filtered;
-                    else if (d.Name == "サンミックダスコン") sundusPurchase = filtered;
-                }
-            }
-
-            // 売上・仕入データ結合
-            var datasetsSP = new[]
-            {
-                    new { Name = "オーノ", Sales = ohnoSales, Purchase = ohnoPurchase },
-                    new { Name = "サンミックカーペット", Sales = suncarSales, Purchase = suncarPurchase },
-                    new { Name = "サンミックダスコン", Sales = sundusSales, Purchase = sundusPurchase }
-            };
-            
-            foreach (var d in datasetsSP)
-            {
-                DataTable result = null;
-                if (d.Sales != null && d.Purchase != null)
-                {
-                    result = processor.MergeSalesPurchase(d.Sales, d.Purchase, false);
-                }
-                else if (d.Sales != null)
-                {
-                    var dt = processor.NormalizeColumnNames(d.Sales, "Sales");
-                    result = processor.SortData(dt);
-                }
-                else if (d.Purchase != null)
-                {
-                    var dt = processor.NormalizeColumnNames(d.Purchase, "Purchase");
-                    result = processor.SortData(dt);
-                }
-                if (result != null)
-                {
-                    if (d.Name == "オーノ") ohnoDt = result;
-                    else if (d.Name == "サンミックカーペット") suncarDt = result;
-                    else if (d.Name == "サンミックダスコン") sundusDt = result;
-                }
-            }
-            var SlPrList = new List<DataTable>();
-            if (ohnoDt != null) SlPrList.Add(ohnoDt);
-            if (suncarDt != null) SlPrList.Add(suncarDt);
-            if (sundusDt != null) SlPrList.Add(sundusDt);
-
-            DataTable slprResult = null;
-            if (SlPrList.Count > 0)
-            {
-                slprResult = processor.MergeData(SlPrList.ToArray());
-
-                DataView dv = slprResult.DefaultView;
-                dv.Sort = "年月 ASC, クラス名 ASC, 部門CD ASC";
-                slprResult = dv.ToTable();
-                view.DisplayData = slprResult;
-            }
-
-            //在庫
-            if (selSlCategories.Contains("在庫"))
-            {
-                foreach (var company in selCompanies)
-                {
-                    if (company == "オーノ") ohnoStock = FormActionMethod.MakeReadData_IV(startDate, endDate, company);
-                    else if (company == "サンミックカーペット") suncarStock = FormActionMethod.MakeReadData_IV(startDate, endDate, company);
-                    else if (company == "サンミックダスコン") sundusStock = FormActionMethod.MakeReadData_IV(startDate, endDate, company);
-                }
-
-                var datasetsI = new[]
-                {
-                    new { Name = "オーノ", Table = ohnoStock },
-                    new { Name = "サンミックカーペット", Table = suncarStock },
-                    new { Name = "サンミックダスコン", Table = sundusStock }
-                };
-
-                // ▼▼条件フィルター
-                foreach (var d in datasetsI)
-                {
-                    var current = d.Table;
-                    if (current == null) continue;
-                    DataTable filtered = current;
-
-                    // 商品区分選択
-                    if (selIvProducts.Count < 5)
-                    {
-                        filtered = processor.ProductFileter(filtered, selIvProducts, selIvProducts);
-                    }
-                    // 部門選択
-                    if (d.Name == "オーノ" && selBumons.Count > 0)
-                    {
-                        filtered = processor.BumonFilter(filtered, selBumons, "ZHBMCD");
-                    }
-
-                    if (d.Name == "オーノ") ohnoStock = filtered;
-                    else if (d.Name == "サンミックカーペット") suncarStock = filtered;
-                    else if (d.Name == "サンミックダスコン") sundusStock = filtered;
-                }
-            }
-            var stockList = new List<DataTable>();
-            if (ohnoStock != null) stockList.Add(ohnoStock);
-            if (suncarStock != null) stockList.Add(suncarStock);
-            if (sundusStock != null) stockList.Add(sundusStock);
-
-            if (stockList.Count > 0)
-            {
-                stockDt = processor.MergeData(stockList.ToArray());
-                stockDt = processor.FormatStockTable(stockDt);
-
-                view.DisplayData = stockDt;
-            }
-
-            // Form2_DataView をモードレスで開く場合（閉じてもForm2が残る）
-            view.Show();
-
-            // --- 終了したらアニメーション閉じる ---
+            // =====================================================================================
+            // ★アニメーションフォーム閉じる
+            // =====================================================================================
             await Task.Delay(300);
+            if (anim != null && !anim.IsDisposed)
+                anim.Invoke(new Action(() => anim.CloseForm()));
+
+            // アニメーションスレッド終了を待つ
+            animThread.Join();
+        }
+
+        // Excelエクスポートボタンクリック
+        private async void btnExportExcel_Click(object sender, EventArgs e)
+        {
+            DataProcessor processor = new DataProcessor();
+            HIZTIM = $"{DateTime.Now:yyyy/MM/dd HH:mm:ss}";
+            Hiz = DateTime.Now.ToString("yyyyMMdd");
+            Tim = DateTime.Now.ToString("HHmmss");
+
+            // =====================================================================================
+            // ★ エラーチェック
+            // =====================================================================================
+            if (ErrCheck())
+                return;
+
+            // =====================================================================================
+            // ★アニメーションフォーム表示
+            // =====================================================================================
+            FormAnimation3 anim = null;
+
+            Thread animThread = new Thread(() =>
+            {
+                using (FormAnimation3 a = new FormAnimation3())
+                {
+                    anim = a; // 外部参照用
+                    Application.Run(a); // GIF表示
+                }
+            });
+            animThread.SetApartmentState(ApartmentState.STA);
+            animThread.Start();
+
+            await Task.Delay(100); // ちょっと待って anim が作られる
+
+            /// =====================================================================================
+            // ★メインデータ作成処理(メインスレッドでデータ抽出)
+            // =====================================================================================
+            var (slprResult, stockDtNow, stockDtOld, selDatas, selAggregte, selBookName) = MakeMainData();
+
+            // =====================================================================================
+            // ★集計処理
+            // =====================================================================================
+            var ExcelData = DoSummary(slprResult, stockDtNow, stockDtOld, selDatas, selAggregte);
+
+            // =====================================================================================
+            // ★データ有無チェック
+            // =====================================================================================
+            if (ExcelData == null || ExcelData.Rows.Count == 0)
+            {
+                MessageBox.Show("エクスポートするデータがありません。");
+                return;
+            }
+
+            // =====================================================================================
+            // ★エクセルへのエクスポート処理
+            // =====================================================================================
+            Excel.Application xlApp = null;
+            Excel.Workbook xlBook = null;
+            Excel.Worksheet xlSheet = null;
+
+            Excel.Range cdRange = null;
+            Excel.Range start2 = null;
+            Excel.Range end2 = null;
+
+            if (string.IsNullOrEmpty(selBookName))
+                selBookName = $"月次データ.{Hiz}.{Tim}.xlsm";
+            else
+                selBookName = $"{selBookName}.xlsm";
+
+            // =====================================================================================
+            // ★アニメーションフォーム閉じる
+            // =====================================================================================
+            await Task.Delay(500);
             if (anim != null && !anim.IsDisposed)
             {
                 anim.Invoke(new Action(() => anim.CloseForm()));
@@ -413,6 +264,293 @@ namespace あすよん月次帳票
 
             // アニメーションスレッド終了を待つ
             animThread.Join();
+
+            try
+            {
+                // 保存ダイアログ
+                SaveFileDialog sfd = new SaveFileDialog();
+                sfd.Filter = "マクロ有効Excelファイル|*.xlsm";
+                sfd.Title = "保存先を指定してください";
+                sfd.FileName = selBookName;
+
+                if (sfd.ShowDialog() != DialogResult.OK) return;
+
+                string filePath = sfd.FileName;
+
+                // Excelアプリケーション作成
+                xlApp = new Excel.Application { Visible = false };
+
+                // 新規ブック作成
+                xlBook = xlApp.Workbooks.Add();
+
+                // =====================================================================================
+                // ★アニメーションフォーム表示
+                // =====================================================================================
+                animThread = new Thread(() =>
+                {
+                    using (FormAnimation3 a = new FormAnimation3())
+                    {
+                        anim = a; // 外部参照用
+                        Application.Run(a); // GIF表示
+                    }
+                });
+                animThread.SetApartmentState(ApartmentState.STA);
+                animThread.Start();
+
+                await Task.Delay(100); // ちょっと待って anim が作られる
+
+                //==================== Dataシート =====================
+                xlSheet = (Excel.Worksheet)xlBook.Sheets[1];
+                xlSheet.Name = "Data";
+
+                // ヘッダー
+                for (int c = 0; c < ExcelData.Columns.Count; c++)
+                {
+                    xlSheet.Cells[1, c + 1] = ExcelData.Columns[c].ColumnName;
+                }
+
+                // データ
+                int rows = ExcelData.Rows.Count;
+                int cols = ExcelData.Columns.Count;
+
+                //==============================================================
+                // 売仕
+                //--------------------------------------------------------------
+                // 集計[1]
+                //  1:年月     2:SbSys区分 3:部門CD  4:クラス 5:取引先CD 6:取引先名
+                //  7:品部門CD 8:品名CD    9:品種CD 10:色CD  11:品名    12:品種名
+                // 13:色名    14:数量     15:単位CD 16:単価  17:金額
+                //--------------------------------------------------------------
+                // 集計[2]
+                //  1:年月 2:SbSys区分 3:部門CD 4:クラス 5:取引先CD 6:取引先名
+                //  7:数量 8:金額
+                //--------------------------------------------------------------
+                // 集計[3]
+                //  1:年月 2:SbSys区分 3:部門CD 4:クラス 5:数量 6:金額
+                //--------------------------------------------------------------
+                // 集計なし
+                //  1:伝票No  2:枝番    3:SbSys区分 4:取引区分  5:伝票日付
+                //  6:部門CD  7:クラス  8:取引先CD  9:取引先名 10:品部門CD
+                // 11:品名CD 12:品種CD 13:色CD     14:品名     15:品種名
+                // 16:色名   17:数量   18:単位CD   19:単価     20:金額
+                //==============================================================
+                // 在庫
+                //--------------------------------------------------------------
+                // 集計[1]
+                // 1:年月 2:部門CD 3:在庫種別 4:クラス 5:品名 6:品目CD 7:残数量 8:残金額
+                //--------------------------------------------------------------
+                // 集計なし
+                //  1:年月    2:部門CD   3:在庫種別 4:クラス 5:倉庫CD
+                //  6:倉庫名  7:預り先CD 8:預り先名 9:品名  10:品目CD
+                // 11:残数量 12:残金額 
+                //==============================================================
+                //
+                // 0埋めが必要な列と桁数（この4種類のみ対象）
+                var zeroPadTargets = new Dictionary<string, int>
+                {
+                    { "伝票No",   8 },
+                    { "取引先CD", 7 },
+                    { "倉庫CD",   7 },
+                    { "預り先CD", 7 }
+                };
+                // 全ての CD 列（文字列扱いにしたい列）
+                string[] cdColNames = { "伝票No", "枝番", "部門CD", "取引先CD",
+                                        "品部門CD", "品名CD", "品種CD", "色CD",
+                                        "単位CD", "SbSys区分", "取引区分", "倉庫CD",
+                                        "預り先CD", "在庫種別", "品目CD" };
+
+                foreach (var cdColName in cdColNames)
+                {
+                    // DataTable に列が無ければスキップ
+                    if (!ExcelData.Columns.Contains(cdColName)) continue;
+                    // Excel 列番号（1-based）
+                    int cdIndex = ExcelData.Columns.IndexOf(ExcelData.Columns[cdColName]) + 1; // Excel列番号
+
+                    // CD列を文字列形式に設定
+                    cdRange = xlSheet.Columns[cdIndex];
+                    cdRange.NumberFormat = "@"; // Excelで文字列扱い
+
+
+                    // CD列を個別に書き込む（ゼロ埋め）
+                    for (int r = 0; r < rows; r++)
+                    {
+                        string cdValue = ExcelData.Rows[r][cdColName]?.ToString() ?? "";
+
+                        if (zeroPadTargets.ContainsKey(cdColName))
+                        {
+                            int fixLen = zeroPadTargets[cdColName];
+
+                            // 数値でも文字でもとにかくゼロ埋め
+                            cdValue = cdValue.PadLeft(fixLen, '0');
+                        }
+
+                        // Excel のセルに書き込み
+                        xlSheet.Cells[r + 2, cdIndex] = cdValue;
+                    }
+                }
+
+                // CD列以外を配列に格納
+                object[,] dataArray = new object[rows, cols - 1];
+                int dataCol = 0;
+                for (int c = 0; c < cols; c++)
+                {
+                    string colName = ExcelData.Columns[c].ColumnName;
+
+                    // CD列はスキップ
+                    if (cdColNames.Contains(colName)) continue;
+
+                    for (int r = 0; r < rows; r++)
+                    {
+                        var val = ExcelData.Rows[r][c];
+
+                        // 数量計・金額計は数値形式に変換
+                        if ((colName == "数量計" || colName == "金額計") && val != null && val != DBNull.Value)
+                        {
+                            if (decimal.TryParse(val.ToString(), out decimal num))
+                            {
+                                dataArray[r, dataCol] = num.ToString("#,0");
+                            }
+                            else
+                            {
+                                dataArray[r, dataCol] = "0";
+                            }
+                        }
+                        // 年月は文字列形式で
+                        else if (colName == "年月")
+                        {
+                            string ymd = val?.ToString() ?? "";
+                            dataArray[r, dataCol] = "'" + ymd;
+                            //dataArray[r, dataCol] = ymd;
+                        }
+                        else
+                        {
+                            dataArray[r, dataCol] = val?.ToString() ?? "";
+                        }
+                    }
+                    // Excel上で文字列扱いにしたい列は NumberFormat = "@"
+                    if (colName == "年月")
+                    {
+                        int excelColIndex = c + 1; // Excel列番号
+                        Excel.Range yearRange = xlSheet.Columns[excelColIndex];
+                        yearRange.NumberFormat = "@"; // 文字列扱い
+                        Marshal.ReleaseComObject(yearRange);
+                    }
+                    dataCol++;
+                }
+
+                // 一括代入（CD列以外）
+                dataCol = 0;
+                for (int c = 0; c < cols; c++)
+                {
+                    string colName = ExcelData.Columns[c].ColumnName;
+                    if (cdColNames.Contains(colName)) continue;
+
+                    Excel.Range colRange = xlSheet.Range[xlSheet.Cells[2, c + 1], xlSheet.Cells[rows + 1, c + 1]];
+
+                    colRange.Value = GetColumnData(dataArray, dataCol, rows);
+                    dataCol++;
+                }
+
+                // カンマ付き表示をExcel上でも設定（念のため）
+                for (int c = 0; c < cols; c++)
+                {
+                    string colName = ExcelData.Columns[c].ColumnName;
+                    if (colName == "数量計" || colName == "金額計")
+                    {
+                        Excel.Range col = xlSheet.Range[xlSheet.Cells[2, c + 1], xlSheet.Cells[rows + 1, c + 1]];
+                        col.NumberFormat = "#,##0";
+                        Marshal.ReleaseComObject(col);
+                    }
+                }
+                // ------------------- ヘルパー関数 -------------------
+                object[,] GetColumnData(object[,] source, int colIndex, int rowCount)
+                {
+                    object[,] colData = new object[rowCount, 1];
+                    for (int r = 0; r < rowCount; r++)
+                        colData[r, 0] = source[r, colIndex];
+                    return colData;
+                }
+
+                // 列幅自動調整
+                xlSheet.Columns.AutoFit();
+
+                // 既存のフィルターをクリア
+                if (xlSheet.AutoFilterMode) xlSheet.AutoFilterMode = false;
+
+                // ヘッダー範囲を取得（1行目）
+                Excel.Range headerRange = xlSheet.Range[xlSheet.Cells[1, 1], xlSheet.Cells[1, cols]];
+                // 太文字
+                headerRange.Font.Bold = true;
+                // 下線＋枠線（外枠＋内部の罫線）
+                headerRange.Borders.LineStyle = Excel.XlLineStyle.xlContinuous;
+                // 背景色（任意）
+                headerRange.Interior.Color = System.Drawing.ColorTranslator.ToOle(System.Drawing.Color.LightGray);
+                // フィルターを有効化
+                headerRange.AutoFilter(1);
+                // COMオブジェクト解放
+                Marshal.ReleaseComObject(headerRange);
+
+                // =====================================================================================
+                // ★アニメーションフォーム閉じる
+                // =====================================================================================
+                await Task.Delay(500);
+                if (anim != null && !anim.IsDisposed)
+                {
+                    anim.Invoke(new Action(() => anim.CloseForm()));
+                }
+
+                // アニメーションスレッド終了を待つ
+                animThread.Join();
+
+                // マクロ有効形式で保存
+                xlBook.SaveAs(filePath, Excel.XlFileFormat.xlOpenXMLWorkbookMacroEnabled);
+                xlBook.Close(false);
+                xlApp.Quit();
+
+                // 保存後に開くか確認
+                var result = MessageBox.Show("Excelを保存しました。\n開きますか?", "保存完了", MessageBoxButtons.YesNo, MessageBoxIcon.Question);
+                if (result == DialogResult.Yes)
+                {
+                    System.Diagnostics.Process.Start(filePath);
+                }
+            }
+            catch (Exception ex)
+            {
+                // =====================================================================================
+                // ★アニメーションフォーム閉じる
+                // =====================================================================================
+                await Task.Delay(500);
+                if (anim != null && !anim.IsDisposed)
+                {
+                    anim.Invoke(new Action(() => anim.CloseForm()));
+                }
+
+                // アニメーションスレッド終了を待つ
+                animThread.Join();
+
+                MessageBox.Show("Excelエクスポート中にエラーが発生しました: " + ex.Message);
+            }
+
+            finally
+            {
+                // COMオブジェクト解放
+                if (cdRange != null) { Marshal.ReleaseComObject(cdRange); cdRange = null; }
+                if (start2 != null) { Marshal.ReleaseComObject(start2); start2 = null; }
+                if (end2 != null) { Marshal.ReleaseComObject(end2); end2 = null; }
+                if (xlSheet != null) { Marshal.ReleaseComObject(xlSheet); xlSheet = null; }
+                if (xlBook != null) { Marshal.ReleaseComObject(xlBook); xlBook = null; }
+                if (xlApp != null) { Marshal.ReleaseComObject(xlApp); xlApp = null; }
+
+                GC.Collect();
+                GC.WaitForPendingFinalizers();
+                GC.Collect();
+                GC.WaitForPendingFinalizers();
+            }
+
+            // ログ追加             
+            if (Application.OpenForms["Form1"] is Form1 form1) form1.AddLog($"{HIZTIM}　Excelエクスポート完了");
+            // ↑↑----------- Excelエクスポート -----------↑↑
+
         }
 
         private void AddDeptMap(Dictionary<string, HashSet<string>> deptmap, Torihiki ts)
@@ -467,8 +605,16 @@ namespace あすよん月次帳票
                     // 戻り値は「チェックされた全取引先×部門」リスト（同コードでも複数行ある）
                     var returned = frm.GetSelectedItems();
 
-                    // salesDeptMap を追加で更新（既存を上書きせずにマージ）
-                    AddDeptMapRange(salesDeptMap, returned);
+                    // 選択なしなら deptMap もクリア
+                    if (returned.Count == 0)
+                    {
+                        salesDeptMap.Clear(); // SHIIREなら supplierDeptMap.Clear()
+                    }
+                    else
+                    {
+                        // salesDeptMap を追加で更新（既存を上書きせずにマージ）
+                        AddDeptMapRange(salesDeptMap, returned);
+                    }
 
                     // selSelleres は listBox 表示用に "コード毎に1行" を維持
                     selSelleres = returned
@@ -516,6 +662,18 @@ namespace あすよん月次帳票
 
         private void UpdateBumonAndCompanyFromTorihiki(List<Torihiki> torihikis)
         {
+            // 取引先が空なら会社チェック・部門リストもクリア
+            if (torihikis == null || torihikis.Count == 0)
+            {
+                chkBxOhno.Checked = false;
+                chkBxSuncar.Checked = false;
+                chkBxSundus.Checked = false;
+
+                selBumons.Clear();
+                listBx部門.Items.Clear();
+                return;
+            }
+
             // 取引先に基づいて会社のチェックボックスを更新
             chkBxOhno.Checked |= torihikis.Any(t => t.Company == "オーノ");
             chkBxSuncar.Checked |= torihikis.Any(t => t.Company == "サンミックカーペット");
@@ -543,6 +701,11 @@ namespace あすよん月次帳票
 
         private void RefreshListBx(ListBox listBox, List<Torihiki> items)
         {
+            listBox.Items.Clear();
+
+            // 選択アイテムがなければ終了
+            if (items.Count == 0) return;
+
             foreach (var item in items)
             {
                 // 同じ Code + Company の Torihiki がなければ追加
@@ -554,48 +717,257 @@ namespace あすよん月次帳票
             }
         }
 
+        private bool ErrCheck()
+        {
+            // =====================================================================================
+            // ★ エラーチェック
+            // =====================================================================================
+            //  ＊年月入力チェック
+            if (!FormActionMethod.TryParseYearMonth(txtBxStrYearMonth, out int strY, out int strM) ||
+                !FormActionMethod.TryParseYearMonth(txtBxEndYearMonth, out int endY, out int endM))
+            {
+                MessageBox.Show("年月は6桁の数字(yyyyMM)で入力してください。", "警告", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                return true;
+            }
+            //  ＊組織未選択NG
+            if (!chkBxOhno.Checked && !chkBxSuncar.Checked && !chkBxSundus.Checked
+                && listBx販売先.Items.Count == 0 && listBx仕入先.Items.Count == 0
+                && listBx部門.Items.Count == 0)
+            {
+                MessageBox.Show("会社～取引先のいずれかを選択してください。",
+                                "警告", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                return true;
+            }
+            //  ＊データ区分未選択NG
+            if (!chkBxSl.Checked && !chkBxPr.Checked && !chkBxIv.Checked)
+            {
+                MessageBox.Show("データ区分を選択してください。",
+                                "警告", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                return true;
+            }
+            string sym = txtBxStrYearMonth.Text.Trim();
+            string eym = txtBxEndYearMonth.Text.Trim();
+            string nowym = DateTime.Now.ToString("yyyyMM");
+            //  ＊データ区分"在庫"選択の場合未来月NG
+            if (chkBxIv.Checked)
+            {
+                if (string.Compare(sym, nowym) > 0 || string.Compare(eym, nowym) > 0)
+                {
+                    MessageBox.Show("データ区分在庫を選択する場合、未来月は指定できません。",
+                                    "警告", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                    return true;
+                }
+            }
+            // データ区分"在庫"選択と、年月複数月(過去月の複数月はOK,過去月と当月はNG)の選択NG
+            if (chkBxIv.Checked && sym != eym && (sym == nowym || eym == nowym))
+            {
+                MessageBox.Show("データ区分在庫を選択する場合、当月の場合は単月で指定してください。",
+                                "警告", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                return true;
+            }
+            return false;
+        }
+
+        private (DataTable, DataTable, DataTable, List<string>, string, string) MakeMainData()
+        {
+            // =====================================================================================
+            // ★メインデータ作成処理
+            // =====================================================================================
+            // 条件選択内容取得
+            FormActionMethod.TryParseYearMonth(txtBxStrYearMonth, out int strY, out int strM);
+            FormActionMethod.TryParseYearMonth(txtBxStrYearMonth, out int endY, out int endM);
+
+            string selBookName = FormActionMethod.GetBookName(txtBx名称);  // 帳票名称
+            (string startDate, string endDate) = FormActionMethod.GetStartEndDate(strY, strM, endY, endM);　// 開始・終了日付
+            var selCompanies = FormActionMethod.GetCompany(chkBxOhno, chkBxSundus, chkBxSuncar); // 会社
+            var selBumons = FormActionMethod.GetSelectedBumons(listBx部門);  // 部門（先頭空白行は無視して取得）
+            var selSelleres = FormActionMethod.GetSallerOrSupplier(listBx販売先);  // 販売先 （先頭空白行は無視）
+            var selSupplieres = FormActionMethod.GetSallerOrSupplier(listBx仕入先);  // 仕入先 （先頭空白行は無視）
+            var selDatas = FormActionMethod.GetSalseProduct(chkBxSl, chkBxPr, chkBxIv);  // データ区分
+            List<string> selSlPrProducts = null;
+            List<string> selIvProducts = null;
+            string selAggregte = null;
+            Dictionary<string, string> selIvTypes = null;
+
+            if (chkBxSl.Checked || chkBxPr.Checked)
+            {
+                selSlPrProducts = FormActionMethod.GetProduct(chkBx原材料, chkBx半製品, chkBx製品,
+                                                                chkBxOhno, chkBxSundus, chkBxSuncar);  // 売・仕クラス区分
+                selAggregte = FormActionMethod.GetAggregte(grpBx売仕集計区分);  // 売仕集計区分
+            }
+            if (chkBxIv.Checked)
+            {
+                selIvProducts = FormActionMethod.GetProduct(chkBx原材料, chkBx半製品, chkBx製品,
+                                                            chkBx加工T, chkBx預りT, chkBx預けT,
+                                                            chkBxOhno, chkBxSundus, chkBxSuncar);  // 在クラス区分
+                selIvTypes = FormActionMethod.GetIvType(chkBx自社, chkBx預け, chkBx預り, chkBx投入);  // 在庫種別
+                selAggregte = FormActionMethod.GetAggregte(grpBx在集計区分);  // 在庫集計区分
+            }
+            
+
+            // 条件フィルター
+            // データ取得・加工処理
+            var (slprResult, stockDtNow, stockDtOld) = FormActionMethod.FilterData(startDate, endDate,
+                                                                                   selCompanies, selBumons,
+                                                                                   selSelleres, selSupplieres,
+                                                                                   selDatas, selSlPrProducts, selIvProducts,
+                                                                                   selIvTypes);
+            return (slprResult, stockDtNow, stockDtOld, selDatas, selAggregte, selBookName);
+        }
+
+        private DataTable DoSummary(DataTable slprResult, DataTable stockDtNow, DataTable stockDtOld, List<string> selDatas, string selAggregte)
+        {
+            // =====================================================================================
+            // ★集計処理
+            // =====================================================================================
+            DataTable displayData = null;
+            // --- 集計キー列を決定 ---
+            List<string> groupKeys = new List<string>();
+            string[] sortcols = null;
+            string ptn = null;
+            if (selDatas.Contains("在庫"))
+            {
+
+                if (stockDtNow != null)
+                    displayData = stockDtNow;
+                else if (stockDtOld != null)
+                {
+                    if (selAggregte == "NONE")
+                        displayData = stockDtOld;
+                    else
+                    {
+                        switch (selAggregte)
+                        {
+                            case "品目CD":
+                                groupKeys = new List<string> { "年月", "クラス", "在庫種別", "部門CD", "品目CD" };
+                                sortcols = new string[] { "年月", "部門CD", "クラス", "品目CD" };
+                                ptn = "1";
+                                break;
+                                //case "倉庫CD":
+                                //    groupKeys = new List<string> { "年月", "クラス", "在庫種別", "部門CD", "倉庫CD" };
+                                //    sortcols = new string[] { "年月", "部門CD", "クラス", "倉庫CD" };
+                                //    ptn = "2";
+                                //    break;
+                                //case "部門CD":
+                                //    groupKeys = new List<string> { "年月", "クラス", "在庫種別", "部門CD" };
+                                //    sortcols = new string[] { "年月", "部門CD", "クラス" };
+                                //    ptn = "3";
+                                //    break;
+                        }
+                        displayData = DataSummarizeMethod.SumData(stockDtOld, groupKeys, sortcols, "在庫", ptn);
+                    }
+                }
+            }
+            else
+                if (slprResult != null)
+            {
+                if (selAggregte == "NONE")
+                    displayData = slprResult;
+                else
+                {
+                    switch (selAggregte)
+                    {
+                        case "品目CD":
+                            groupKeys = new List<string> { "年月", "SbSys区分", "クラス", "部門CD", "品部門CD", "品名CD", "品種CD", "色CD" };
+                            sortcols = new string[] { "年月", "SbSys区分", "部門CD", "クラス", "品部門CD", "品名CD", "品種CD", "色CD" };
+                            ptn = "1";
+                            break;
+                        case "取引先CD":
+                            groupKeys = new List<string> { "年月", "SbSys区分", "クラス", "部門CD", "取引先CD" };
+                            sortcols = new string[] { "年月", "SbSys区分", "部門CD", "クラス", "取引先CD" };
+                            ptn = "2";
+                            break;
+                        case "部門CD":
+                            groupKeys = new List<string> { "年月", "SbSys区分", "クラス", "部門CD" };
+                            sortcols = new string[] { "年月", "SbSys区分", "部門CD", "クラス" };
+                            ptn = "3";
+                            break;
+                    }
+                    displayData = DataSummarizeMethod.SumData(slprResult, groupKeys, sortcols, "売仕", ptn);
+                }
+            }
+            return displayData;
+        }
         /// <summary>
         /// Form1へ戻る
         /// </summary>
         /// <param name="sender"></param>
         /// <param name="e"></param>
-        private void btnForm1Back_Click(object sender, EventArgs e)
-        {
-            // Form1 のインスタンスを取得して表示
-            if (Application.OpenForms["Form1"] is Form1 form1)
-            {
-                form1.Show();
-            }
-            // Form2 を閉じる
-            this.Close();
-        }
-        
 
         private void chkBxControl(object sender, EventArgs e)
         {
             // チェックボックス制御
+            bool showSd = chkBxSundus.Checked;
             bool showSl = chkBxSl.Checked;
             bool showPr = chkBxPr.Checked;
             bool showIv = chkBxIv.Checked;
-            bool showRaw = chkBx原材料.Checked;
-            bool showSemi = chkBx半製品.Checked;
-            bool showProd = chkBx製品.Checked;
-            bool showProc = chkBx加工.Checked;
-            bool showCust = chkBx預り.Checked;
 
-            // 売・仕選択時は在庫チェック無効化, 在選択時は売・仕チェック無効化
+            // 売・仕・在の排他制御
             chkBxSl.Enabled = !showIv;
             chkBxPr.Enabled = !showIv;
             chkBxIv.Enabled = !showSl && !showPr;
-            //chkBx預り.Enabled = !showSl && !showPr;
-        }
-        
-        private void TxtBxYearMonth_KeyPress(object sender, KeyPressEventArgs e)
-        {
-            // 数字とバックスペースのみ許可
-            if (!char.IsDigit(e.KeyChar) && e.KeyChar != (char)Keys.Back)
+
+            // 在庫関連の初期有効状態(売上・仕入が選ばれていない場合のみ)
+            chkBx加工T.Enabled = !showSl && !showPr;
+            chkBx預りT.Enabled = !showSl && !showPr;
+            chkBx預けT.Enabled = !showSl && !showPr;
+            foreach (Control cBox in grpBx在庫種別.Controls)
+                cBox.Enabled = !showSl && !showPr;
+
+            // 売・仕選択時は在庫集計無効
+            foreach (Control cBox in grpBx在集計区分.Controls.OfType<RadioButton>())
+                cBox.Enabled = !showSl && !showPr;
+
+            // 在庫選択時は売仕集計無効
+            foreach (Control cBox in grpBx売仕集計区分.Controls.OfType<RadioButton>())
+                cBox.Enabled = !showIv;
+
+            // 在庫選択＋年月入力内容に応じた制御
+            if (showIv)
             {
-                e.Handled = true;
+                string inputYm = txtBxEndYearMonth.Text.Trim(); // 入力年月
+                if (string.IsNullOrEmpty(inputYm)) return;
+
+                string monthlyFile = @"\\ohnosv01\OhnoSys\099_sys\mf\Monthly.txt";
+                if (!File.Exists(monthlyFile)) return;
+
+                string firstLine = File.ReadLines(monthlyFile).FirstOrDefault();
+                if (string.IsNullOrEmpty(firstLine)) return;
+
+                string currentYm = firstLine.Substring(0, 6); // 先頭6文字を取得(当月)
+
+                // 当月の場合 → grpBx在庫種別無効、預りT/預けTは有効
+                if (inputYm == currentYm) // 当月
+                                          // 在庫選択＋サンミックダスコン、預りT/預けTを無効化
+                {
+                    if (showSd)
+                    {
+                        foreach (Control cBox in grpBx在庫種別.Controls)
+                            cBox.Enabled = false;
+                        chkBx加工T.Enabled = true;
+                        chkBx預りT.Enabled = false;
+                        chkBx預けT.Enabled = false;
+                    }
+                    else
+                    {
+                        foreach (Control cBox in grpBx在庫種別.Controls)
+                        {
+                            cBox.Enabled = false;
+                            chkBx加工T.Enabled = true;
+                            chkBx預りT.Enabled = true;
+                            chkBx預けT.Enabled = true;
+                        }
+                    }
+                }
+                // 過去月の場合 → grpBx在庫種別有効、預りT/預けTは無効
+                else if (string.Compare(inputYm, currentYm) < 0) // 過去月
+                {
+                    foreach (Control cBox in grpBx在庫種別.Controls)
+                        cBox.Enabled = true;
+                    chkBx加工T.Enabled = false;
+                    chkBx預りT.Enabled = false;
+                    chkBx預けT.Enabled = false;
+                }
             }
         }
 
@@ -620,53 +992,27 @@ namespace あすよん月次帳票
             //StyleDataGrid(dgvDataIV, Color.FromArgb(160, 120, 60), Color.FromArgb(245, 220, 170), Color.FromArgb(200, 160, 100));
 
             // チェックボックスなどは直接色指定でもOK
-            foreach (Control ctrl in grpBx組織.Controls)
+            foreach (var gb in cBoxList)
             {
-                if (ctrl is CheckBox chk)
-                {
-                    chk.ForeColor = ColorManager.MemeDark1;
-                    chk.BackColor = Color.FromArgb(255, 220, 150);
-                    ;
-                }
-            }
+                // グループボックスの背景
+                gb.BackColor = Color.FromArgb(255, 220, 150);
 
-            foreach (Control ctrl in grpBxクラス区分.Controls)
-            {
-                if (ctrl is CheckBox chk)
+                foreach (Control ctrl in gb.Controls)
                 {
-                    chk.ForeColor = ColorManager.MemeDark1;
-                    chk.BackColor = Color.FromArgb(255, 220, 150);
+                    // チェックボックスの色
+                    if (ctrl is CheckBox chk)
+                    {
+                        chk.ForeColor = ColorManager.KojiDark1;
+                        chk.BackColor = Color.FromArgb(255, 220, 150);
+                    }
+                    // ラジオボタンの色
+                    else if (ctrl is RadioButton rdo)
+                    {
+                        rdo.ForeColor = Color.FromArgb(246, 83, 10);
+                        rdo.BackColor = Color.FromArgb(255, 220, 150);
+                    }
                 }
             }
-            // CheckBox（データ・商品区分）
-            foreach (Control ctrl in grpBx組織.Controls)
-            {
-                if (ctrl is CheckBox cb)
-                {
-                    cb.ForeColor = ColorManager.KojiDark2;
-                    cb.BackColor = Color.FromArgb(255, 220, 150);
-                }
-            }
-
-            // CheckBox（会社選択）
-            foreach (Control ctrl in grpBxクラス区分.Controls)
-            {
-                if (ctrl is CheckBox cb)
-                {
-                    cb.ForeColor = ColorManager.KojiDark2;
-                    cb.BackColor = Color.FromArgb(255, 220, 150);
-                }
-            }
-
-            // グループボックスの背景
-            grpBx抽出期間.BackColor = Color.FromArgb(255, 220, 150);
-            grpBx組織.BackColor = Color.FromArgb(255, 220, 150);
-            grpBxクラス区分.BackColor = Color.FromArgb(255, 220, 150);
-            grpBx取引先.BackColor = Color.FromArgb(255, 220, 150);
-            grpBxデータ区分.BackColor = Color.FromArgb(255, 220, 150);
-            grpBxクラス区分.BackColor = Color.FromArgb(255, 220, 150);
-            grpBx売仕集計区分.BackColor = Color.FromArgb(255, 220, 150);
-            grpBxBtn.BackColor = Color.FromArgb(255, 220, 150);
 
             // ボタンの色
             StyleButton(btnDisplay, ColorManager.KojiBase, Color.White, borderColor: ColorManager.KojiDark1);
@@ -704,8 +1050,6 @@ namespace あすよん月次帳票
                     e.Graphics.DrawString(box.Text, box.Font, brush, 8, 0);
                 }
             }
-
-
         }
         // フィールドに追加
         private Point mouseOffset;
@@ -743,6 +1087,5 @@ namespace あすよん月次帳票
         {
             this.WindowState = FormWindowState.Minimized;
         }
-
     }
 }

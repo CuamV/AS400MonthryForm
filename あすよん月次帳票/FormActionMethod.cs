@@ -3,12 +3,15 @@ using OHNO.PComm;
 using System;
 using System.Collections.Generic;
 using System.Data;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using System.Net.Sockets;
 using System.Security.Cryptography;
 using System.Text.Json;
 using System.Text.RegularExpressions;
 using System.Windows.Forms;
+using System.Windows.Navigation;
 using System.Xml.Linq;
 
 namespace あすよん月次帳票
@@ -25,6 +28,273 @@ namespace あすよん月次帳票
 
         private static List<string> runtimelog = new List<string>();
 
+        // =======================================================================
+        // 【マスターデータ取得メソッド】
+        //  <Form1>
+        //   ◆販売先マスター取得
+        public static Dictionary<string, List<mf_HANBAI>> GetHanbaiAll(string lib)
+        {
+            var result = new Dictionary<string, List<mf_HANBAI>>();
+            var dbManager = (DbManager_Db2)DbManager.CreateDbManager(OhnoSysDBName.Db2);
+
+            var cmdText = $@"
+                        SELECT SL.URBMCD, SL.URHBSC, MIN(PM.TOTHNM), MIN(PM.TOKANM)
+                        FROM {lib}.SLURIMP AS SL
+                        LEFT JOIN SM1MLB01.MMTORIP AS PM ON SL.URHBSC = PM.TOTHCD
+                        WHERE SL.URDNDT >= 20030701
+                        GROUP BY SL.URBMCD, SL.URHBSC
+                        ORDER BY SL.URBMCD, MIN(PM.TOKANM)";
+
+            var dTable = dbManager.GetDataTable(cmdText);
+
+            foreach (DataRow row in dTable.Rows)
+            {
+                string bumon = row["URBMCD"].ToString();
+                string code = row["URHBSC"].ToString();
+                string name = row[2].ToString();
+                string kana = row[3].ToString();
+
+                if (!result.ContainsKey(bumon))
+                    result[bumon] = new List<mf_HANBAI>();
+
+                result[bumon].Add(new mf_HANBAI
+                {
+                    Code = code,
+                    Name = name,
+                    Kana = kana
+                });
+            }
+            return result;
+        }
+        //   ◆仕入先マスター取得
+        public static Dictionary<string, List<mf_SHIIRE>> GetShiireAll(string lib)
+        {
+            var result = new Dictionary<string, List<mf_SHIIRE>>();
+            var dbManager = (DbManager_Db2)DbManager.CreateDbManager(OhnoSysDBName.Db2);
+            var cmdText = $@"
+                        SELECT PR.SRBMCD, PR.SRSRCD, MIN(PM.TOTHNM), MIN(PM.TOKANM)
+                        FROM {lib}.PRSREMP AS PR
+                        LEFT JOIN SM1MLB01.MMTORIP AS PM ON PR.SRSRCD = PM.TOTHCD
+                        WHERE PR.SRDNDT >= 20030701
+                        GROUP BY PR.SRBMCD, PR.SRSRCD
+                        ORDER BY PR.SRBMCD, MIN(PM.TOKANM)";
+
+            var dTable = dbManager.GetDataTable(cmdText);
+
+            foreach (DataRow row in dTable.Rows)
+            {
+                string bumon = row["SRBMCD"].ToString();
+                string code = row["SRSRCD"].ToString();
+                string name = row[2].ToString();
+                string kana = row[3].ToString();
+
+                if (!result.ContainsKey(bumon))
+                    result[bumon] = new List<mf_SHIIRE>();
+
+                result[bumon].Add(new mf_SHIIRE
+                {
+                    Code = code,
+                    Name = name,
+                    Kana = kana
+                });
+            }
+            return result;
+        }
+        // 【JSON操作メソッド】
+        ///  <Form1>
+        ///   ◆JSONファイル保存
+        public static void SaveToJson<T>(string filePath, T data)
+        {
+            var json = JsonSerializer.Serialize(data, new JsonSerializerOptions { WriteIndented = true });
+            File.WriteAllText(filePath, json);
+        }
+        // =======================================================================
+
+        // =======================================================================
+        // 【エラーチェックメソッド】
+        //  <RplForm2>
+        //   ◆年月入力チェック(yyyyMM形式)
+        public static bool TryParseYearMonth(TextBox txtBox, out int year, out int month)
+        {
+            year = 0;
+            month = 0;
+
+            string input = txtBox.Text.Trim();
+
+            // yyyyMM 6桁の数字かチェック
+            if (!Regex.IsMatch(input, @"^\d{6}$"))
+                return false;
+
+            year = int.Parse(input.Substring(0, 4));
+            month = int.Parse(input.Substring(4, 2));
+
+            // 月が1～12かチェック
+            if (month < 1 || month > 12)
+                return false;
+
+            return true;
+        }
+        // =======================================================================
+
+        // =======================================================================
+        // 【条件選択取得メソッド】
+        //  <RplForm2>
+        //   ◆帳票名選択
+        public static string GetBookName(TextBox txtBox)
+        {
+            return txtBox.Text.Trim();
+        }
+        //   ◆年月選択
+        public static (string startDate, string endDate) GetStartEndDate(int syear, int smonth, int eyear, int emonth)
+        {
+            string startDate = new DateTime(syear, smonth, 1).ToString("yyyyMMdd");
+            int lastDay = DateTime.DaysInMonth(eyear, emonth);
+            string endDate = new DateTime(eyear, emonth, lastDay).ToString("yyyyMMdd");
+            return (startDate, endDate);
+        }
+        //   ◆会社選択
+        public static List<string> GetCompany(CheckBox chkBxOhno, CheckBox chkBxSundus, CheckBox chkBxSuncar)
+        {
+            var selectedCompanies = new List<string>();
+            if (chkBxOhno.Checked) selectedCompanies.Add("オーノ");
+            if (chkBxSundus.Checked) selectedCompanies.Add("サンミックダスコン");
+            if (chkBxSuncar.Checked) selectedCompanies.Add("サンミックカーペット");
+            return selectedCompanies;
+        }
+        //   ◆部門選択
+        public static List<string> GetSelectedBumons(ListBox listBxB)
+        {
+            var result = new List<string>();
+
+            foreach (var item in listBxB.Items)
+            {
+                switch (item) 
+                {
+                    case Torihiki t:
+                        result.Add(t.DeptCode); break;
+                    case Department d:
+                        result.Add(d.Code); break;
+                }
+            }
+            return result;
+        }
+        //   ◆販売先/仕入先選択
+        public static List<string> GetSallerOrSupplier(ListBox listbx)
+        {
+            var result = new List<string>();
+            foreach (var item in listbx.Items)
+            {
+                result.Add(((Torihiki)item).Code);
+            }
+            return result;
+        }
+        //   ◆データ区分選択
+        public static List<string> GetSalseProduct(CheckBox chkBxSl, CheckBox chkBxPr, CheckBox chkBxIv)
+        {
+            var selectedSlProduct = new List<string>();
+            if (chkBxSl.Checked) selectedSlProduct.Add("売上");
+            if (chkBxPr.Checked) selectedSlProduct.Add("仕入");
+            if (chkBxIv.Checked) selectedSlProduct.Add("在庫");
+            return selectedSlProduct;
+        }
+        //   ◆クラス区分選択
+        //    ＊売上・仕入
+        public static List<string> GetProduct(CheckBox chkBxRawMaterials, CheckBox chkBxSemiFinProducts, CheckBox chkBxProduct,
+                                              CheckBox chkBxOhno, CheckBox chkBxSundus, CheckBox chkBxSuncar)
+        {
+            var selectedSlPrProduct = new List<string>();
+
+            if (chkBxRawMaterials.Checked) selectedSlPrProduct.Add("原材料");
+            if (chkBxSemiFinProducts.Checked) selectedSlPrProduct.Add("半製品");
+            if (chkBxProduct.Checked) selectedSlPrProduct.Add("製品");
+
+            return selectedSlPrProduct;
+        }
+        //    ＊在庫
+        public static List<string> GetProduct(CheckBox chkBxRawMaterials, CheckBox chkBxSemiFinProducts, CheckBox chkBxProduct,
+                                              CheckBox chkBxProcess, CheckBox chkBxCustody, CheckBox chkEntrust,
+                                              CheckBox chkBxOhno, CheckBox chkBxSundus, CheckBox chkBxSuncar)
+        {
+            var selectedIvProduct = new List<string>();
+
+            if (chkBxRawMaterials.Checked) selectedIvProduct.Add("原材料");
+            if (chkBxSuncar.Checked && chkBxSundus.Checked && chkBxSemiFinProducts.Checked)
+            {
+                selectedIvProduct.Add("タフト半製品");
+                selectedIvProduct.Add("コーティング半製品");
+            }
+            else if (chkBxSuncar.Checked && chkBxSemiFinProducts.Checked)
+            {
+                selectedIvProduct.Add("タフト半製品");
+                selectedIvProduct.Add("コーティング半製品");
+            }
+            else if (chkBxSundus.Checked && chkBxSemiFinProducts.Checked) selectedIvProduct.Add("コーティング半製品");
+
+            if (chkBxProduct.Checked) selectedIvProduct.Add("製品");
+            if (chkBxProcess.Checked) selectedIvProduct.Add("加工在庫");
+            if (chkBxCustody.Checked) selectedIvProduct.Add("預り在庫");
+            if (chkEntrust.Checked) selectedIvProduct.Add("預け在庫");
+
+            if (selectedIvProduct.Count > 0)
+                return selectedIvProduct;
+
+            if (chkBxOhno.Checked)
+            {
+                selectedIvProduct.Add("原材料");
+                selectedIvProduct.Add("製品");
+                selectedIvProduct.Add("加工在庫");
+                selectedIvProduct.Add("預り在庫");
+                selectedIvProduct.Add("預け在庫");
+            }
+            if (chkBxSundus.Checked)
+            {
+                selectedIvProduct.Add("原材料");
+                selectedIvProduct.Add("コーティング半製品");
+                selectedIvProduct.Add("製品");
+                selectedIvProduct.Add("加工在庫");
+                selectedIvProduct.Add("預り在庫");
+                selectedIvProduct.Add("預け在庫");
+            }
+            if (chkBxSuncar.Checked)
+            {
+                selectedIvProduct.Add("原材料");
+                selectedIvProduct.Add("タフト半製品");
+                selectedIvProduct.Add("コーティング半製品");
+                selectedIvProduct.Add("製品");
+                selectedIvProduct.Add("加工在庫");
+                selectedIvProduct.Add("預り在庫");
+                selectedIvProduct.Add("預け在庫");
+            }
+            // selectedIvProductに重複がある場合は削除
+            return selectedIvProduct.Distinct().ToList();
+        }
+        //   ◆在庫種別選択
+        public static Dictionary<string, string> GetIvType(CheckBox chkBxOneCom, CheckBox chkBxCustody, CheckBox chkBxEntrust, CheckBox chkBxProcess)
+        {
+            // 0=自社,1=預り,2=預け,3=投入
+            var selIvType = new Dictionary<string, string>();
+
+            if (chkBxOneCom.Checked) selIvType["0"] = "自社";
+            if (chkBxCustody.Checked) selIvType["1"] = "預り";
+            if (chkBxEntrust.Checked) selIvType["2"] = "預け";
+            if (chkBxProcess.Checked) selIvType["3"] = "投入";
+
+            return selIvType;
+        }
+        //   ◆売上・仕入・在庫集計区分選択
+        public static string GetAggregte(GroupBox grpBox)
+        {
+            return grpBox.Controls
+                .OfType<RadioButton>()
+                .FirstOrDefault(rb => rb.Checked)?
+                .Tag?.ToString();
+        }
+        // =======================================================================
+
+        // =======================================================================
+        // 【データ取得メソッド】
+        //  <RplForm2>
+        //   ◆売上・仕入データ取得
         public static DataTable MakeReadData_SLPR(string startDate, string endDate, string company, string kubun)
 
         {
@@ -44,48 +314,82 @@ namespace あすよん月次帳票
                 dt = GetDataMethod.GetPurchaseData(startDate, endDate, "SM1DLB02", "0000009");  // サンミック ダスコン(仕入)
             return dt;
         }
-
-        public static DataTable MakeReadData_IV(string startDate, string endDate, string company)
+        //   ◆在庫データ取得
+        public static (DataTable, DataTable) MakeReadData_IV(string startDate, string endDate, string company, List<string> selIvProducts)
         {
-            string startYM = startDate.Substring(0, 6);
-            string currentYM = DateTime.Now.ToString("yyyyMM");
+            string monthlyFile = @"\\ohnosv01\OhnoSys\099_sys\mf\Monthly.txt";
+            string firstLine = File.ReadLines(monthlyFile).FirstOrDefault();
+            string currentYm = firstLine.Substring(0, 6); // 先頭6文字を取得(当月)
 
-            DataTable dt = new DataTable();
-            if (startYM == currentYM)
+            string startYM = startDate.Substring(0, 6);
+
+            DataTable dtNow = null;
+            DataTable dtOld = null;
+            if (startYM == currentYm)
             {
                 // 今月分の在庫データ取得(ライブラリより取得)
-                string[] files = null;
-
-                switch (company)
+                // 会社ごと＋品目ごとのファイルマッピング
+                var fileMap = new Dictionary<string, Dictionary<string, string>>(StringComparer.OrdinalIgnoreCase)
                 {
-                    case "オーノ":
-                        files = new string[] { "OIZAIKOG", "OIZAIKOS", "OIZAIKOK","OIZAIKOA" };
-                        break;
-                    case "サンミックダスコン":
-                        files = new string[] { "SDIZAIKOG", "SDIZAIKOCH", "SDIZAIKOS" };
-                        break;
-                    case "サンミックカーペット":
-                        files = new string[] { "SCIZAIKOG", "SCIZAIKOTH", "SCIZAIKOCH", "SCIZAIKOS" };
-                        break;
-                }
+                    ["オーノ"] = new Dictionary<string, string>
+                    {
+                        { "原材料", "OIZAIKOG" },
+                        { "製品", "OIZAIKOS" },
+                        { "加工在庫", "OIZAIKOK" },
+                        { "預り在庫", "OIZAIKOAR" },
+                        { "預け在庫", "OIZAIKOAK" }
+                    },
+                    ["サンミックダスコン"] = new Dictionary<string, string>
+                    {
+                        { "原材料", "SDIZAIKOG" },
+                        { "コーティング半製品", "SDIZAIKOCH" },
+                        { "製品", "SDIZAIKOS" },
+                        { "加工在庫", "SDIZAIKOK" },
+                    },
+                    ["サンミックカーペット"] = new Dictionary<string, string>
+                    {
+                        { "原材料", "SCIZAIKOG" },
+                        { "タフト半製品", "SCIZAIKOTH" },
+                        { "コーティング半製品", "SCIZAIKOCH" },
+                        { "製品", "SCIZAIKOS" },
+                        { "加工在庫", "SCIZAIKOK" },
+                        { "預り在庫", "SCIZAIKOAR" },
+                        { "預け在庫", "SCIZAIKOAK" }
+                    }
+                };
+
+                // 選択された品目のファイル名リストを作る
+                var files = selIvProducts
+                    .Where(p => fileMap[company].ContainsKey(p))
+                    .Select(p => fileMap[company][p])
+                    .ToList();
+
                 var processor = new DataProcessor();
-
-
                 var stockList = new List<DataTable>();
-                // オーノ
+
                 foreach (var file in files)
                 {
                     // 1.SQLで在庫データ取得
-                    dt = GetDataMethod.GetStockData(file);
+                    dtNow = GetDataMethod.GetStockData(file);
 
-                    if (dt == null) continue;
+                    if (dtNow == null) continue;
 
                     // 2.カテゴリ列追加+コード列作成+欠損値０埋め
-                    dt = processor.ProsessStockTable(dt, file);
-                    stockList.Add(dt);
+                    dtNow = processor.ProsessStockTable(dtNow, file);
+                    stockList.Add(dtNow);
                 }
+                //==============================================================
+                // 1:ZHCSNM(クラス名) 2:ZHBMCD(部門CD) 3:ZHHNNM(品名)
+                // 4:ZHHMCD(品名CD)   5:ZHHSCD(品種CD) 6:ZHTZQT(当月残数量) 7:ZHTGZA(当月残金額)
+                //==============================================================
+                dtNow = processor.MergeData(stockList.ToArray());
 
-                dt = processor.MergeData(stockList.ToArray());
+                //==============================================================
+                // 1:年月           2:ZHCSNM(クラス名) 3:ZHBMCD(部門CD)     4:ZHHNNM(品名)
+                // 5:ZHHMCD(品名CD) 6:ZHHSCD(品種CD)   7:ZHTZQT(当月残数量) 8:ZHTGZA(当月残金額)
+                //==============================================================
+                dtNow = AddYearMonthColum(dtNow, startYM);
+
             }
             else
             {
@@ -126,30 +430,19 @@ namespace あすよん月次帳票
                             { "2", "タフト半製品" },
                             { "3", "コーティング半製品" },
                             { "4", "製品" },
-                            { "5", "加工在庫" },
-                            { "6", "預り在庫" }
                         };
 
                         foreach (DataRow r in IVdata.Rows)
                         {
-                            string code = r["ZHCSNM"]?.ToString()?.Trim();
+                            string code = r["SHCLAS"]?.ToString()?.Trim();
                             if (classMap.ContainsKey(code))
                             {
-                                r["ZHCSNM"] = classMap[code];
+                                r["SHCLAS"] = classMap[code];
                             }
                             else
                             {
                                 // マッピングが見つからない場合はコードをそのまま使用
                             }
-                        }
-
-                        // 年月列連結
-                        if (!IVdata.Columns.Contains("年月"))
-                            IVdata.Columns.Add("年月", typeof(string));
-
-                        foreach (DataRow r in IVdata.Rows)
-                        {
-                            r["年月"] = $"{yy}{mm}";
                         }
 
                         // 縦連結
@@ -159,9 +452,25 @@ namespace あすよん月次帳票
                             IVdataAll.ImportRow(r);
                     }
                 }
-                dt = IVdataAll ?? new DataTable(); // データなしは空テーブル
-            }
+                //==============================================================
+                //  1:ZGZKSB(在庫種別)     2:SHCLAS(クラス)      3:ZGBMCD(部門コード) 4:ZGWHCD(倉庫コード)  5:倉庫名
+                //  6:ZGAZCD(預り先コード) 7:預り先名            8:品名               9:ZGHMCD(品名コード) 10:ZGHSCD(品種コード)
+                // 11:ZGCLCD(色コード)    12:ZGTZQT(当月残数量) 13:ZGTGZA(当月残金額) 
+                //==============================================================
+                dtOld = IVdataAll ?? new DataTable(); // データなしは空テーブル
 
+                //==============================================================
+                //  1:年月                2:ZGZKSB(在庫種別)     3:SHCLAS(クラス)      4:ZGBMCD(部門コード)  5:ZGWHCD(倉庫コード)
+                //  6:倉庫名              7:ZGAZCD(預り先コード) 8:預り先名            9:品名               10:ZHHMCD(品名コード)
+                // 11:ZHHSCD(品種コード) 12:ZGCLCD(色コード)    13:ZGTZQT(当月残数量) 14:ZGTGZA(当月残金額) 
+                //==============================================================
+                dtOld = AddYearMonthColum(dtOld, startYM);
+            }
+            return (dtNow,dtOld);
+        }
+        //   ◆年月列追加共通処理
+        public static DataTable AddYearMonthColum(DataTable dt, string startYM)
+        {
             // 🔸 共通：年月列を追加
             if (dt != null && !dt.Columns.Contains("年月"))
             {
@@ -175,68 +484,303 @@ namespace あすよん月次帳票
 
             // 年月列を先頭へ移動
             dt.Columns["年月"].SetOrdinal(0);
+
             return dt;
         }
-
-        public (string sd, string ed) UpdateStartEndDate(TextBox txtBxStrYearMonth,TextBox txtBxEndYearMonth)
+        //   ◆フィルター処理
+        public static (DataTable, DataTable, DataTable) FilterData(string startDate, string endDate,
+                                                                   List<string> selCompanies, List<string> selBumons,
+                                                                   List<string> selSelleres, List<string> selSupplieres,
+                                                                   List<string> selSlCategories, List<string> selSlPrProducts, List<string> selIvProducts,
+                                                                   Dictionary<string,string> selIvTypes)
         {
-            string strInput = txtBxStrYearMonth.Text.Trim();
-            string endInput = txtBxEndYearMonth.Text.Trim();
+            DataProcessor processor = new DataProcessor();
 
-            // yyyyMM形式のチェック
-            if (!Regex.IsMatch(strInput, @"^\d{6}$"))
+            // 各データ取得
+            DataTable ohnoSales = null, ohnoPurchase = null, ohnoStockNow = null, ohnoStockOld = null;
+            DataTable suncarSales = null, suncarPurchase = null, suncarStockNow = null, suncarStockOld = null;
+            DataTable sundusSales = null, sundusPurchase = null, sundusStockNow = null, sundusStockOld = null;
+
+            var classProduct = new Dictionary<string, string>
+                            {
+                                { "1", "原材料" },
+                                { "2", "半製品" },
+                                { "3", "半製品" },
+                                { "4", "製品" },
+                            };
+
+            DataTable ohnoDt = null;
+            DataTable suncarDt = null;
+            DataTable sundusDt = null;
+            DataTable stockDtNow = null;
+            DataTable stockDtOld = null;
+
+            // ★売上データ
+            if (selSlCategories.Contains("売上"))
             {
-                MessageBox.Show("開始年月の形式が不正です。YYYYMM 形式で入力してください。", "警告", MessageBoxButtons.OK, MessageBoxIcon.Warning);
-                return (null, null);
+                foreach (var company in selCompanies)
+                {
+                    if (company == "オーノ") ohnoSales = MakeReadData_SLPR(startDate, endDate, company, "SL");
+                    else if (company == "サンミックカーペット") suncarSales = MakeReadData_SLPR(startDate, endDate, company, "SL");
+                    else if (company == "サンミックダスコン") sundusSales = MakeReadData_SLPR(startDate, endDate, company, "SL");
+                }
+
+                var datasetsS = new[]
+                {
+                    new { Name = "オーノ", Table = ohnoSales },
+                    new { Name = "サンミックカーペット", Table = suncarSales },
+                    new { Name = "サンミックダスコン", Table = sundusSales }
+                };
+
+                // ▼▼条件フィルター
+
+                foreach (var d in datasetsS)
+                {
+                    if (d.Table == null) continue;
+
+                    DataTable filtered = d.Table;
+                    // 販売先
+                    if (selSelleres.Count > 0)
+                    {
+                        filtered = processor.CustFilter(filtered, d.Table, selSelleres, "URHBSC");
+                    }
+
+                    // クラス区分選択
+                    if (selSlPrProducts.Count > 0 && selSlPrProducts.Count < 3)
+                    {
+                        filtered = processor.ProductFileter(filtered, classProduct, selSlPrProducts);
+                    }
+
+                    // 部門選択
+                    if (d.Name == "オーノ" && selBumons.Count > 0)
+                    {
+                        filtered = processor.BumonFilter(filtered, selBumons, "URBMCD");
+                    }
+
+                    var salesList = new List<DataTable>();
+                    if (ohnoSales != null) salesList.Add(ohnoSales);
+                    if (suncarSales != null) salesList.Add(suncarSales);
+                    if (sundusSales != null) salesList.Add(sundusSales);
+
+                    if (d.Name == "オーノ") ohnoSales = filtered;
+                    else if (d.Name == "サンミックカーペット") suncarSales = filtered;
+                    else if (d.Name == "サンミックダスコン") sundusSales = filtered;
+                }
             }
 
-            if (!Regex.IsMatch(endInput, @"^\d{6}$"))
+            // ★仕入データ
+            if (selSlCategories.Contains("仕入"))
             {
-                MessageBox.Show("終了年月の形式が不正です。YYYYMM 形式で入力してください。", "警告", MessageBoxButtons.OK, MessageBoxIcon.Warning);
-                return (null, null);
+                foreach (var company in selCompanies)
+                {
+                    if (company == "オーノ") ohnoPurchase = MakeReadData_SLPR(startDate, endDate, company, "PR");
+                    else if (company == "サンミックカーペット") suncarPurchase = MakeReadData_SLPR(startDate, endDate, company, "PR");
+                    else if (company == "サンミックダスコン") sundusPurchase = MakeReadData_SLPR(startDate, endDate, company, "PR");
+                }
+
+                var datasetsP = new[]
+                {
+                    new { Name = "オーノ", Table = ohnoPurchase },
+                    new { Name = "サンミックカーペット", Table = suncarPurchase },
+                    new { Name = "サンミックダスコン", Table = sundusPurchase }
+                };
+
+                // ▼▼条件フィルター
+                foreach (var d in datasetsP)
+                {
+                    if (d.Table == null) continue;
+
+                    DataTable filtered = d.Table;
+                    // 仕入先選択
+                    if (selSupplieres.Count > 0)
+                    {
+                        filtered = processor.CustFilter(filtered, d.Table, selSupplieres, "SRSRCD");
+                    }
+
+                    // クラス区分選択
+                    if (selSlPrProducts.Count > 0 && selSlPrProducts.Count < 3)
+                    {
+                        filtered = processor.ProductFileter(filtered, classProduct, selSlPrProducts);
+                    }
+
+                    // 部門選択
+                    if (d.Name == "オーノ" && selBumons.Count > 0)
+                    {
+                        filtered = processor.BumonFilter(filtered, selBumons, "SRBMCD");
+                    }
+
+                    var purchaseList = new List<DataTable>();
+                    if (ohnoPurchase != null) purchaseList.Add(ohnoPurchase);
+                    if (suncarPurchase != null) purchaseList.Add(suncarPurchase);
+                    if (sundusPurchase != null) purchaseList.Add(sundusPurchase);
+
+                    if (d.Name == "オーノ") ohnoPurchase = filtered;
+                    else if (d.Name == "サンミックカーペット") suncarPurchase = filtered;
+                    else if (d.Name == "サンミックダスコン") sundusPurchase = filtered;
+                }
             }
 
-            // DateTimeに変換（yyyyMM → yyyy/MM/01）
-            DateTime start = DateTime.ParseExact(strInput, "yyyyMM", null);
-            DateTime end = DateTime.ParseExact(endInput, "yyyyMM", null);
+            // 売上・仕入データ結合
+            var datasetsSP = new[]
+            {
+                    new { Name = "オーノ", Sales = ohnoSales, Purchase = ohnoPurchase },
+                    new { Name = "サンミックカーペット", Sales = suncarSales, Purchase = suncarPurchase },
+                    new { Name = "サンミックダスコン", Sales = sundusSales, Purchase = sundusPurchase }
+            };
 
-            string sd = start.ToString("yyyyMMdd"); // 月初
-            int lastDay = DateTime.DaysInMonth(end.Year, end.Month);
-            string ed = new DateTime(end.Year, end.Month, lastDay).ToString("yyyyMMdd"); // 月末
+            foreach (var d in datasetsSP)
+            {
+                DataTable result = null;
+                if (d.Sales != null && d.Purchase != null)
+                {
+                    result = processor.MergeSalesPurchase(d.Sales, d.Purchase, false);
+                }
+                else if (d.Sales != null)
+                {
+                    var dt = processor.NormalizeColumnNames(d.Sales, "Sales");
+                    result = processor.SortData(dt);
+                }
+                else if (d.Purchase != null)
+                {
+                    var dt = processor.NormalizeColumnNames(d.Purchase, "Purchase");
+                    result = processor.SortData(dt);
+                }
+                if (result != null)
+                {
+                    if (d.Name == "オーノ") ohnoDt = result;
+                    else if (d.Name == "サンミックカーペット") suncarDt = result;
+                    else if (d.Name == "サンミックダスコン") sundusDt = result;
+                }
+            }
+            var SlPrList = new List<DataTable>();
+            if (ohnoDt != null) SlPrList.Add(ohnoDt);
+            if (suncarDt != null) SlPrList.Add(suncarDt);
+            if (sundusDt != null) SlPrList.Add(sundusDt);
 
-            return (sd, ed);
+            DataTable slprResult = null;
+            if (SlPrList.Count > 0)
+            {
+                slprResult = processor.MergeData(SlPrList.ToArray());
+
+                DataView dv = slprResult.DefaultView;
+                dv.Sort = "伝票No ASC, 枝番 ASC";
+                slprResult = dv.ToTable();
+            }
+
+            //在庫
+            if (selSlCategories.Contains("在庫"))
+            {
+                foreach (var company in selCompanies)
+                {
+                    if (company == "オーノ") (ohnoStockNow,ohnoStockOld) = MakeReadData_IV(startDate, endDate, company, selIvProducts);
+                    else if (company == "サンミックカーペット") (suncarStockNow,ohnoStockOld) = MakeReadData_IV(startDate, endDate, company, selIvProducts);
+                    else if (company == "サンミックダスコン") (sundusStockNow,ohnoStockOld) = MakeReadData_IV(startDate, endDate, company, selIvProducts);
+                }
+
+                var datasetsINow = new[]
+                {
+                    new { Name = "オーノ", Table = ohnoStockNow },
+                    new { Name = "サンミックカーペット", Table = suncarStockNow },
+                    new { Name = "サンミックダスコン", Table = sundusStockNow },
+                };
+                var datasetsIOld = new[]
+                {
+                    new { Name = "オーノ", Table = ohnoStockOld },
+                    new { Name = "サンミックカーペット", Table = suncarStockOld },
+                    new { Name = "サンミックダスコン", Table = sundusStockOld }
+                };
+
+                //==============================================================
+                // 「 Now 」
+                // 1:年月           2:ZHCSNM(クラス名) 3:ZHBMCD(部門CD)     4:ZHHNNM(品名)
+                // 5:ZHHMCD(品名CD) 6:ZHHSCD(品種CD)   7:ZHTZQT(当月残数量) 8:ZHTGZA(当月残金額)
+                //==============================================================
+                // 「 Old 」
+                //  1:年月                2:ZGZKSB(在庫種別)     3:SHCLAS(クラス)      4:ZGBMCD(部門コード)  5:ZGWHCD(倉庫コード)
+                //  6:倉庫名              7:ZGAZCD(預り先コード) 8:預り先名            9:品名               10:ZHHMCD(品名コード)
+                // 11:ZHHSCD(品種コード) 12:ZGCLCD(色コード)    13:ZGTZQT(当月残数量) 14:ZGTGZA(当月残金額) 
+                //==============================================================
+                // ▼▼条件フィルター
+                if (ohnoStockNow != null)
+                {
+                    foreach (var d in datasetsINow)
+                    {
+                        var current = d.Table;
+                        if (current == null) continue;
+                        DataTable filtered = current;
+
+                        // 部門選択
+                        if (d.Name == "オーノ" && selBumons.Count > 0)
+                        {
+                            filtered = processor.BumonFilter(filtered, selBumons, "ZHBMCD");
+                        }
+
+                        if (d.Name == "オーノ") ohnoStockNow = filtered;
+                        else if (d.Name == "サンミックカーペット") suncarStockNow = filtered;
+                        else if (d.Name == "サンミックダスコン") sundusStockNow = filtered;
+                    }
+                }
+
+                if (ohnoStockOld != null)
+                {
+                    foreach (var d in datasetsIOld)
+                    {
+                        var current = d.Table;
+                        if (current == null) continue;
+                        DataTable filtered = current;
+
+                        //クラス区分選択
+                        if (selIvProducts.Count > 0)
+                            filtered = processor.ProductFileter(filtered, selIvProducts);
+
+                        // 在庫種別選択
+                        if (selIvTypes.Count > 0)
+                            filtered = processor.IvTypeFilter(filtered, selIvTypes);
+
+                        // 部門選択
+                        if (d.Name == "オーノ" && selBumons.Count > 0)
+                        {
+                            filtered = processor.BumonFilter(filtered, selBumons, "ZHBMCD");
+                        }
+
+                        if (d.Name == "オーノ") ohnoStockOld = filtered;
+                        else if (d.Name == "サンミックカーペット") suncarStockOld = filtered;
+                        else if (d.Name == "サンミックダスコン") sundusStockOld = filtered;
+                    }
+                }
+            }
+            stockDtNow = MargeAndFormat_StockData(ohnoStockNow, suncarStockNow, sundusStockNow, false);
+            stockDtOld = MargeAndFormat_StockData(ohnoStockOld, suncarStockOld, sundusStockOld, true);
+
+            return(slprResult,stockDtNow, stockDtOld);
         }
-
-        public static bool TryParseYearMonth(TextBox txtBox, out int year, out int month)
+        public static DataTable MargeAndFormat_StockData(DataTable ohnoStock,DataTable suncarStock, DataTable sundusStock, bool newold)
         {
-            year = 0;
-            month = 0;
+            DataTable stockDt = null;
+            var stockList = new List<DataTable>();
+            DataProcessor processor = new DataProcessor();
 
-            string input = txtBox.Text.Trim();
+            if (ohnoStock != null) stockList.Add(ohnoStock);
+            if (suncarStock != null) stockList.Add(suncarStock);
+            if (sundusStock != null) stockList.Add(sundusStock);
 
-            // yyyyMM 6桁の数字かチェック
-            if (!Regex.IsMatch(input, @"^\d{6}$"))
-                return false;
-
-            year = int.Parse(input.Substring(0, 4));
-            month = int.Parse(input.Substring(4, 2));
-
-            // 月が1～12かチェック
-            if (month < 1 || month > 12)
-                return false;
-
-            return true;
+            if (stockList.Count > 0)
+            {
+                stockDt = processor.MergeData(stockList.ToArray());　
+                if (newold)
+                    stockDt = processor.FormatStockTable(stockDt, newold);
+                else
+                    stockDt = processor.FormatStockTable(stockDt);
+            }
+            return stockDt;
         }
+        
+        // =======================================================================
 
-        // 年月から yyyyMMdd の開始日・終了日を取得
-        public static (string startDate, string endDate) GetStartEndDate(int syear, int smonth, int eyear, int emonth)
-        {
-            string startDate = new DateTime(syear, smonth, 1).ToString("yyyyMMdd");
-            int lastDay = DateTime.DaysInMonth(eyear, emonth);
-            string endDate = new DateTime(eyear, emonth, lastDay).ToString("yyyyMMdd");
-            return (startDate, endDate);
-        }
-
+        // =======================================================================
+        // 【シュミレーションメソッド】
+        //  <Form3>
+        //   ◆シュミレーションロックチェック
         public static bool CheckAndLockSimulation(string currentUID, string lockFilePath, string LogFilePath, int lockMinutes)
         {
             string logFilePath = Path.Combine(LogFilePath, $@"{HIZ}\LOG_Simulation.txt");
@@ -286,7 +830,7 @@ namespace あすよん月次帳票
                 // ログ追記
                 AppendLog(logFilePath, $"LOCKED by {currentUID}");
                 return true;
-                
+
             }
             catch (Exception ex)
             {
@@ -294,7 +838,7 @@ namespace あすよん月次帳票
                 return false;
             }
         }
-
+        //   ◆ロックファイル書き込み
         public static void WriteLockFile(string path, string uid)
         {
             File.WriteAllLines(path, new[]
@@ -305,8 +849,8 @@ namespace あすよん月次帳票
                 $"Status=LOCKED"
             });
         }
-
-        public static bool ReleaseSimulationLock(string currentUID, string lockFilePath, string LogFilePath, bool timflg)
+        //   ◆シュミレーションロック解除
+        public static bool ReleaseSimulationLock(string currentUID, string lockFilePath, string LogFilePath)
         {
             string logFilePath = Path.Combine(LogFilePath, $@"{HIZ}\LOG_Simulation.txt");
             string AllLogFilePath = Path.Combine(LogFilePath, $@"{HIZ}\LOG_AllSimulation.txt");
@@ -314,44 +858,28 @@ namespace あすよん月次帳票
             try
             {
                 if (!File.Exists(lockFilePath))
+                    // ロックファイルが存在しないときは何もしない
                     return false;
 
                 var lines = File.ReadAllLines(lockFilePath);
                 string lockUser = lines.FirstOrDefault(l => l.StartsWith("UserID="))?.Split('=')[1];
                 string timeLine = lines.FirstOrDefault(l => l.StartsWith("Time="))?.Split('=')[1];
 
-                // "Time=" の行に書かれている時刻を取得
-                if (!DateTime.TryParse(timeLine, out DateTime lockTime))
-                    lockTime = DateTime.Now;
-
-                // ロックファイル作成（または更新）から10分経過しているか判定
-                bool isExpired = (DateTime.Now - lockTime) >= TimeSpan.FromMinutes(10);
-
-                // 実行者本人のときだけ「解除状態」に変更
-                if (lockUser == currentUID) 
+                if (lockUser == currentUID)
                 {
-                    if (timflg)
-                    {
-                        lines[3] = "Status=RELEASED";
-                        File.WriteAllLines(lockFilePath, lines);
-                    }
+                    // 実行者本人のときはロック解除+ログ記録
+                    lines[3] = "Status=RELEASED";
+                    File.WriteAllLines(lockFilePath, lines);
 
                     AppendLog(logFilePath, $"RELEASED by {currentUID}");
                     if (Application.OpenForms["Form1"] is Form1 form1) form1.AddLog2($"{HIZTIM} 実行者ID:{currentUID} ロック解除");
                     return true;
                 }
-                else if (isExpired)
+                else
                 {
-                    if (timflg)
-                    {
-                        lines[3] = "Status=RELEASED";
-                        File.WriteAllLines(lockFilePath, lines);
-                    }
-
-                    AppendLog(logFilePath, $"RELEASED by {currentUID}");
-                    if (Application.OpenForms["Form1"] is Form1 form1) form1.AddLog2($"{HIZTIM} 実行者ID:{currentUID} 最終実行から10分経過のためロック解除");
+                    // 実行者本人でないときはロック解除せずに、何もしない
+                    return false;
                 }
-                return false; // 他人のロックは解除しない
             }
             catch (Exception ex)
             {
@@ -359,15 +887,7 @@ namespace あすよん月次帳票
                 return false;
             }
         }
-
-        private static void AppendLog(string logFilePath, string message)
-        {
-            Directory.CreateDirectory(Path.GetDirectoryName(logFilePath));
-            File.AppendAllText(logFilePath,
-                $"{DateTime.Now:yyyy/MM/dd HH:mm:ss} | {message} ({Environment.MachineName}){Environment.NewLine}");
-        }
-
-        // 全部門版シュミレーション
+        //   ◆オーノ版シュミレーション(全部門)
         public void SimulateIZAIKO_Ohno(string uid, string pass, string ym)
         {
             PCommOperator.StartConnection("AUT000", PCommWindowState.MIN);
@@ -393,14 +913,19 @@ namespace あすよん月次帳票
             // オーノ預り在庫印刷
             PrintIZAIKO(ym, "6");
             // オーノ預り在庫のライブラリ作成
-            MakeLibrary("OIZAIKOA");
+            MakeLibrary("OIZAIKOAR");
+
+            // オーノ預け在庫印刷
+            PrintIZAIKO(ym, "7");
+            // オーノ預け在庫のライブラリ作成
+            MakeLibrary("OIZAIKOAK");
 
             PCommOperator.SendKeys(f3, 20, 7);
             PCommOperator.SendKeys("24", 20, 7);
             PCommOperator.SignOff();
             PCommOperator.StopConnection();
         }
-        // 部門指定版シュミレーション
+        //   ◆オーノ版シュミレーション(部門別)
         public void SimulateIZAIKO_Ohno(string uid, string pass, string ym, string bumon)
         {
             PCommOperator.StartConnection("AUT000", PCommWindowState.MIN);
@@ -426,15 +951,19 @@ namespace あすよん月次帳票
             // オーノ預り在庫印刷
             PrintIZAIKO(ym, "6", bumon);
             // オーノ預り在庫のライブラリ作成
-            MakeLibrary("OIZAIKOA");
+            MakeLibrary("OIZAIKOAR");
+
+            // オーノ預け在庫印刷
+            PrintIZAIKO(ym, "7", bumon);
+            // オーノ預け在庫のライブラリ作成
+            MakeLibrary("OIZAIKOAK");
 
             PCommOperator.SendKeys(f3, 20, 7);
             PCommOperator.SendKeys("24", 20, 7);
             PCommOperator.SignOff();
             PCommOperator.StopConnection();
         }
-
-
+        //   ◆サンミック版シュミレーション
         public void SimulateIZAIKO_Sun(string uid, string pass, string ym, string file)
         {
             PCommOperator.StartConnection("AUT000", PCommWindowState.MIN);
@@ -452,6 +981,16 @@ namespace あすよん月次帳票
                 PrintIZAIKO(ym, "2");
                 // サンミックタフト半製品在庫のライブラリ作成
                 MakeLibrary(file + "IZAIKOTH");
+
+                // サンミック預り在庫印刷
+                PrintIZAIKO(ym, "6");
+                // サンミック預り在庫のライブラリ作成
+                MakeLibrary(file + "IZAIKOAR");
+
+                // サンミック預け在庫印刷
+                PrintIZAIKO(ym, "7");
+                // サンミック預け在庫のライブラリ作成
+                MakeLibrary(file + "IZAIKOAK");
             }
 
             // サンミックコーティング半製品在庫印刷
@@ -464,15 +1003,19 @@ namespace あすよん月次帳票
             // サンミック製品在庫のライブラリ作成
             MakeLibrary(file + "IZAIKOS");
 
+            // サンミック加工在庫印刷
+            PrintIZAIKO(ym, "5");
+            // サンミック加工在庫のライブラリ作成
+            MakeLibrary(file + "IZAIKOK");
+
             PCommOperator.SendKeys(f3, 20, 7);
             PCommOperator.SendKeys("24", 20, 7);
             PCommOperator.SignOff();
             PCommOperator.StopConnection();
         }
-
+        //   ◆シュミレーション実行(全部門)
         public void Simulate(string uid, string pass)
         {
-            // シュミレーション実行(全部門)
             PCommOperator.SignOn(uid, pass);
             PCommOperator.SendKeys("11" + ctl, 20, 7);  // 月次原価シュミレーションメニュー
             PCommOperator.SendKeys("1" + ctl, 20, 7);  // 月次原価シュミレーション
@@ -481,10 +1024,9 @@ namespace あすよん月次帳票
             PCommOperator.WaitForInputReady(20000);  // 最大20秒待機
             PCommOperator.SendKeys(f3, 7, 35);  // シュミレーション終了
         }
-
+        //   ◆シュミレーション実行(部門別)
         public void Simulate(string uid, string pass, string bumon)
         {
-            // シュミレーション実行(部門指定)
             PCommOperator.SignOn(uid, pass);
             PCommOperator.SendKeys("11" + ctl, 20, 7);  // 月次原価シュミレーションメニュー
             PCommOperator.SendKeys("1" + ctl, 20, 7);  // 月次原価シュミレーション
@@ -493,10 +1035,9 @@ namespace あすよん月次帳票
             PCommOperator.WaitForInputReady(20000);  // 最大20秒待機
             PCommOperator.SendKeys(f3, 7, 35);  // シュミレーション終了
         }
-
+        //   ◆在庫表印刷(全部門)
         public void PrintIZAIKO(string ym, string cls)
         {
-            // 在庫表印刷(全部門)
             PCommOperator.SendKeys("13" + ctl, 20, 7);  // 在庫表(月次原価シュミレーションメニュー)
             PCommOperator.SendKeys(tb, 5, 14);  // 部門選択は変更なしで年月へ移動
             PCommOperator.SendKeys(ym + ent, 8, 14);  // 年月(当月)
@@ -509,10 +1050,9 @@ namespace あすよん月次帳票
             PCommOperator.SendKeys("OHNOQ" + ctl, 10, 40);  // OHNOQへ印刷実行
             PCommOperator.SendKeys(f3, 5, 14);  // 印刷完了後、1つ戻る
         }
-
+        //   ◆// 在庫表印刷(部門別)
         public void PrintIZAIKO(string ym, string cls, string bumon)
         {
-            // 在庫表印刷(部門指定)
             PCommOperator.SendKeys("13" + ctl, 20, 7);  // 在庫表(月次原価シュミレーションメニュー)
             PCommOperator.SendKeys(bumon, 5, 14);  // 部門選択は変更なしで年月へ移動
             PCommOperator.SendKeys(ym + ent, 8, 14);  // 年月(当月)
@@ -523,15 +1063,18 @@ namespace あすよん月次帳票
             PCommOperator.SendKeys(tb, 10, 28);  // 品名選択は変更なしでクラスへ移動
             PCommOperator.SendKeys(cls + ctl + ctl, 12, 14);  // 原材料決定＋実行
             PCommOperator.Wait(3000);  // 3秒待機
+            var txt = PCommOperator.GetText(24, 1, 30).Trim();
+            if(txt.Contains("作表データがありません"))
+            {
+                PCommOperator.SendKeys(f3, 5, 14);  // 印刷完了後、1つ戻る
+                return;
+            }
             PCommOperator.SendKeys("OHNOQ" + ctl, 10, 40);  // OHNOQへ印刷実行
             PCommOperator.SendKeys(f3, 5, 14);  // 印刷完了後、1つ戻る
         }
-
-        
-
+        //   ◆ライブラリー作成
         public void MakeLibrary(string file)
         {
-            // ライブラリー作成
             PCommOperator.SendKeys("WRKQRY" + ctl,20, 7);  // 選択項目またはコマンド(月次原価シュミレーションメニュー)
             PCommOperator.SendKeys("2",5,26);  // QUERY処理,オプション:変更
             PCommOperator.SendKeys(file + tb, 8, 26);  // QUERY定義入力
@@ -545,242 +1088,15 @@ namespace あすよん月次帳票
             PCommOperator.Wait(2000);  // 2秒待機
             PCommOperator.SendKeys(f3, 5, 26);  // QUERY処理終了、1つ戻る
         }
+        // =======================================================================
 
-        public static Dictionary<string, List<mf_HANBAI>> GetHanbai10Year(string lib)
+        // =======================================================================
+        private static void AppendLog(string logFilePath, string message)
         {
-            var result = new Dictionary<string, List<mf_HANBAI>>();
-            var dbManager = (DbManager_Db2)DbManager.CreateDbManager(OhnoSysDBName.Db2);
-
-            var cmdText = $@"
-                        SELECT SL.URBMCD, SL.URHBSC, MIN(PM.TOTHNM), MIN(PM.TOKANM)
-                        FROM {lib}.SLURIMP AS SL
-                        LEFT JOIN SM1MLB01.MMTORIP AS PM ON SL.URHBSC = PM.TOTHCD
-                        WHERE SL.URDNDT >= 20030701
-                        GROUP BY SL.URBMCD, SL.URHBSC
-                        ORDER BY SL.URBMCD, MIN(PM.TOKANM)";
-
-            var dTable = dbManager.GetDataTable(cmdText);
-
-            foreach (DataRow row in dTable.Rows)
-            {
-                string bumon = row["URBMCD"].ToString();
-                string code = row["URHBSC"].ToString();
-                string name = row[2].ToString();
-                string kana = row[3].ToString();
-
-                if (!result.ContainsKey(bumon))
-                    result[bumon] = new List<mf_HANBAI>();
-
-                result[bumon].Add(new mf_HANBAI
-                {
-                    Code = code,
-                    Name = name,
-                    Kana = kana
-                });
-            }
-            return result;
+            Directory.CreateDirectory(Path.GetDirectoryName(logFilePath));
+            File.AppendAllText(logFilePath,
+                $"{DateTime.Now:yyyy/MM/dd HH:mm:ss} | {message} ({Environment.MachineName}){Environment.NewLine}");
         }
-
-        public static List<string> GetCompany(CheckBox chkBxOhno, CheckBox chkBxSundus, CheckBox chkBxSuncar)
-        {
-            var selectedCompanies = new List<string>();
-            if (chkBxOhno.Checked) selectedCompanies.Add("オーノ");
-            if (chkBxSundus.Checked) selectedCompanies.Add("サンミックダスコン");
-            if (chkBxSuncar.Checked) selectedCompanies.Add("サンミックカーペット");
-            return selectedCompanies;
-        }
-        public static (List<string> selectedSlPrProduct, List<string> selectedIvProduct) GetProduct(CheckBox chkBxRawMaterials, CheckBox chkBxSemiFinProducts,
-                                              CheckBox chkBxProduct, CheckBox chkBxProcess, CheckBox chkBxCustody,
-                                              CheckBox chkBxOhno, CheckBox chkBxSundus, CheckBox chkBxSuncar)
-        {
-            // 売上・仕入の製品区分選択
-            var selectedSlPrProduct = new List<string>();
-            if (chkBxRawMaterials.Checked) selectedSlPrProduct.Add("原材料");
-            if (chkBxSemiFinProducts.Checked) selectedSlPrProduct.Add("半製品");
-            if (chkBxProduct.Checked) selectedSlPrProduct.Add("製品");
-            if (chkBxProcess.Checked) selectedSlPrProduct.Add("加工");
-            if (chkBxCustody.Checked) selectedSlPrProduct.Add("預り");
-
-            // 在庫の製品区分選択
-            var selectedIvProduct = new List<string>();
-            if (chkBxRawMaterials.Checked) selectedIvProduct.Add("原材料");
-            if (chkBxSuncar.Checked && chkBxSundus.Checked && chkBxSemiFinProducts.Checked)
-            {
-                selectedIvProduct.Add("タフト半製品");
-                selectedIvProduct.Add("コーティング半製品");
-            }
-            else if (chkBxSuncar.Checked && chkBxSemiFinProducts.Checked)
-            {
-                selectedIvProduct.Add("タフト半製品");
-                selectedIvProduct.Add("コーティング半製品");
-            }
-            else if (chkBxSundus.Checked && chkBxSemiFinProducts.Checked) selectedIvProduct.Add("コーティング半製品");
-            if (chkBxProduct.Checked) selectedIvProduct.Add("製品");
-            if (chkBxProcess.Checked) selectedIvProduct.Add("加工在庫");
-            if (chkBxCustody.Checked) selectedIvProduct.Add("預り在庫");
-            return (selectedSlPrProduct, selectedIvProduct);
-        }
-
-        public static List<string> GetSalseProduct(CheckBox chkBxSl, CheckBox chkBxPr, CheckBox chkBxIv)
-        {
-            var selectedSlProduct = new List<string>();
-            if (chkBxSl.Checked) selectedSlProduct.Add("売上");
-            if (chkBxPr.Checked) selectedSlProduct.Add("仕入");
-            if (chkBxIv.Checked) selectedSlProduct.Add("在庫");
-            return selectedSlProduct;
-        }
-
-        // 部門リスト用（空白行ガード付き）
-        public static List<string> GetSelectedBumons(ListBox listBxB)
-        {
-            return listBxB.Items
-                           .Cast<string>()
-                           .Where(x => !string.IsNullOrWhiteSpace(x)) // 空白行を除外
-                           .Select(x => x.Split(' ')[0])  // "コード 名前" → スペースで分割して最初の要素をコードとして取得
-                           .ToList();
-        }
-
-        public static List<string> GetSallerOrSupplier(ListBox listbx)
-        {
-            return listbx.Items
-                        .Cast<string>()
-                        .Where(x => !string.IsNullOrWhiteSpace(x)) // 空白行を除外
-                        .Select(x => x.Split(' ')[0])  // "コード 名前" → スペースで分割して最初の要素をコードとして取得
-                        .ToList();
-        }
-
-
-        public static void SelectCompany_Bumon(CheckBox chkBxOhno, CheckBox chkBxSundus, CheckBox chkBxSuncar, ListBox listBxBumon)
-        {
-            listBxBumon.Items.Clear();
-
-            // 会社選択確認
-            var selctedComp = FormActionMethod.GetCompany(chkBxOhno, chkBxSundus, chkBxSuncar);
-
-            // 先頭に空白行を追加
-            listBxBumon.Items.Add(string.Empty);
-
-            // 選択された会社の部門をlistBxBumonに追加
-            foreach (var bumon in JsonLoader.GetBUMONs(selctedComp.ToArray()))
-            {
-                listBxBumon.Items.Add($"{bumon.Code}:{bumon.Name}");
-            }
-            listBxBumon.SelectedIndex = 0; // 空白行を選択状態にする
-        }
-
-        public static void ShowBumon(Form form, ListBox listBxBumon, ListBox listBxSaller, ListBox listBxSupplier,
-                                     CheckBox chkBxOhno, CheckBox chkBxSundus, CheckBox chkBxSuncar)
-        {
-            // Invokeで後回しにしなくてOK（選択状態はすでに反映済み）
-            var selBumon = listBxBumon.SelectedItems
-                .Cast<string>()
-                .Select(item => item.Split(':')[0])
-                .ToList();
-
-            Bumon_selectedChanged(selBumon, listBxSaller, listBxSupplier, chkBxOhno, chkBxSundus, chkBxSuncar);
-        }
-
-        private static bool isUpdating = false;
-        private static void Bumon_selectedChanged(List<string> selBumon, ListBox listBxSaller, ListBox listBxSupplier,
-                                                 CheckBox chkBxOhno, CheckBox chkBxSundus, CheckBox chkBxSuncar)
-        {
-            if (isUpdating) return; // 再入防止
-            isUpdating = true;
-
-            try
-            {
-                // チェックされている部門がない場合はクリアして終了
-                if (selBumon.Count == 0)
-            {
-                listBxSaller.DataSource = null;
-                listBxSupplier.DataSource = null;
-                return;
-            }
-
-            // 会社選択確認
-            var selctedComp = FormActionMethod.GetCompany(chkBxOhno, chkBxSundus, chkBxSuncar);
-
-            // 部門ごとに販売先リストを取得
-            var sallerList = new List<mf_HANBAI>();
-            var supplierList = new List<mf_SHIIRE>();
-
-            foreach (var comp in selctedComp)
-            {
-                sallerList.AddRange(JsonLoader.GetMf_HANBAIs(comp, selBumon));
-                supplierList.AddRange(JsonLoader.GetMf_SHIIREs(comp, selBumon));
-            }
-
-
-
-            // **既存アイテムをクリアしてから追加**
-            listBxSaller.Items.Clear();
-            listBxSupplier.Items.Clear();
-
-            // ---販売先を表示---
-            // 先頭に空白行を追加
-            listBxSaller.Items.Add(string.Empty);
-            foreach (var s in sallerList.OrderBy(x => x.Code))
-            {
-                listBxSaller.Items.Add($"[{s.Code}] {s.Name}");
-            }
-
-            // 仕入先を表示
-            // 先頭に空白行を追加
-            listBxSupplier.Items.Add(string.Empty);
-            foreach (var s in supplierList.OrderBy(x => x.Code))
-            {
-                listBxSupplier.Items.Add($"[{s.Code}] {s.Name}");
-            }
-            // 空白行を選択状態にする
-            listBxSaller.SelectedIndex = 0; 
-            listBxSupplier.SelectedIndex = 0;
-            }
-            finally
-            {
-                isUpdating = false; // 再入防止フラグ解除
-            }
-        }
-
-        public static Dictionary<string, List<mf_SHIIRE>> GetShiire10Year(string lib)
-        {
-            var result = new Dictionary<string, List<mf_SHIIRE>>();
-            var dbManager = (DbManager_Db2)DbManager.CreateDbManager(OhnoSysDBName.Db2);
-            var cmdText = $@"
-                        SELECT PR.SRBMCD, PR.SRSRCD, MIN(PM.TOTHNM), MIN(PM.TOKANM)
-                        FROM {lib}.PRSREMP AS PR
-                        LEFT JOIN SM1MLB01.MMTORIP AS PM ON PR.SRSRCD = PM.TOTHCD
-                        WHERE PR.SRDNDT >= 20030701
-                        GROUP BY PR.SRBMCD, PR.SRSRCD
-                        ORDER BY PR.SRBMCD, MIN(PM.TOKANM)";
-
-            var dTable = dbManager.GetDataTable(cmdText);
-
-            foreach (DataRow row in dTable.Rows)
-            {
-                string bumon = row["SRBMCD"].ToString();
-                string code = row["SRSRCD"].ToString();
-                string name = row[2].ToString();
-                string kana = row[3].ToString();
-
-                if (!result.ContainsKey(bumon))
-                    result[bumon] = new List<mf_SHIIRE>();
-
-                result[bumon].Add(new mf_SHIIRE
-                {
-                    Code = code,
-                    Name = name,
-                    Kana = kana
-                });
-            }
-            return result;
-        }
-
-        public static void SaveToJson<T>(string filePath, T data)
-        {
-            var json = JsonSerializer.Serialize(data, new JsonSerializerOptions { WriteIndented = true });
-            File.WriteAllText(filePath, json);
-        }
-
         /// <summary>
         /// 各FormのlistBxSituationとメモリ上にログ追加
         /// </summary>
@@ -803,8 +1119,6 @@ namespace あすよん月次帳票
                 listBxSituation.Items.Add(logMessage);
             }
         }
-
-
         /// <summary>
         /// 各Formを表示するたびに既存ログもlistBxSituationに表示
         /// </summary>
@@ -815,6 +1129,124 @@ namespace あすよん月次帳票
             {
                 listBxSituation.Items.Add(log);
             }
+        }
+        // =======================================================================
+
+
+        // 以下のメソッドは不要なため後ほど削除
+        public static void ShowBumon(Form form, ListBox listBxBumon, ListBox listBxSaller, ListBox listBxSupplier,
+                                     CheckBox chkBxOhno, CheckBox chkBxSundus, CheckBox chkBxSuncar)
+        {
+            // Invokeで後回しにしなくてOK（選択状態はすでに反映済み）
+            var selBumon = listBxBumon.SelectedItems
+                .Cast<string>()
+                .Select(item => item.Split(':')[0])
+                .ToList();
+
+            Bumon_selectedChanged(selBumon, listBxSaller, listBxSupplier, chkBxOhno, chkBxSundus, chkBxSuncar);
+        }
+        public static void SelectCompany_Bumon(CheckBox chkBxOhno, CheckBox chkBxSundus, CheckBox chkBxSuncar, ListBox listBxBumon)
+        {
+            listBxBumon.Items.Clear();
+
+            // 会社選択確認
+            var selctedComp = FormActionMethod.GetCompany(chkBxOhno, chkBxSundus, chkBxSuncar);
+
+            // 先頭に空白行を追加
+            listBxBumon.Items.Add(string.Empty);
+
+            // 選択された会社の部門をlistBxBumonに追加
+            foreach (var bumon in JsonLoader.GetBUMONs(selctedComp.ToArray()))
+            {
+                listBxBumon.Items.Add($"{bumon.Code}:{bumon.Name}");
+            }
+            listBxBumon.SelectedIndex = 0; // 空白行を選択状態にする
+        }
+        private static bool isUpdating = false;
+        private static void Bumon_selectedChanged(List<string> selBumon, ListBox listBxSaller, ListBox listBxSupplier,
+                                                 CheckBox chkBxOhno, CheckBox chkBxSundus, CheckBox chkBxSuncar)
+        {
+            if (isUpdating) return; // 再入防止
+            isUpdating = true;
+
+            try
+            {
+                // チェックされている部門がない場合はクリアして終了
+                if (selBumon.Count == 0)
+                {
+                    listBxSaller.DataSource = null;
+                    listBxSupplier.DataSource = null;
+                    return;
+                }
+
+                // 会社選択確認
+                var selctedComp = FormActionMethod.GetCompany(chkBxOhno, chkBxSundus, chkBxSuncar);
+
+                // 部門ごとに販売先リストを取得
+                var sallerList = new List<mf_HANBAI>();
+                var supplierList = new List<mf_SHIIRE>();
+
+                foreach (var comp in selctedComp)
+                {
+                    sallerList.AddRange(JsonLoader.GetMf_HANBAIs(comp, selBumon));
+                    supplierList.AddRange(JsonLoader.GetMf_SHIIREs(comp, selBumon));
+                }
+
+                // **既存アイテムをクリアしてから追加**
+                listBxSaller.Items.Clear();
+                listBxSupplier.Items.Clear();
+
+                // ---販売先を表示---
+                // 先頭に空白行を追加
+                listBxSaller.Items.Add(string.Empty);
+                foreach (var s in sallerList.OrderBy(x => x.Code))
+                {
+                    listBxSaller.Items.Add($"[{s.Code}] {s.Name}");
+                }
+
+                // 仕入先を表示
+                // 先頭に空白行を追加
+                listBxSupplier.Items.Add(string.Empty);
+                foreach (var s in supplierList.OrderBy(x => x.Code))
+                {
+                    listBxSupplier.Items.Add($"[{s.Code}] {s.Name}");
+                }
+                // 空白行を選択状態にする
+                listBxSaller.SelectedIndex = 0;
+                listBxSupplier.SelectedIndex = 0;
+            }
+            finally
+            {
+                isUpdating = false; // 再入防止フラグ解除
+            }
+        }
+        public (string sd, string ed) UpdateStartEndDate(TextBox txtBxStrYearMonth, TextBox txtBxEndYearMonth)
+        {
+            string strInput = txtBxStrYearMonth.Text.Trim();
+            string endInput = txtBxEndYearMonth.Text.Trim();
+
+            // yyyyMM形式のチェック
+            if (!Regex.IsMatch(strInput, @"^\d{6}$"))
+            {
+                MessageBox.Show("開始年月の形式が不正です。YYYYMM 形式で入力してください。", "警告", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                return (null, null);
+            }
+
+            if (!Regex.IsMatch(endInput, @"^\d{6}$"))
+            {
+                MessageBox.Show("終了年月の形式が不正です。YYYYMM 形式で入力してください。", "警告", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                return (null, null);
+            }
+
+            // DateTimeに変換（yyyyMM → yyyy/MM/01）
+            DateTime start = DateTime.ParseExact(strInput, "yyyyMM", null);
+            DateTime end = DateTime.ParseExact(endInput, "yyyyMM", null);
+
+            string sd = start.ToString("yyyyMMdd"); // 月初
+            int lastDay = DateTime.DaysInMonth(end.Year, end.Month);
+            string ed = new DateTime(end.Year, end.Month, lastDay).ToString("yyyyMMdd"); // 月末
+
+            return (sd, ed);
         }
     }
 }

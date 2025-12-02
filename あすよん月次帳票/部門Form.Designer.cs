@@ -28,6 +28,7 @@
         /// </summary>
         private void InitializeComponent()
         {
+            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(部門Form));
             this.treeView部門 = new System.Windows.Forms.TreeView();
             this.label1 = new System.Windows.Forms.Label();
             this.listBx部門 = new System.Windows.Forms.ListBox();
@@ -122,6 +123,7 @@
             this.Controls.Add(this.listBx部門);
             this.Controls.Add(this.label1);
             this.Controls.Add(this.treeView部門);
+            this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
             this.Name = "部門Form";
             this.Text = "部門Form";
             this.ResumeLayout(false);

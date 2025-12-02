@@ -11,6 +11,176 @@ namespace あすよん月次帳票
 {
     internal class DataSummarizeMethod
     {
+        
+
+        public static DataTable SumData(DataTable data, List<string> groupKeys, string[] sortcols, string type, string ptn)
+        {
+            if (data == null || data.Rows.Count == 0) return new DataTable();
+
+            // 伝票日付→年月(売上・仕入)
+            if(data.Columns.Contains("伝票日付") && !data.Columns.Contains("年月"))
+            {
+                data.Columns.Add("年月", typeof(string));
+                foreach (DataRow r in data.Rows)
+                {
+                    string dd = r["伝票日付"].ToString();
+                    r["年月"] = dd.Substring(0, 6);
+                }
+            }
+
+            // 結果用テーブルの作成
+            DataTable result = new DataTable();
+
+            // 結果テーブルの列作成(元テーブル列をコピー)
+            foreach (DataColumn col in data.Columns)
+                result.Columns.Add(col.ColumnName, col.DataType);
+            //==============================================================
+            // 売上・仕入
+            //  1:伝票No  2:枝番    3:SbSys区分 4:取引区分  5:伝票日付
+            //  6:部門CD  7:クラス  8:取引先CD  9:取引先名 10:品部門CD
+            // 11:品名CD 12:品種CD 13:色CD     14:品名     15:品種名
+            // 16:色名   17:数量   18:単位CD   19:単価     20:金額
+            //==============================================================
+            // 在庫
+            //  1:年月    2:部門CD   3:在庫種別 4:クラス 5:倉庫CD
+            //  6:倉庫名  7:預り先CD 8:預り先名 9:品名  10:品目CD
+            // 11:残数量 12:残金額 
+            //==============================================================
+
+            //  SUM 対象となる列を明示的に定義
+            var allowedSumColumns = new List<string>
+            {
+                "数量", "金額", "残数量", "残金額", "当月残数量", "当月残金額"
+            };
+            var numericColumns = data.Columns
+                    .Cast<DataColumn>()
+                    .Where(c => allowedSumColumns.Contains(c.ColumnName))
+                    .Select(c => c.ColumnName)
+                    .ToList();
+
+            // GroupByキーでグループ化
+            IEnumerable<IGrouping<string, DataRow>> grouped;
+            if (groupKeys.Count > 0)
+                grouped = data.AsEnumerable()
+                    .GroupBy(row => string.Join("§", groupKeys.Select(k => row[k]?.ToString() ?? "")));
+            else
+                grouped = new List<IGrouping<string, DataRow>> { new GroupingAllRows(data) };
+
+            // 行を生成
+            foreach (var g in grouped)
+            {
+                DataRow newRow = result.NewRow();
+
+                // キー列セット
+                if (groupKeys.Count > 0)
+                {
+                    var keys = g.Key.Split('§');
+                    for (int i = 0; i < groupKeys.Count; i++)
+                    {
+                        newRow[groupKeys[i]] = keys[i];
+                    }
+                }
+
+                // 数値列をSUM
+                foreach (var numCol in numericColumns)
+                    newRow[numCol] = g.Sum(r => Convert.ToDecimal(r[numCol]));
+
+                // その他列は先頭行の値をそのままセット(文字列など)
+                foreach (DataColumn col in data.Columns)
+                {
+                    if (!groupKeys.Contains(col.ColumnName) && !numericColumns.Contains(col.ColumnName))
+                        newRow[col.ColumnName] = g.First()[col.ColumnName];
+                }
+                result.Rows.Add(newRow);
+            }
+            switch (type)
+            {
+                case "売仕":
+                    if (ptn == "1")
+                    {
+                        // 不要列を削除
+                        //==============================================================
+                        //  1:年月     2:SbSys区分 3:部門CD  4:クラス 5:取引先CD 6:取引先名
+                        //  7:品部門CD 8:品名CD    9:品種CD 10:色CD  11:品名    12:品種名
+                        // 13:色名    14:数量     15:単位CD 16:単価  17:金額
+                        //==============================================================
+                        if (result.Columns.Contains("伝票No")) result.Columns.Remove("伝票No");
+                        if (result.Columns.Contains("枝番")) result.Columns.Remove("枝番");
+                        if (result.Columns.Contains("取引区分")) result.Columns.Remove("取引区分");
+                        if (result.Columns.Contains("伝票日付")) result.Columns.Remove("伝票日付");
+                        // 年月列を先頭へ移動
+                        result.Columns["年月"].SetOrdinal(0);
+                    }
+                    else if (ptn == "2")
+                    {
+                        // 不要列を削除
+                        //==============================================================
+                        //  1:年月 2:SbSys区分 3:部門CD 4:クラス 5:取引先CD 6:取引先名
+                        //  7:数量 8:金額
+                        //==============================================================
+                        if (result.Columns.Contains("伝票No")) result.Columns.Remove("伝票No");
+                        if (result.Columns.Contains("枝番")) result.Columns.Remove("枝番");
+                        if (result.Columns.Contains("取引区分")) result.Columns.Remove("取引区分");
+                        if (result.Columns.Contains("伝票日付")) result.Columns.Remove("伝票日付");
+                        if (result.Columns.Contains("品部門CD")) result.Columns.Remove("品部門CD");
+                        if (result.Columns.Contains("品名CD")) result.Columns.Remove("品名CD");
+                        if (result.Columns.Contains("品種CD")) result.Columns.Remove("品種CD");
+                        if (result.Columns.Contains("色CD")) result.Columns.Remove("色CD");
+                        if (result.Columns.Contains("品名")) result.Columns.Remove("品名");
+                        if (result.Columns.Contains("品種名")) result.Columns.Remove("品種名");
+                        if (result.Columns.Contains("色名")) result.Columns.Remove("色名");
+                        if (result.Columns.Contains("単位CD")) result.Columns.Remove("単位CD");
+                        if (result.Columns.Contains("単価")) result.Columns.Remove("単価");
+                        // 年月列を先頭へ移動
+                        result.Columns["年月"].SetOrdinal(0);
+                    }
+                    else if (ptn == "3")
+                    {
+                        // 不要列を削除
+                        //==============================================================
+                        //  1:年月 2:SbSys区分 3:部門CD 4:クラス 5:数量 6:金額
+                        //==============================================================
+                        if (result.Columns.Contains("伝票No")) result.Columns.Remove("伝票No");
+                        if (result.Columns.Contains("枝番")) result.Columns.Remove("枝番");
+                        if (result.Columns.Contains("取引区分")) result.Columns.Remove("取引区分");
+                        if (result.Columns.Contains("伝票日付")) result.Columns.Remove("伝票日付");
+                        if (result.Columns.Contains("取引先CD")) result.Columns.Remove("取引先CD");
+                        if (result.Columns.Contains("伝票日付")) result.Columns.Remove("伝票日付");
+                        if (result.Columns.Contains("取引先名")) result.Columns.Remove("取引先名");
+                        if (result.Columns.Contains("品名CD")) result.Columns.Remove("品名CD");
+                        if (result.Columns.Contains("品種CD")) result.Columns.Remove("品種CD");
+                        if (result.Columns.Contains("色CD")) result.Columns.Remove("色CD");
+                        if (result.Columns.Contains("品名")) result.Columns.Remove("品名");
+                        if (result.Columns.Contains("品種名")) result.Columns.Remove("品種名");
+                        if (result.Columns.Contains("色名")) result.Columns.Remove("色名");
+                        if (result.Columns.Contains("単位CD")) result.Columns.Remove("単位CD");
+                        if (result.Columns.Contains("単価")) result.Columns.Remove("単価");
+                        // 年月列を先頭へ移動
+                        result.Columns["年月"].SetOrdinal(0);
+                    }
+                    break;
+                case "在庫":
+                    if (ptn == "1")
+                    {
+                        // 不要列を削除
+                        //==============================================================
+                        // 1:年月 2:部門CD 3:在庫種別 4:クラス 5:品名 6:品目CD 7:残数量 8:残金額 
+                        //==============================================================
+                        if (result.Columns.Contains("倉庫CD")) result.Columns.Remove("倉庫CD");
+                        if (result.Columns.Contains("倉庫名")) result.Columns.Remove("倉庫名");
+                        if (result.Columns.Contains("預り先CD")) result.Columns.Remove("預り先CD");
+                        if (result.Columns.Contains("預り先名")) result.Columns.Remove("預り先名");
+                    }
+                    break;
+            }
+            
+                DataProcessor processor = new DataProcessor();
+            result = processor.SortData(result, sortcols);
+
+            return result;
+        }
+        //====================================================================
+        // ◆社長用集計
         public static DataTable SummarizeSalesPurchase(DataTable dt)
         {
             DataTable summary = new DataTable();
@@ -34,7 +204,7 @@ namespace あすよん月次帳票
 
             var grouped = dt.AsEnumerable().GroupBy(r => new
             {
-                YearMonth = r["伝票日付"]?.ToString()?.Length >=6
+                YearMonth = r["伝票日付"]?.ToString()?.Length >= 6
                             ? r["伝票日付"].ToString().Substring(0, 6)
                             : "",
                 ClassName = r["クラス名"]?.ToString()?.Trim(),
@@ -82,7 +252,7 @@ namespace あすよん月次帳票
                 {
                     DataRow newRow = mergedSummary.NewRow();
 
-                    if(dt.Columns.Contains("年月"))
+                    if (dt.Columns.Contains("年月"))
                         newRow["年月"] = row["年月"]?.ToString()?.Trim();
                     else
                         newRow["年月"] = "";
@@ -115,7 +285,7 @@ namespace あすよん月次帳票
 
             if (mergedSummary == null || mergedSummary.Rows.Count == 0) return summary;
 
-            Func<string, string,string> mapCategory = (className, transType) =>
+            Func<string, string, string> mapCategory = (className, transType) =>
             {
                 string cls = (className ?? "").Trim();
                 string type = (transType ?? "").Trim();
@@ -252,31 +422,15 @@ namespace あすよん月次帳票
 
             return result;
         }
-
-        public static DataTable SumOldStockData(DataTable IVdata)
-        {
-            var grouped = IVdata.AsEnumerable()
-                    .GroupBy(r => new
-                    {
-                        ClassName = r.Field<string>("ZHCSNM"),
-                        Dept = r.Field<string>("ZHBMCD"),
-                        ProductName = r.Field<string>("ZHHNNM"), 
-                        ProductCode = r.Field<string>("ZHHMCD"), // 品名CD
-                        VarietyCode = r.Field<string>("ZHHSCD")  // 品種CD
-                    })
-                    .Select(g => {
-                        var row = IVdata.NewRow();
-                        row["ZHCSNM"] = g.Key.ClassName;
-                        row["ZHBMCD"] = g.Key.Dept;
-                        row["ZHHNNM"] = g.Key.ProductName;
-                        row["ZHHMCD"] = g.Key.ProductCode;
-                        row["ZHHSCD"] = g.Key.VarietyCode;
-                        row["ZHTZQT"] = g.Sum(x => Convert.ToDouble(x["ZHTZQT"]));
-                        row["ZHTGZA"] = g.Sum(x => Convert.ToInt32(x["ZHTGZA"]));
-                        return row;
-                    }).CopyToDataTable();
-
-            return grouped;
-        }
+        //==============================================================================
+    }
+    // 全行を1グループとして返すヘルパークラス (NONE 用)
+    internal class GroupingAllRows : IGrouping<string, DataRow>
+    {
+        private IEnumerable<DataRow> _rows;
+        public GroupingAllRows(DataTable dt) => _rows = dt.AsEnumerable();
+        public string Key => "";
+        public IEnumerator<DataRow> GetEnumerator() => _rows.GetEnumerator();
+        System.Collections.IEnumerator System.Collections.IEnumerable.GetEnumerator() => _rows.GetEnumerator();
     }
 }

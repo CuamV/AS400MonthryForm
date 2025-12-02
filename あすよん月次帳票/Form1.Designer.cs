@@ -19,11 +19,14 @@ namespace あすよん月次帳票
             this.btnEnd = new System.Windows.Forms.Button();
             this.lnkLbSimulate = new System.Windows.Forms.LinkLabel();
             this.lnkLbStandard = new System.Windows.Forms.LinkLabel();
-            this.lbMenu = new System.Windows.Forms.Label();
             this.lnkLbExport = new System.Windows.Forms.LinkLabel();
             this.lnkLbDisplay = new System.Windows.Forms.LinkLabel();
             this.lnkLbMaster = new System.Windows.Forms.LinkLabel();
-            this.timerReleaseLock = new System.Windows.Forms.Timer(this.components);
+            this.timrReleaseLock = new System.Windows.Forms.Timer(this.components);
+            this.grpBxMenu = new System.Windows.Forms.GroupBox();
+            this.lbMenu = new System.Windows.Forms.Label();
+            this.timrLogRenewal = new System.Windows.Forms.Timer(this.components);
+            this.grpBxMenu.SuspendLayout();
             this.SuspendLayout();
             // 
             // lbSituation
@@ -60,10 +63,10 @@ namespace あすよん月次帳票
             // lnkLbSimulate
             // 
             this.lnkLbSimulate.AutoSize = true;
-            this.lnkLbSimulate.Font = new System.Drawing.Font("Meiryo UI", 11.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(128)));
-            this.lnkLbSimulate.Location = new System.Drawing.Point(244, 313);
+            this.lnkLbSimulate.Font = new System.Drawing.Font("Meiryo UI", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(128)));
+            this.lnkLbSimulate.Location = new System.Drawing.Point(266, 26);
             this.lnkLbSimulate.Name = "lnkLbSimulate";
-            this.lnkLbSimulate.Size = new System.Drawing.Size(114, 19);
+            this.lnkLbSimulate.Size = new System.Drawing.Size(122, 20);
             this.lnkLbSimulate.TabIndex = 69;
             this.lnkLbSimulate.TabStop = true;
             this.lnkLbSimulate.Text = "● シュミレーション";
@@ -72,44 +75,29 @@ namespace あすよん月次帳票
             // lnkLbStandard
             // 
             this.lnkLbStandard.AutoSize = true;
-            this.lnkLbStandard.Font = new System.Drawing.Font("Meiryo UI", 11.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(128)));
-            this.lnkLbStandard.Location = new System.Drawing.Point(161, 362);
+            this.lnkLbStandard.Font = new System.Drawing.Font("Meiryo UI", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(128)));
+            this.lnkLbStandard.Location = new System.Drawing.Point(81, 76);
             this.lnkLbStandard.Name = "lnkLbStandard";
-            this.lnkLbStandard.Size = new System.Drawing.Size(89, 19);
+            this.lnkLbStandard.Size = new System.Drawing.Size(94, 20);
             this.lnkLbStandard.TabIndex = 70;
             this.lnkLbStandard.TabStop = true;
             this.lnkLbStandard.Text = "● 定型帳票";
             this.lnkLbStandard.LinkClicked += new System.Windows.Forms.LinkLabelLinkClickedEventHandler(this.lnkLbStandard_LinkClicked);
             // 
-            // lbMenu
-            // 
-            this.lbMenu.AutoSize = true;
-            this.lbMenu.Font = new System.Drawing.Font("Meiryo UI", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(128)));
-            this.lbMenu.Location = new System.Drawing.Point(29, 274);
-            this.lbMenu.Name = "lbMenu";
-            this.lbMenu.Size = new System.Drawing.Size(72, 20);
-            this.lbMenu.TabIndex = 71;
-            this.lbMenu.Text = "【メニュー】";
-            // 
             // lnkLbExport
             // 
-            this.lnkLbExport.AutoSize = true;
-            this.lnkLbExport.Font = new System.Drawing.Font("Meiryo UI", 11.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(128)));
-            this.lnkLbExport.Location = new System.Drawing.Point(424, 313);
+            this.lnkLbExport.Location = new System.Drawing.Point(0, 0);
             this.lnkLbExport.Name = "lnkLbExport";
-            this.lnkLbExport.Size = new System.Drawing.Size(96, 19);
-            this.lnkLbExport.TabIndex = 72;
-            this.lnkLbExport.TabStop = true;
-            this.lnkLbExport.Text = "● エクスポート";
-            this.lnkLbExport.LinkClicked += new System.Windows.Forms.LinkLabelLinkClickedEventHandler(this.lnkLbExport_LinkClicked);
+            this.lnkLbExport.Size = new System.Drawing.Size(100, 23);
+            this.lnkLbExport.TabIndex = 75;
             // 
             // lnkLbDisplay
             // 
             this.lnkLbDisplay.AutoSize = true;
-            this.lnkLbDisplay.Font = new System.Drawing.Font("Meiryo UI", 11.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(128)));
-            this.lnkLbDisplay.Location = new System.Drawing.Point(317, 362);
+            this.lnkLbDisplay.Font = new System.Drawing.Font("Meiryo UI", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(128)));
+            this.lnkLbDisplay.Location = new System.Drawing.Point(266, 76);
             this.lnkLbDisplay.Name = "lnkLbDisplay";
-            this.lnkLbDisplay.Size = new System.Drawing.Size(93, 19);
+            this.lnkLbDisplay.Size = new System.Drawing.Size(99, 20);
             this.lnkLbDisplay.TabIndex = 73;
             this.lnkLbDisplay.TabStop = true;
             this.lnkLbDisplay.Text = "● データ抽出";
@@ -118,28 +106,51 @@ namespace あすよん月次帳票
             // lnkLbMaster
             // 
             this.lnkLbMaster.AutoSize = true;
-            this.lnkLbMaster.Font = new System.Drawing.Font("Meiryo UI", 11.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(128)));
-            this.lnkLbMaster.Location = new System.Drawing.Point(92, 313);
+            this.lnkLbMaster.Font = new System.Drawing.Font("Meiryo UI", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(128)));
+            this.lnkLbMaster.Location = new System.Drawing.Point(81, 26);
             this.lnkLbMaster.Name = "lnkLbMaster";
-            this.lnkLbMaster.Size = new System.Drawing.Size(91, 19);
+            this.lnkLbMaster.Size = new System.Drawing.Size(97, 20);
             this.lnkLbMaster.TabIndex = 74;
             this.lnkLbMaster.TabStop = true;
             this.lnkLbMaster.Text = "● マスタ更新";
             this.lnkLbMaster.LinkClicked += new System.Windows.Forms.LinkLabelLinkClickedEventHandler(this.lnkLbMaster_LinkClicked);
             // 
-            // timerReleaseLock
+            // timrReleaseLock
             // 
-            this.timerReleaseLock.Interval = 60000;
+            this.timrReleaseLock.Interval = 60000;
+            // 
+            // grpBxMenu
+            // 
+            this.grpBxMenu.Controls.Add(this.lnkLbMaster);
+            this.grpBxMenu.Controls.Add(this.lnkLbDisplay);
+            this.grpBxMenu.Controls.Add(this.lnkLbSimulate);
+            this.grpBxMenu.Controls.Add(this.lnkLbStandard);
+            this.grpBxMenu.Location = new System.Drawing.Point(83, 284);
+            this.grpBxMenu.Name = "grpBxMenu";
+            this.grpBxMenu.Size = new System.Drawing.Size(461, 118);
+            this.grpBxMenu.TabIndex = 76;
+            this.grpBxMenu.TabStop = false;
+            // 
+            // lbMenu
+            // 
+            this.lbMenu.AutoSize = true;
+            this.lbMenu.Font = new System.Drawing.Font("Meiryo UI", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(128)));
+            this.lbMenu.Location = new System.Drawing.Point(89, 272);
+            this.lbMenu.Name = "lbMenu";
+            this.lbMenu.Size = new System.Drawing.Size(72, 20);
+            this.lbMenu.TabIndex = 77;
+            this.lbMenu.Text = "【メニュー】";
+            // 
+            // timrLogRenewal
+            // 
+            this.timrLogRenewal.Interval = 15000;
             // 
             // Form1
             // 
             this.ClientSize = new System.Drawing.Size(629, 468);
-            this.Controls.Add(this.lnkLbMaster);
-            this.Controls.Add(this.lnkLbDisplay);
-            this.Controls.Add(this.lnkLbExport);
             this.Controls.Add(this.lbMenu);
-            this.Controls.Add(this.lnkLbStandard);
-            this.Controls.Add(this.lnkLbSimulate);
+            this.Controls.Add(this.grpBxMenu);
+            this.Controls.Add(this.lnkLbExport);
             this.Controls.Add(this.btnEnd);
             this.Controls.Add(this.listBxSituation);
             this.Controls.Add(this.lbSituation);
@@ -149,7 +160,10 @@ namespace あすよん月次帳票
             this.Opacity = 0.95D;
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
             this.Text = "あすよん月次帳票";
+            this.Activated += new System.EventHandler(this.timerReleaseLock_Tick);
             this.Load += new System.EventHandler(this.Form1_Load);
+            this.grpBxMenu.ResumeLayout(false);
+            this.grpBxMenu.PerformLayout();
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -340,11 +354,13 @@ namespace あすよん月次帳票
         private Button btnEnd;
         private LinkLabel lnkLbSimulate;
         private LinkLabel lnkLbStandard;
-        private Label lbMenu;
         private LinkLabel lnkLbExport;
         private LinkLabel lnkLbDisplay;
         private LinkLabel lnkLbMaster;
-        private Timer timerReleaseLock;
+        private Timer timrReleaseLock;
         private System.ComponentModel.IContainer components;
+        private GroupBox grpBxMenu;
+        private Label lbMenu;
+        private Timer timrLogRenewal;
     }
 }

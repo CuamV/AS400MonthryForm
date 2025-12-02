@@ -192,9 +192,24 @@ namespace あすよん月次帳票
 
         private void btn削除_Click(object sender, EventArgs e)
         {
-            var selectedItems = listBx部門.SelectedItems.Cast<string>().ToList();
+            var selectedItems = listBx部門.SelectedItems.Cast<Department>().ToList();
             foreach (var item in selectedItems)
+            {
                 listBx部門.Items.Remove(item);
+
+                // TreeView 上のチェックも外す
+                foreach (TreeNode compNode in treeView部門.Nodes)
+                {
+                    if (compNode.Tag.ToString() != item.Company) continue;
+                    { 
+                        foreach (TreeNode itemNode in compNode.Nodes)
+                        {
+                            if (itemNode.Tag.ToString() == item.Code)
+                                itemNode.Checked = false;
+                        }
+                    }
+                }
+            }
         }
 
         private void btnOK_Click(object sender, EventArgs e)

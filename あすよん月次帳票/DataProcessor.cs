@@ -28,8 +28,9 @@ namespace あすよん月次帳票
             if (fmFlg) 
             {
                 string[] requiredColumns = {
-                "伝票日付", "部門CD", "取引先CD", "取引先名", "クラス名", "品名部門CD",
-                "品名CD", "品名", "品種CD", "品種名", "取引区分", "サブシステム区分",
+                "伝票No", "枝番", "サブシステム区分", "取引区分", 
+                "伝票日付","部門CD", "クラス名", "取引先CD", "取引先名", 
+                "品名部門CD", "品名CD", "品名", "品種CD", "品種名","色CD", "色名",  
                 "数量", "単位CD", "単価", "金額"
                 };
 
@@ -63,7 +64,20 @@ namespace あすよん月次帳票
         {
             var dv = dt.DefaultView;
             List<string> sortColumns = new List<string>();
-            foreach (var c in new[] { "伝票日付", "サブシステム区分", "取引区分", "部門CD", "取引先CD" })
+            foreach (var c in new[] { "伝票No", "枝番", "伝票日付", "部門CD", "取引先CD" })
+            {
+                if (dt.Columns.Contains(c)) sortColumns.Add(c + " ASC");
+            }
+            if (sortColumns.Count > 0)
+                dv.Sort = string.Join(", ", sortColumns);
+            return dv.ToTable();
+        }
+
+        public DataTable SortData(DataTable dt, string[] sortcols)
+        {
+            var dv = dt.DefaultView;
+            List<string> sortColumns = new List<string>();
+            foreach (var c in sortcols)
             {
                 if (dt.Columns.Contains(c)) sortColumns.Add(c + " ASC");
             }
@@ -84,18 +98,22 @@ namespace あすよん月次帳票
             {
                 if (type == "Sales") // 売上
                 {
+                    if (dtCopy.Columns.Contains("URNHNO")) dtCopy.Columns["URNHNO"].ColumnName = "伝票No";
+                    if (dtCopy.Columns.Contains("URNHEB")) dtCopy.Columns["URNHEB"].ColumnName = "枝番";
+                    if (dtCopy.Columns.Contains("URSBKB")) dtCopy.Columns["URSBKB"].ColumnName = "SbSys区分";
+                    if (dtCopy.Columns.Contains("URTRKB")) dtCopy.Columns["URTRKB"].ColumnName = "取引区分";
                     if (dtCopy.Columns.Contains("URDNDT")) dtCopy.Columns["URDNDT"].ColumnName = "伝票日付";
                     if (dtCopy.Columns.Contains("URBMCD")) dtCopy.Columns["URBMCD"].ColumnName = "部門CD";
+                    if (dtCopy.Columns.Contains("SHCLAS")) dtCopy.Columns["SHCLAS"].ColumnName = "クラス";
                     if (dtCopy.Columns.Contains("URHBSC")) dtCopy.Columns["URHBSC"].ColumnName = "取引先CD";
                     if (dtCopy.Columns.Contains("TOTHNM")) dtCopy.Columns["TOTHNM"].ColumnName = "取引先名";
-                    if (dtCopy.Columns.Contains("SHCLAS")) dtCopy.Columns["SHCLAS"].ColumnName = "クラス";
-                    if (dtCopy.Columns.Contains("URHBCD")) dtCopy.Columns["URHBCD"].ColumnName = "品名部門CD";
+                    if (dtCopy.Columns.Contains("URHBCD")) dtCopy.Columns["URHBCD"].ColumnName = "品部門CD";
                     if (dtCopy.Columns.Contains("URHMCD")) dtCopy.Columns["URHMCD"].ColumnName = "品名CD";
-                    if (dtCopy.Columns.Contains("URHNNM")) dtCopy.Columns["URHNNM"].ColumnName = "品名";
                     if (dtCopy.Columns.Contains("URHSCD")) dtCopy.Columns["URHSCD"].ColumnName = "品種CD";
+                    if (dtCopy.Columns.Contains("URCLCD")) dtCopy.Columns["URCLCD"].ColumnName = "色CD";
+                    if (dtCopy.Columns.Contains("URHNNM")) dtCopy.Columns["URHNNM"].ColumnName = "品名";
                     if (dtCopy.Columns.Contains("URHSNM")) dtCopy.Columns["URHSNM"].ColumnName = "品種名";
-                    if (dtCopy.Columns.Contains("URTRKB")) dtCopy.Columns["URTRKB"].ColumnName = "取引区分";
-                    if (dtCopy.Columns.Contains("URSBKB")) dtCopy.Columns["URSBKB"].ColumnName = "サブシステム区分";
+                    if (dtCopy.Columns.Contains("URCLNM")) dtCopy.Columns["URCLNM"].ColumnName = "色名";
                     if (dtCopy.Columns.Contains("URQNTY")) dtCopy.Columns["URQNTY"].ColumnName = "数量";
                     if (dtCopy.Columns.Contains("URUNCD")) dtCopy.Columns["URUNCD"].ColumnName = "単位CD";
                     if (dtCopy.Columns.Contains("URUNPR")) dtCopy.Columns["URUNPR"].ColumnName = "単価";
@@ -103,18 +121,22 @@ namespace あすよん月次帳票
                 }
                 else if (type == "Purchase") // 仕入
                 {
+                    if (dtCopy.Columns.Contains("SRSRNO")) dtCopy.Columns["SRSRNO"].ColumnName = "伝票No";
+                    if (dtCopy.Columns.Contains("SRSREB")) dtCopy.Columns["SRSREB"].ColumnName = "枝番";
+                    if (dtCopy.Columns.Contains("SRSBKB")) dtCopy.Columns["SRSBKB"].ColumnName = "SbSys区分";
+                    if (dtCopy.Columns.Contains("SRTRKB")) dtCopy.Columns["SRTRKB"].ColumnName = "取引区分";
                     if (dtCopy.Columns.Contains("SRDNDT")) dtCopy.Columns["SRDNDT"].ColumnName = "伝票日付";
                     if (dtCopy.Columns.Contains("SRBMCD")) dtCopy.Columns["SRBMCD"].ColumnName = "部門CD";
+                    if (dtCopy.Columns.Contains("SHCLAS")) dtCopy.Columns["SHCLAS"].ColumnName = "クラス";
                     if (dtCopy.Columns.Contains("SRSRCD")) dtCopy.Columns["SRSRCD"].ColumnName = "取引先CD";
                     if (dtCopy.Columns.Contains("TOTHNM")) dtCopy.Columns["TOTHNM"].ColumnName = "取引先名";
-                    if (dtCopy.Columns.Contains("SHCLAS")) dtCopy.Columns["SHCLAS"].ColumnName = "クラス";
-                    if (dtCopy.Columns.Contains("SRHBCD")) dtCopy.Columns["SRHBCD"].ColumnName = "品名部門CD";
+                    if (dtCopy.Columns.Contains("SRHBCD")) dtCopy.Columns["SRHBCD"].ColumnName = "品部門CD";
                     if (dtCopy.Columns.Contains("SRHMCD")) dtCopy.Columns["SRHMCD"].ColumnName = "品名CD";
-                    if (dtCopy.Columns.Contains("SRHNNM")) dtCopy.Columns["SRHNNM"].ColumnName = "品名";
                     if (dtCopy.Columns.Contains("SRHSCD")) dtCopy.Columns["SRHSCD"].ColumnName = "品種CD";
+                    if (dtCopy.Columns.Contains("SRCLCD")) dtCopy.Columns["SRCLCD"].ColumnName = "色CD";
+                    if (dtCopy.Columns.Contains("SRHNNM")) dtCopy.Columns["SRHNNM"].ColumnName = "品名";
                     if (dtCopy.Columns.Contains("SRHSNM")) dtCopy.Columns["SRHSNM"].ColumnName = "品種名";
-                    if (dtCopy.Columns.Contains("SRTRKB")) dtCopy.Columns["SRTRKB"].ColumnName = "取引区分";
-                    if (dtCopy.Columns.Contains("SRSBKB")) dtCopy.Columns["SRSBKB"].ColumnName = "サブシステム区分";
+                    if (dtCopy.Columns.Contains("SRCLNM")) dtCopy.Columns["SRCLNM"].ColumnName = "色名";
                     if (dtCopy.Columns.Contains("SRQNTY")) dtCopy.Columns["SRQNTY"].ColumnName = "数量";
                     if (dtCopy.Columns.Contains("SRUNCD")) dtCopy.Columns["SRUNCD"].ColumnName = "単位CD";
                     if (dtCopy.Columns.Contains("SRUNPR")) dtCopy.Columns["SRUNPR"].ColumnName = "単価";
@@ -150,9 +172,14 @@ namespace あすよん月次帳票
                 if (dt.Columns.Contains("ZHTGZA") && row["ZHTGZA"] == DBNull.Value)
                     row["ZHTGZA"] = 0m;
             }
+            // 色CD列追加
+            if (!dt.Columns.Contains("ZGCLCD"))
+                dt.Columns.Add("ZGCLCD", typeof(string));
+
             // 品名CD・品種CDの結合
             if (!dt.Columns.Contains("CodeCombined"))
                 dt.Columns.Add("CodeCombined", typeof(string));
+            
             foreach (DataRow row in dt.Rows)
             {
                 row["CodeCombined"] = $"{row["ZHHMCD"]}-{row["ZHHSCD"]}";
@@ -163,6 +190,16 @@ namespace あすよん月次帳票
         // 複数DataTableを縦にマージ
         public DataTable MergeData(params DataTable[] tables)
         {
+            //==============================================================
+            // 「 Now 」
+            // 1:年月           2:ZHCSNM(クラス名) 3:ZHBMCD(部門CD)     4:ZHHNNM(品名)
+            // 5:ZHHMCD(品名CD) 6:ZHHSCD(品種CD)   7:ZHTZQT(当月残数量) 8:ZHTGZA(当月残金額)
+            //==============================================================
+            // 「 Old 」
+            //  1:年月                2:ZGZKSB(在庫種別)     3:SHCLAS(クラス)      4:ZGBMCD(部門コード)  5:ZGWHCD(倉庫コード)
+            //  6:倉庫名              7:ZGAZCD(預り先コード) 8:預り先名            9:品名               10:ZHHMCD(品名コード)
+            // 11:ZHHSCD(品種コード) 12:ZGCLCD(色コード)    13:ZGTZQT(当月残数量) 14:ZGTGZA(当月残金額) 
+            //==============================================================
             if (tables == null || tables.Length == 0)
                 return new DataTable();
 
@@ -183,29 +220,23 @@ namespace あすよん月次帳票
         }
 
         // レイアウト調整
-        public DataTable FormatStockTable(DataTable dt, bool flg = false)
+        public DataTable FormatStockTable(DataTable dt)
         {
             DataTable formated = new DataTable();
-
+            //==============================================================
+            // 「 Now 」
+            // 1:年月           2:ZHBMCD(部門CD)   3:ZHCSNM(クラス名)      4:ZHHNNM(品名)
+            // 5:ZHHMCD(品名CD) 6:ZHHSCD(品種CD)   7:ZHTZQT(当月残数量) 8:ZHTGZA(当月残金額)
+            //==============================================================
             // 列定義
             formated.Columns.Add("年月", typeof(string));
+            formated.Columns.Add("部門CD", typeof(string));
             formated.Columns.Add("クラス名", typeof(string));
             formated.Columns.Add("取引区分", typeof(string));
-            formated.Columns.Add("部門CD", typeof(string));
-            if (flg)
-            {
-                // true Excel用
-                formated.Columns.Add("取引先/品種CD", typeof(string));
-                formated.Columns.Add("取引先/品名", typeof(string));
-            }
-            else 
-            {
-                // false 表示用
-                formated.Columns.Add("品種", typeof(string));
-                formated.Columns.Add("品名", typeof(string));
-            }
-            formated.Columns.Add("数量計", typeof(decimal));
-            formated.Columns.Add("金額計", typeof(decimal));
+            formated.Columns.Add("品種", typeof(string));
+            formated.Columns.Add("品名", typeof(string));
+            formated.Columns.Add("当月残数量", typeof(decimal));
+            formated.Columns.Add("当月残金額", typeof(decimal));
 
             if (dt == null) return formated; // 空のテーブルを返す
 
@@ -215,41 +246,83 @@ namespace あすよん月次帳票
 
                 // 列が存在するかチェックして代入
                 newRow["年月"] = dt.Columns.Contains("年月") ? row["年月"]?.ToString() : string.Empty;
+                newRow["部門CD"] = dt.Columns.Contains("ZHBMCD") ? row["ZHBMCD"]?.ToString() : string.Empty;
                 newRow["クラス名"] = dt.Columns.Contains("ZHCSNM") ? row["ZHCSNM"]?.ToString() : string.Empty;
                 newRow["取引区分"] = "在庫";
-                newRow["部門CD"] = dt.Columns.Contains("ZHBMCD") ? row["ZHBMCD"]?.ToString() : string.Empty;
                 string hmcd = dt.Columns.Contains("ZHHMCD") ? row["ZHHMCD"]?.ToString() : string.Empty;
                 string hscd = dt.Columns.Contains("ZHHSCD") ? row["ZHHSCD"]?.ToString() : string.Empty;
-                if (flg)
-                {
-                    newRow["取引先/品種CD"] = $"{hmcd}-{hscd}";
-                    newRow["取引先/品名"] = dt.Columns.Contains("ZHHNNM") ? row["ZHHNNM"]?.ToString() : string.Empty;
-                }
-                else
-                {
-                    newRow["品種"] = $"{hmcd}-{hscd}";
-                    newRow["品名"] = dt.Columns.Contains("ZHHNNM") ? row["ZHHNNM"]?.ToString() : string.Empty;
-                }
-                    
-                newRow["数量計"] = (dt.Columns.Contains("ZHTZQT") && row["ZHTZQT"] != DBNull.Value)
+                newRow["品種"] = $"{hmcd}-{hscd}";
+                newRow["品名"] = dt.Columns.Contains("ZHHNNM") ? row["ZHHNNM"]?.ToString() : string.Empty;
+                newRow["当月残数量"] = (dt.Columns.Contains("ZHTZQT") && row["ZHTZQT"] != DBNull.Value)
                     ? Convert.ToDecimal(row["ZHTZQT"]) : 0m;
-                newRow["金額計"] = (dt.Columns.Contains("ZHTGZA") && row["ZHTGZA"] != DBNull.Value)
+                newRow["当月残金額"] = (dt.Columns.Contains("ZHTGZA") && row["ZHTGZA"] != DBNull.Value)
                     ? Convert.ToDecimal(row["ZHTGZA"]) : 0m;
-
                 formated.Rows.Add(newRow);
             }
 
             // ソート
             DataView dv = formated.DefaultView;
-            if (flg)
-            {
-                dv.Sort = "年月 ASC, クラス名 ASC, 部門CD ASC, 取引先/品種CD ASC";
-            } 
-            else
-            {
-                dv.Sort = "年月 ASC, クラス名 ASC, 部門CD ASC, 品種 ASC";
-            }
+            dv.Sort = "年月 ASC, 部門CD ASC, クラス名 ASC";
+            
             return dv.ToTable();
+        }
+        public DataTable FormatStockTable(DataTable dt, bool newold)
+        {
+            DataTable formated = new DataTable();
+            //==============================================================
+            // 「 Old 」
+            //  1:年月                2:ZGBMCD(部門コード)   3:ZGZKSB(在庫種別)  4:SHCLAS(クラス)  5:ZGWHCD(倉庫コード)
+            //  6:TOTHNM1(倉庫名)     7:ZGAZCD(預り先コード) 8:TOTHNM2(預り先名) 9:ZHHNNM(品名)   10:ZHHMCD(品名コード)
+            // 11:ZHHSCD(品種コード) 12:ZGCLCD(色コード)    13:ZGTZQT(残数量)   14:ZGTGZA(残金額) 
+            //==============================================================
+            // 列定義
+            formated.Columns.Add("年月", typeof(string));
+            formated.Columns.Add("部門CD", typeof(string));
+            formated.Columns.Add("在庫種別", typeof(string));
+            formated.Columns.Add("クラス", typeof(string));
+            formated.Columns.Add("倉庫CD", typeof (string));
+            formated.Columns.Add("倉庫名", typeof(string));
+            formated.Columns.Add("預り先CD", typeof(string));
+            formated.Columns.Add("預り先名", typeof(string));
+            formated.Columns.Add("品名", typeof(string));
+            formated.Columns.Add("品目CD",typeof (string));
+            formated.Columns.Add("残数量", typeof(decimal));
+            formated.Columns.Add("残金額",typeof(decimal));
+
+            if (dt == null) return formated; // 空のテーブルを返す
+
+            foreach (DataRow row in dt.Rows)
+            {
+                DataRow newRow = formated.NewRow();
+
+                // 列が存在するかチェックして代入
+                newRow["年月"] = dt.Columns.Contains("年月") ? row["年月"]?.ToString() : string.Empty;
+                newRow["部門CD"] = dt.Columns.Contains("ZHBMCD") ? row["ZHBMCD"]?.ToString() : string.Empty;
+                newRow["在庫種別"] = dt.Columns.Contains("ZGZKSB") ? row["ZGZKSB"]?.ToString() : string.Empty;
+                newRow["クラス"] = dt.Columns.Contains("SHCLAS") ? row["SHCLAS"]?.ToString() : string.Empty;
+                newRow["倉庫CD"] = dt.Columns.Contains("ZGWHCD") ? row["ZGWHCD"]?.ToString() : string.Empty;
+                newRow["倉庫名"] = dt.Columns.Contains("TOTHNM1") ? row["TOTHNM1"]?.ToString() : string.Empty;
+                newRow["預り先CD"] = dt.Columns.Contains("ZGAZCD") ? row["ZGAZCD"]?.ToString() : string.Empty;
+                newRow["預り先名"] = dt.Columns.Contains("TOTHNM2") ? row["TOTHNM2"]?.ToString() : string.Empty;
+                newRow["品名"] = dt.Columns.Contains("ZHHNNM") ? row["ZHHNNM"]?.ToString() : string.Empty;
+                string hmcd = dt.Columns.Contains("ZHHMCD") ? row["ZHHMCD"]?.ToString() : string.Empty;
+                string hscd = dt.Columns.Contains("ZHHSCD") ? row["ZHHSCD"]?.ToString() : string.Empty;
+                string ircd = dt.Columns.Contains("ZGCLCD") ? row["ZGCLCD"]?.ToString() : string.Empty;
+                newRow["品目CD"] = $"{hmcd}-{hscd}-{ircd}";
+                
+                newRow["残数量"] = (dt.Columns.Contains("ZHTZQT") && row["ZHTZQT"] != DBNull.Value)
+                    ? Convert.ToDecimal(row["ZHTZQT"]) : 0m;
+                newRow["残金額"] = (dt.Columns.Contains("ZHTGZA") && row["ZHTGZA"] != DBNull.Value)
+                    ? Convert.ToDecimal(row["ZHTGZA"]) : 0m;
+                formated.Rows.Add(newRow);
+            }
+
+            // ソート
+            DataView dv = formated.DefaultView;
+            dv.Sort = "年月 ASC, 部門CD ASC, クラス ASC";
+
+            return dv.ToTable();
+
         }
 
         public DataTable CustFilter(DataTable filtered, DataTable dt, List<string> selected, string cutCD)
@@ -261,6 +334,29 @@ namespace あすよん月次帳票
             return tmp;
         }
 
+        // 在庫種別フィルター
+        public DataTable IvTypeFilter(DataTable filtered, Dictionary<string, string> selected)
+        {
+            // ZGZKSB: 在庫種別
+            // 0=自社,1=預り,2=預け,3=投入
+            //==============================================================
+            ///  1:年月                2:ZGZKSB(在庫種別)     3:SHCLAS(クラス)      4:ZGBMCD(部門コード)  5:ZGWHCD(倉庫コード)
+            //  6:倉庫名              7:ZGAZCD(預り先コード) 8:預り先名            9:品名               10:ZHHMCD(品名コード)
+            // 11:ZHHSCD(品種コード) 12:ZGCLCD(色コード)    13:ZGTZQT(当月残数量) 14:ZGTGZA(当月残金額) 
+            //==============================================================
+            DataTable tmp = filtered.Clone();
+            foreach (DataRow row in filtered.Rows)
+            {
+                string ivtype = row["ZGZKSB"]?.ToString()?.Trim();
+                if (!string.IsNullOrEmpty(ivtype) && selected.ContainsKey(ivtype))
+                {
+                    tmp.ImportRow(row);
+                }
+            }
+            return tmp;
+        }
+        // クラス区分フィルター
+        //   売上・仕入
         public DataTable ProductFileter(DataTable filtered, Dictionary<string, string> classProduct, List<string> selected)
         {
             DataTable tmp = filtered.Clone();
@@ -276,14 +372,14 @@ namespace あすよん月次帳票
             }
             return tmp;
         }
-
-        public DataTable ProductFileter(DataTable filtered, List<string> selIvProducts, List<string> selected)
+        // 在庫
+        public DataTable ProductFileter(DataTable filtered, List<string> selected)
         {
             DataTable tmp = filtered.Clone();
             foreach (DataRow row in filtered.Rows)
             {
-                string classname = row["ZHCSNM"]?.ToString()?.Trim();
-                if (!string.IsNullOrEmpty(classname) && selIvProducts.Contains(classname))
+                string classname = row["SHCLAS"]?.ToString()?.Trim();
+                if (!string.IsNullOrEmpty(classname) && selected.Contains(classname))
                 {
                     tmp.ImportRow(row);
                 }

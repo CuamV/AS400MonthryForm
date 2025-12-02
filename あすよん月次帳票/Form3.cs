@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Drawing;
 using System.IO;
+using System.Linq;
 using System.Runtime.InteropServices;
 using System.Threading;
 using System.Threading.Tasks;
@@ -195,7 +196,10 @@ namespace あすよん月次帳票
             sundusuid = "S" + idText;
             sunduspass = "S" + passText;
 
-            string sumirateYM = DateTime.Now.ToString("yyyyMM");
+            string monthlyFile = @"\\ohnosv01\OhnoSys\099_sys\mf\Monthly.txt";
+            string firstLine = File.ReadLines(monthlyFile).FirstOrDefault();
+            string sumirateYM = firstLine.Substring(0, 6); // 先頭6文字を取得(当月)
+            //string sumirateYM = DateTime.Now.ToString("yyyyMM");
             FormActionMethod formActionMethod = new FormActionMethod();
 
             // 選択部門コード取得

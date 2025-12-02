@@ -12,7 +12,22 @@ namespace あすよん月次帳票
 {
     public partial class Form2_DataView : Form
     {
-        public DataTable DisplayData { get; set; }
+        //public DataTable DisplayData { get; set; }
+        private DataTable _displayData;
+
+        public DataTable DisplayData
+        {
+            get => _displayData;
+            set
+            {
+                _displayData = value;
+                if (dgvData != null)
+                {
+                    dgvData.DataSource = _displayData;
+                    dgvData.AutoResizeColumns();
+                }
+            }
+        }
 
         public Form2_DataView()
         {
@@ -25,7 +40,7 @@ namespace あすよん月次帳票
         {
             if (DisplayData != null)
             {
-                dgvData.DataSource = DisplayData;
+                dgvData.DataSource = _displayData;
             }
         }
     }
