@@ -1,12 +1,6 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
 using System.Drawing;
-using System.Linq;
 using System.Runtime.InteropServices;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows.Forms;
 
 namespace あすよん月次帳票
@@ -30,6 +24,10 @@ namespace あすよん月次帳票
             this.TopMost = true;
             this.Region = System.Drawing.Region.FromHrgn(
                 CreateRoundRectRgn(0, 0, this.Width, this.Height, 40, 40));
+
+            this.MouseDown += FormAnimation2_MouseDown;
+            this.MouseMove += FormAnimation2_MouseMove;
+            this.MouseUp += FormAnimation2_MouseUp;
         }
         [DllImport("Gdi32.dll", EntryPoint = "CreateRoundRectRgn")]
         private static extern IntPtr CreateRoundRectRgn(
@@ -43,5 +41,36 @@ namespace あすよん月次帳票
 
         // lblMessage フィールドのアクセス修飾子を public に変更
         public Label lblMessage;
+
+
+        // フィールドに追加
+        private Point mouseOffset;
+        private bool isMouseDown = false;
+        private void FormAnimation2_MouseDown(object sender, MouseEventArgs e)
+        {
+            if (e.Button == MouseButtons.Left)
+            {
+                isMouseDown = true;
+                mouseOffset = new Point(-e.X, -e.Y);
+            }
+        }
+
+        // MouseMove
+        private void FormAnimation2_MouseMove(object sender, MouseEventArgs e)
+        {
+            if (isMouseDown)
+            {
+                Point mousePos = Control.MousePosition;
+                mousePos.Offset(mouseOffset.X, mouseOffset.Y);
+                this.Location = mousePos;
+            }
+        }
+
+        // MouseUp
+        private void FormAnimation2_MouseUp(object sender, MouseEventArgs e)
+        {
+            if (e.Button == MouseButtons.Left)
+                isMouseDown = false;
+        }
     }
 }

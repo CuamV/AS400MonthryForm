@@ -33,7 +33,7 @@ namespace あすよん月次帳票
         {
             this.dgvData = new System.Windows.Forms.DataGridView();
             this.lb条件 = new System.Windows.Forms.Label();
-            this.textBox1 = new System.Windows.Forms.TextBox();
+            this.txtBx条件 = new System.Windows.Forms.TextBox();
             ((System.ComponentModel.ISupportInitialize)(this.dgvData)).BeginInit();
             this.SuspendLayout();
             // 
@@ -42,37 +42,37 @@ namespace あすよん月次帳票
             this.dgvData.AllowDrop = true;
             this.dgvData.ClipboardCopyMode = System.Windows.Forms.DataGridViewClipboardCopyMode.EnableAlwaysIncludeHeaderText;
             this.dgvData.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
-            this.dgvData.Location = new System.Drawing.Point(14, 155);
+            this.dgvData.Location = new System.Drawing.Point(14, 181);
             this.dgvData.Margin = new System.Windows.Forms.Padding(4);
             this.dgvData.Name = "dgvData";
             this.dgvData.RowTemplate.Height = 21;
-            this.dgvData.Size = new System.Drawing.Size(1400, 594);
+            this.dgvData.Size = new System.Drawing.Size(1441, 600);
             this.dgvData.TabIndex = 63;
             // 
             // lb条件
             // 
             this.lb条件.AutoSize = true;
             this.lb条件.Font = new System.Drawing.Font("Meiryo UI", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(128)));
-            this.lb条件.Location = new System.Drawing.Point(22, 25);
+            this.lb条件.Location = new System.Drawing.Point(22, 7);
             this.lb条件.Name = "lb条件";
             this.lb条件.Size = new System.Drawing.Size(47, 17);
             this.lb条件.TabIndex = 64;
             this.lb条件.Text = "条件：";
             // 
-            // textBox1
+            // txtBx条件
             // 
-            this.textBox1.Location = new System.Drawing.Point(25, 45);
-            this.textBox1.Multiline = true;
-            this.textBox1.Name = "textBox1";
-            this.textBox1.Size = new System.Drawing.Size(306, 103);
-            this.textBox1.TabIndex = 65;
+            this.txtBx条件.Location = new System.Drawing.Point(25, 27);
+            this.txtBx条件.Multiline = true;
+            this.txtBx条件.Name = "txtBx条件";
+            this.txtBx条件.Size = new System.Drawing.Size(239, 143);
+            this.txtBx条件.TabIndex = 65;
             // 
             // Form2_DataView
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(1428, 760);
-            this.Controls.Add(this.textBox1);
+            this.ClientSize = new System.Drawing.Size(1469, 788);
+            this.Controls.Add(this.txtBx条件);
             this.Controls.Add(this.lb条件);
             this.Controls.Add(this.dgvData);
             this.Font = new System.Drawing.Font("Meiryo UI", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(128)));
@@ -103,6 +103,6 @@ namespace あすよん月次帳票
         }
         private System.Windows.Forms.DataGridView dgvData;
         private Label lb条件;
-        private TextBox textBox1;
+        private TextBox txtBx条件;
     }
 }

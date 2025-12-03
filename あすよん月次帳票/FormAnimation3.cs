@@ -30,6 +30,10 @@ namespace あすよん月次帳票
             this.TopMost = true;
             this.Region = System.Drawing.Region.FromHrgn(
                 CreateRoundRectRgn(0, 0, this.Width, this.Height, 40, 40));
+
+            this.MouseDown += FormAnimation3_MouseDown;
+            this.MouseMove += FormAnimation3_MouseMove;
+            this.MouseUp += FormAnimation3_MouseUp;
         }
 
         [DllImport("Gdi32.dll", EntryPoint = "CreateRoundRectRgn")]
@@ -44,5 +48,36 @@ namespace あすよん月次帳票
 
         // lblMessage フィールドのアクセス修飾子を public に変更
         public Label lblMessage;
+
+        // フィールドに追加
+        private Point mouseOffset;
+        private bool isMouseDown = false;
+        private void FormAnimation3_MouseDown(object sender, MouseEventArgs e)
+        {
+            if (e.Button == MouseButtons.Left)
+            {
+                isMouseDown = true;
+                mouseOffset = new Point(-e.X, -e.Y);
+            }
+        }
+
+        // MouseMove
+        private void FormAnimation3_MouseMove(object sender, MouseEventArgs e)
+        {
+            if (isMouseDown)
+            {
+                Point mousePos = Control.MousePosition;
+                mousePos.Offset(mouseOffset.X, mouseOffset.Y);
+                this.Location = mousePos;
+            }
+        }
+
+        // MouseUp
+        private void FormAnimation3_MouseUp(object sender, MouseEventArgs e)
+        {
+            if (e.Button == MouseButtons.Left)
+                isMouseDown = false;
+        }
     }
+
 }

@@ -6,7 +6,7 @@ using System.Windows.Forms;
 
 namespace あすよん月次帳票
 {
-    partial class RplForm2
+    partial class Form2
     {
         /// <summary>
         /// Required designer variable.
@@ -34,7 +34,8 @@ namespace あすよん月次帳票
         /// </summary>
         private void InitializeComponent()
         {
-            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(RplForm2));
+            this.components = new System.ComponentModel.Container();
+            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(Form2));
             this.lbTitleDisplay = new System.Windows.Forms.Label();
             this.lb抽出期間 = new System.Windows.Forms.Label();
             this.grpBx抽出期間 = new System.Windows.Forms.GroupBox();
@@ -86,6 +87,7 @@ namespace あすよん月次帳票
             this.chkBx投入 = new System.Windows.Forms.CheckBox();
             this.groupBox1 = new System.Windows.Forms.GroupBox();
             this.label1 = new System.Windows.Forms.Label();
+            this.timrAnimation2 = new System.Windows.Forms.Timer(this.components);
             this.grpBx抽出期間.SuspendLayout();
             this.grpBxBtn.SuspendLayout();
             this.grpBx組織.SuspendLayout();
@@ -140,7 +142,7 @@ namespace あすよん月次帳票
             this.txtBxEndYearMonth.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.txtBxEndYearMonth.Name = "txtBxEndYearMonth";
             this.txtBxEndYearMonth.Size = new System.Drawing.Size(106, 24);
-            this.txtBxEndYearMonth.TabIndex = 72;
+            this.txtBxEndYearMonth.TabIndex = 1;
             this.txtBxEndYearMonth.TextChanged += new System.EventHandler(this.chkBxControl);
             // 
             // txtBxStrYearMonth
@@ -149,7 +151,7 @@ namespace あすよん月次帳票
             this.txtBxStrYearMonth.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.txtBxStrYearMonth.Name = "txtBxStrYearMonth";
             this.txtBxStrYearMonth.Size = new System.Drawing.Size(106, 24);
-            this.txtBxStrYearMonth.TabIndex = 71;
+            this.txtBxStrYearMonth.TabIndex = 0;
             this.txtBxStrYearMonth.TextChanged += new System.EventHandler(this.chkBxControl);
             // 
             // lbSymbol1
@@ -183,7 +185,7 @@ namespace あすよん月次帳票
             this.btnExportExcel.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.btnExportExcel.Name = "btnExportExcel";
             this.btnExportExcel.Size = new System.Drawing.Size(104, 34);
-            this.btnExportExcel.TabIndex = 79;
+            this.btnExportExcel.TabIndex = 1;
             this.btnExportExcel.Text = "Excelエクスポート";
             this.btnExportExcel.UseVisualStyleBackColor = true;
             this.btnExportExcel.Click += new System.EventHandler(this.btnExportExcel_Click);
@@ -195,7 +197,7 @@ namespace あすよん月次帳票
             this.btnDisplay.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.btnDisplay.Name = "btnDisplay";
             this.btnDisplay.Size = new System.Drawing.Size(104, 34);
-            this.btnDisplay.TabIndex = 63;
+            this.btnDisplay.TabIndex = 0;
             this.btnDisplay.Text = "データ表示実行";
             this.btnDisplay.UseVisualStyleBackColor = true;
             this.btnDisplay.Click += new System.EventHandler(this.btnReadData_Click);
@@ -207,7 +209,7 @@ namespace あすよん月次帳票
             this.btnForm1Back.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.btnForm1Back.Name = "btnForm1Back";
             this.btnForm1Back.Size = new System.Drawing.Size(104, 34);
-            this.btnForm1Back.TabIndex = 64;
+            this.btnForm1Back.TabIndex = 2;
             this.btnForm1Back.Text = "戻る";
             this.btnForm1Back.UseVisualStyleBackColor = true;
             this.btnForm1Back.Click += new System.EventHandler(this.btnForm1Back_Click);
@@ -236,7 +238,7 @@ namespace あすよん月次帳票
             this.linkLb部門.Location = new System.Drawing.Point(200, 32);
             this.linkLb部門.Name = "linkLb部門";
             this.linkLb部門.Size = new System.Drawing.Size(69, 19);
-            this.linkLb部門.TabIndex = 87;
+            this.linkLb部門.TabIndex = 3;
             this.linkLb部門.TabStop = true;
             this.linkLb部門.Text = "部門選択";
             this.linkLb部門.LinkClicked += new System.Windows.Forms.LinkLabelLinkClickedEventHandler(this.linkLb部門_LinkClicked);
@@ -260,7 +262,7 @@ namespace あすよん月次帳票
             this.chkBxSundus.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.chkBxSundus.Name = "chkBxSundus";
             this.chkBxSundus.Size = new System.Drawing.Size(122, 23);
-            this.chkBxSundus.TabIndex = 33;
+            this.chkBxSundus.TabIndex = 1;
             this.chkBxSundus.Text = "サンミックダスコン";
             this.chkBxSundus.UseVisualStyleBackColor = true;
             // 
@@ -272,7 +274,7 @@ namespace あすよん月次帳票
             this.chkBxOhno.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.chkBxOhno.Name = "chkBxOhno";
             this.chkBxOhno.Size = new System.Drawing.Size(61, 23);
-            this.chkBxOhno.TabIndex = 32;
+            this.chkBxOhno.TabIndex = 0;
             this.chkBxOhno.Text = "オーノ";
             this.chkBxOhno.UseVisualStyleBackColor = true;
             // 
@@ -284,7 +286,7 @@ namespace あすよん月次帳票
             this.chkBxSuncar.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.chkBxSuncar.Name = "chkBxSuncar";
             this.chkBxSuncar.Size = new System.Drawing.Size(134, 23);
-            this.chkBxSuncar.TabIndex = 35;
+            this.chkBxSuncar.TabIndex = 2;
             this.chkBxSuncar.Text = "サンミックカーペット";
             this.chkBxSuncar.UseVisualStyleBackColor = true;
             // 
@@ -338,7 +340,7 @@ namespace あすよん月次帳票
             this.chkBx加工T.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.chkBx加工T.Name = "chkBx加工T";
             this.chkBx加工T.Size = new System.Drawing.Size(81, 23);
-            this.chkBx加工T.TabIndex = 53;
+            this.chkBx加工T.TabIndex = 3;
             this.chkBx加工T.Text = "加工(5)";
             this.chkBx加工T.UseVisualStyleBackColor = true;
             // 
@@ -350,7 +352,7 @@ namespace あすよん月次帳票
             this.chkBx預けT.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.chkBx預けT.Name = "chkBx預けT";
             this.chkBx預けT.Size = new System.Drawing.Size(78, 23);
-            this.chkBx預けT.TabIndex = 52;
+            this.chkBx預けT.TabIndex = 5;
             this.chkBx預けT.Text = "預け(7)";
             this.chkBx預けT.UseVisualStyleBackColor = true;
             this.chkBx預けT.CheckedChanged += new System.EventHandler(this.chkBxControl);
@@ -363,7 +365,7 @@ namespace あすよん月次帳票
             this.chkBx原材料.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.chkBx原材料.Name = "chkBx原材料";
             this.chkBx原材料.Size = new System.Drawing.Size(96, 23);
-            this.chkBx原材料.TabIndex = 49;
+            this.chkBx原材料.TabIndex = 0;
             this.chkBx原材料.Text = "原材料(1)";
             this.chkBx原材料.UseVisualStyleBackColor = true;
             this.chkBx原材料.CheckedChanged += new System.EventHandler(this.chkBxControl);
@@ -376,7 +378,7 @@ namespace あすよん月次帳票
             this.chkBx預りT.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.chkBx預りT.Name = "chkBx預りT";
             this.chkBx預りT.Size = new System.Drawing.Size(75, 23);
-            this.chkBx預りT.TabIndex = 51;
+            this.chkBx預りT.TabIndex = 4;
             this.chkBx預りT.Text = "預り(6)";
             this.chkBx預りT.UseVisualStyleBackColor = true;
             this.chkBx預りT.CheckedChanged += new System.EventHandler(this.chkBxControl);
@@ -389,7 +391,7 @@ namespace あすよん月次帳票
             this.chkBx半製品.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.chkBx半製品.Name = "chkBx半製品";
             this.chkBx半製品.Size = new System.Drawing.Size(110, 23);
-            this.chkBx半製品.TabIndex = 50;
+            this.chkBx半製品.TabIndex = 1;
             this.chkBx半製品.Text = "半製品(2,3)";
             this.chkBx半製品.UseVisualStyleBackColor = true;
             this.chkBx半製品.CheckedChanged += new System.EventHandler(this.chkBxControl);
@@ -402,7 +404,7 @@ namespace あすよん月次帳票
             this.chkBx製品.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.chkBx製品.Name = "chkBx製品";
             this.chkBx製品.Size = new System.Drawing.Size(81, 23);
-            this.chkBx製品.TabIndex = 48;
+            this.chkBx製品.TabIndex = 2;
             this.chkBx製品.Text = "製品(4)";
             this.chkBx製品.UseVisualStyleBackColor = true;
             this.chkBx製品.CheckedChanged += new System.EventHandler(this.chkBxControl);
@@ -415,7 +417,7 @@ namespace あすよん月次帳票
             this.chkBx預け.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.chkBx預け.Name = "chkBx預け";
             this.chkBx預け.Size = new System.Drawing.Size(78, 23);
-            this.chkBx預け.TabIndex = 56;
+            this.chkBx預け.TabIndex = 1;
             this.chkBx預け.Text = "預け(1)";
             this.chkBx預け.UseVisualStyleBackColor = true;
             this.chkBx預け.CheckedChanged += new System.EventHandler(this.chkBxControl);
@@ -428,7 +430,7 @@ namespace あすよん月次帳票
             this.chkBxIv.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.chkBxIv.Name = "chkBxIv";
             this.chkBxIv.Size = new System.Drawing.Size(58, 23);
-            this.chkBxIv.TabIndex = 44;
+            this.chkBxIv.TabIndex = 2;
             this.chkBxIv.Text = "在庫";
             this.chkBxIv.UseVisualStyleBackColor = true;
             this.chkBxIv.CheckedChanged += new System.EventHandler(this.chkBxControl);
@@ -441,7 +443,7 @@ namespace あすよん月次帳票
             this.chkBxPr.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.chkBxPr.Name = "chkBxPr";
             this.chkBxPr.Size = new System.Drawing.Size(58, 23);
-            this.chkBxPr.TabIndex = 43;
+            this.chkBxPr.TabIndex = 1;
             this.chkBxPr.Text = "仕入";
             this.chkBxPr.UseVisualStyleBackColor = true;
             this.chkBxPr.CheckedChanged += new System.EventHandler(this.chkBxControl);
@@ -454,7 +456,7 @@ namespace あすよん月次帳票
             this.chkBxSl.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.chkBxSl.Name = "chkBxSl";
             this.chkBxSl.Size = new System.Drawing.Size(58, 23);
-            this.chkBxSl.TabIndex = 42;
+            this.chkBxSl.TabIndex = 0;
             this.chkBxSl.Text = "売上";
             this.chkBxSl.UseVisualStyleBackColor = true;
             this.chkBxSl.CheckedChanged += new System.EventHandler(this.chkBxControl);
@@ -493,7 +495,7 @@ namespace あすよん月次帳票
             this.linkLb販売先.Location = new System.Drawing.Point(6, 28);
             this.linkLb販売先.Name = "linkLb販売先";
             this.linkLb販売先.Size = new System.Drawing.Size(84, 19);
-            this.linkLb販売先.TabIndex = 80;
+            this.linkLb販売先.TabIndex = 0;
             this.linkLb販売先.TabStop = true;
             this.linkLb販売先.Text = "販売先選択";
             this.linkLb販売先.LinkClicked += new System.Windows.Forms.LinkLabelLinkClickedEventHandler(this.linkLb販売先_LinkClicked);
@@ -505,7 +507,7 @@ namespace あすよん月次帳票
             this.linkLb仕入先.Location = new System.Drawing.Point(226, 28);
             this.linkLb仕入先.Name = "linkLb仕入先";
             this.linkLb仕入先.Size = new System.Drawing.Size(84, 19);
-            this.linkLb仕入先.TabIndex = 81;
+            this.linkLb仕入先.TabIndex = 1;
             this.linkLb仕入先.TabStop = true;
             this.linkLb仕入先.Text = "仕入先選択";
             this.linkLb仕入先.LinkClicked += new System.Windows.Forms.LinkLabelLinkClickedEventHandler(this.linkLb仕入先_LinkClicked);
@@ -534,7 +536,7 @@ namespace あすよん月次帳票
             this.rdBtn売仕なし.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.rdBtn売仕なし.Name = "rdBtn売仕なし";
             this.rdBtn売仕なし.Size = new System.Drawing.Size(51, 23);
-            this.rdBtn売仕なし.TabIndex = 83;
+            this.rdBtn売仕なし.TabIndex = 0;
             this.rdBtn売仕なし.TabStop = true;
             this.rdBtn売仕なし.Tag = "NONE";
             this.rdBtn売仕なし.Text = "なし";
@@ -548,7 +550,7 @@ namespace あすよん月次帳票
             this.rdBtn売仕取引先.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.rdBtn売仕取引先.Name = "rdBtn売仕取引先";
             this.rdBtn売仕取引先.Size = new System.Drawing.Size(72, 23);
-            this.rdBtn売仕取引先.TabIndex = 84;
+            this.rdBtn売仕取引先.TabIndex = 2;
             this.rdBtn売仕取引先.TabStop = true;
             this.rdBtn売仕取引先.Tag = "取引先CD";
             this.rdBtn売仕取引先.Text = "取引先";
@@ -562,7 +564,7 @@ namespace あすよん月次帳票
             this.rdBtn売仕部門.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.rdBtn売仕部門.Name = "rdBtn売仕部門";
             this.rdBtn売仕部門.Size = new System.Drawing.Size(57, 23);
-            this.rdBtn売仕部門.TabIndex = 85;
+            this.rdBtn売仕部門.TabIndex = 3;
             this.rdBtn売仕部門.TabStop = true;
             this.rdBtn売仕部門.Tag = "部門CD";
             this.rdBtn売仕部門.Text = "部門";
@@ -592,7 +594,7 @@ namespace あすよん月次帳票
             this.rdBtn品目.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.rdBtn品目.Name = "rdBtn品目";
             this.rdBtn品目.Size = new System.Drawing.Size(57, 23);
-            this.rdBtn品目.TabIndex = 86;
+            this.rdBtn品目.TabIndex = 1;
             this.rdBtn品目.TabStop = true;
             this.rdBtn品目.Tag = "品目CD";
             this.rdBtn品目.Text = "品目";
@@ -605,7 +607,7 @@ namespace あすよん月次帳票
             this.txtBx名称.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.txtBx名称.Name = "txtBx名称";
             this.txtBx名称.Size = new System.Drawing.Size(194, 24);
-            this.txtBx名称.TabIndex = 87;
+            this.txtBx名称.TabIndex = 7;
             // 
             // lb名称
             // 
@@ -650,7 +652,7 @@ namespace あすよん月次帳票
             this.rdBtn在なし.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.rdBtn在なし.Name = "rdBtn在なし";
             this.rdBtn在なし.Size = new System.Drawing.Size(51, 23);
-            this.rdBtn在なし.TabIndex = 83;
+            this.rdBtn在なし.TabIndex = 0;
             this.rdBtn在なし.TabStop = true;
             this.rdBtn在なし.Tag = "NONE";
             this.rdBtn在なし.Text = "なし";
@@ -664,7 +666,7 @@ namespace あすよん月次帳票
             this.rdBtn在品種.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.rdBtn在品種.Name = "rdBtn在品種";
             this.rdBtn在品種.Size = new System.Drawing.Size(57, 23);
-            this.rdBtn在品種.TabIndex = 84;
+            this.rdBtn在品種.TabIndex = 1;
             this.rdBtn在品種.TabStop = true;
             this.rdBtn在品種.Tag = "品目CD";
             this.rdBtn在品種.Text = "品目";
@@ -694,7 +696,7 @@ namespace あすよん月次帳票
             this.chkBx自社.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.chkBx自社.Name = "chkBx自社";
             this.chkBx自社.Size = new System.Drawing.Size(81, 23);
-            this.chkBx自社.TabIndex = 42;
+            this.chkBx自社.TabIndex = 0;
             this.chkBx自社.Text = "自社(0)";
             this.chkBx自社.UseVisualStyleBackColor = true;
             this.chkBx自社.CheckedChanged += new System.EventHandler(this.chkBxControl);
@@ -707,7 +709,7 @@ namespace あすよん月次帳票
             this.chkBx預り.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.chkBx預り.Name = "chkBx預り";
             this.chkBx預り.Size = new System.Drawing.Size(75, 23);
-            this.chkBx預り.TabIndex = 43;
+            this.chkBx預り.TabIndex = 2;
             this.chkBx預り.Text = "預り(2)";
             this.chkBx預り.UseVisualStyleBackColor = true;
             this.chkBx預り.CheckedChanged += new System.EventHandler(this.chkBxControl);
@@ -720,7 +722,7 @@ namespace あすよん月次帳票
             this.chkBx投入.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.chkBx投入.Name = "chkBx投入";
             this.chkBx投入.Size = new System.Drawing.Size(81, 23);
-            this.chkBx投入.TabIndex = 44;
+            this.chkBx投入.TabIndex = 3;
             this.chkBx投入.Text = "投入(9)";
             this.chkBx投入.UseVisualStyleBackColor = true;
             this.chkBx投入.CheckedChanged += new System.EventHandler(this.chkBxControl);
@@ -742,11 +744,11 @@ namespace あすよん月次帳票
             this.label1.Size = new System.Drawing.Size(0, 12);
             this.label1.TabIndex = 92;
             // 
-            // RplForm2
+            // Form2
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 12F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(873, 594);
+            this.ClientSize = new System.Drawing.Size(867, 600);
             this.Controls.Add(this.label1);
             this.Controls.Add(this.groupBox1);
             this.Controls.Add(this.grpBx在庫種別);
@@ -766,7 +768,7 @@ namespace あすよん月次帳票
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.None;
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
             this.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
-            this.Name = "RplForm2";
+            this.Name = "Form2";
             this.Opacity = 0.95D;
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
             this.Text = "RplForm2";
@@ -1025,5 +1027,6 @@ namespace あすよん月次帳票
         private Label label1;
         private CheckBox chkBx加工T;
         private RadioButton rdBtn品目;
+        private Timer timrAnimation2;
     }
 }

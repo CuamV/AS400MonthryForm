@@ -11,12 +11,18 @@ using Label = System.Windows.Forms.Label;
 
 namespace あすよん月次帳票
 {
+    //==========================================================
+    // --------Form1(トップフォーム)クラス--------
+    //==========================================================
     public partial class Form1 : Form
     {
+        //=========================================================
+        // フィールド変数
+        //=========================================================
         private string HIZTIM;
         private string HIZ = DateTime.Now.ToString("yyyyMMdd");
         private string TIM = DateTime.Now.ToString("HHmmss");
-        private Label lbSituation;
+        private Label lb操作履歴;
 
         private string mfPath = @"\\ohnosv01\OhnoSys\099_sys\mf";
         private readonly string logPath =
@@ -24,10 +30,12 @@ namespace あすよん月次帳票
         private const string LockFilePath = @"\\ohnosv01\OhnoSys\099_sys\Lock";
         private const string LogFilePath = @"\\ohnosv01\OhnoSys\099_sys\LOG";
 
+        //=========================================================
+        // コンストラクタ
+        //=========================================================
         public Form1()
         {
             InitializeComponent();
-
 
             JsonLoader.LoadBumon(mfPath + @"\BUMON.json");
             JsonLoader.LoadHanbai("オーノ", Path.Combine(mfPath, "DLB01HANBAI.json"));
@@ -37,7 +45,7 @@ namespace あすよん月次帳票
             JsonLoader.LoadHanbai("サンミックカーペット", Path.Combine(mfPath, "DLB03HANBAI.json"));
             JsonLoader.LoadShiire("サンミックカーペット", Path.Combine(mfPath, "DLB03SHIIRE.json"));
 
-            grpBxMenu.Paint += GroupBoxCustomBorder;
+            grpBxメニュー.Paint += GroupBoxCustomBorder;
 
             LoadLogs();
 
@@ -45,91 +53,11 @@ namespace あすよん月次帳票
             this.Shown += Form1_Shown;
         }
 
-        ///<summary>
-        ///ログを追加する専用メソッド
-        ///</summary>
-        public void AddLog(string message)
-        {
-            // Form1のリストに追加
-            listBxSituation.Items.Add($"{message}");
-            // ファイルに保存
-            File.AppendAllText(logPath, message + Environment.NewLine);
-        }
-
-        public void AddLog2(string message)
-        {
-            string logFilePath = Path.Combine(LogFilePath, $@"{HIZ}\LOG_AllSimulation.txt");
-            // Form1のリストに追加
-            listBxSituation.Items.Add($"{message}");
-            // ファイルに保存
-            File.AppendAllText(logFilePath, message + Environment.NewLine);
-        }
-
-        // 過去3日間のログ読込
-        private void LoadLogs()
-        {
-            listBxSituation.Items.Clear();
-
-            string AllLogFilePath = Path.Combine(LogFilePath, $@"{HIZ}\LOG_AllSimulation.txt");
-            // --- 個人ログの読込 ---
-            if (!File.Exists(logPath)) return;
-
-            var lines = File.ReadAllLines(logPath);
-            DateTime threshold = DateTime.Now.AddDays(-3);
-
-            foreach (var line in lines)
-            {
-                // ログの日付部分をバース
-                if (DateTime.TryParse(line.Substring(0, 10), out DateTime logDate))
-                {
-                    if (logDate > threshold)
-                    {
-                        listBxSituation.Items.Add(line);
-                    }
-                }
-            }
-            // --- 全体ログの読込 ---
-            if (!File.Exists(AllLogFilePath)) return;
-            var allLines = File.ReadAllLines(AllLogFilePath);
-            foreach (var line in allLines)
-            {
-                // ログの日付部分をバース
-                if (DateTime.TryParse(line.Substring(0, 10), out DateTime logDate))
-                {
-                    if (logDate > threshold)
-                    {
-                        listBxSituation.Items.Add(line);
-                    }
-                }
-            }
-
-            var sorted = listBxSituation.Items.Cast<string>()
-                .OrderByDescending(line =>
-                {
-                    if (DateTime.TryParse(line.Substring(line.IndexOf('2'), 16), out var dt)) return dt;
-                    return DateTime.MinValue;
-                })
-                .ToList();
-
-            listBxSituation.Items.Clear();
-            foreach (var s in sorted)
-                listBxSituation.Items.Add(s);
-
-            // listBxSituation.Itemsが0件の場合、ログファイルをリネームして空ファイル再作成
-            if (listBxSituation.Items.Count == 0)
-            {
-                string backupLogPath = logPath.Replace("log.txt", $"log_backup_{HIZ}_{TIM}.txt");
-                File.Move(logPath, backupLogPath);
-                File.Create(logPath).Close();
-            }
-        }
-
         /// <summary>
-        /// フォームが開いたときに呼ばれる
+        /// Form1(トップフォーム)読込時イベント
         /// </summary>
         /// <param name="sender"></param>
         /// <param name="e"></param>
-        // 
         private void Form1_Load(object sender, EventArgs e)
         {
             ApplySnowManColors();
@@ -143,12 +71,14 @@ namespace あすよん月次帳票
             timrLogRenewal.Start();
         }
 
-        private void Form1_FormClosing(object sender, FormClosingEventArgs e)
-        {
-            Form3.ClearRuntimeLog();
-        }
-
-        // マスター更新ボタンクリック
+        //=========================================================
+        // コントロール実行メソッド
+        //=========================================================
+        /// <summary>
+        /// マスタ更新リンククリック
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private async void lnkLbMaster_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
         {
             try
@@ -211,7 +141,7 @@ namespace あすよん月次帳票
                 string currentUserID = Properties.Settings.Default.UserID;
 
                 MessageBox.Show("マスタ作成が完了しました！", "完了", MessageBoxButtons.OK, MessageBoxIcon.Information);
-                listBxSituation.Items.Add($"{DateTime.Now:yyyy/MM/dd　HH:mm:ss}　マスタ更新実行");
+                listBxログ表示.Items.Add($"{DateTime.Now:yyyy/MM/dd　HH:mm:ss}　マスタ更新実行");
                 AddLog2($"{HIZTIM} 実行者ID:{currentUserID} がマスタ更新実行しました");
             }
             catch (Exception ex)
@@ -220,7 +150,11 @@ namespace あすよん月次帳票
             }
         }
 
-        /// シュミレーションリンク
+        /// <summary>
+        /// シュミレーションリンククリック(Form3)
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void lnkLbSimulate_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
         {
             // Form3を作成
@@ -232,53 +166,40 @@ namespace あすよん月次帳票
         }
 
         /// <summary>
-        /// データ表示ボタンクリック
+        /// データ抽出リンククリック
         /// </summary>
         /// <param name="sender"></param>
         /// <param name="e"></param>
-        // 
         private void lnkLbDisplay_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
         {
             // Form2を作成
-            var form2 = new RplForm2();
+            var form2 = new Form2();
             // Form2を表示
             form2.Show();
             // Form1を非表示
             this.Hide();
         }
 
+        /// <summary>
+        /// 定型帳票リンククリック
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void lnkLbStandard_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
         {
-            MessageBox.Show("現在開発中です。", "お知らせ", MessageBoxButtons.OK, MessageBoxIcon.Information);
+            // Form5を作成
+            var form5 = new Form5();
+            // Form5を表示
+            form5.Show();
+            // Form1を非表示
+            this.Hide();
         }
 
-        public void ApplySnowManColors()
-        {
-            // フォーム全体の背景色
-            this.BackColor = ColorManager.RauLight1;  // 背景黒
-            // ラベルの色
-            lbMenu.ForeColor = ColorManager.MemeBase;  // 白文字
-            lbSituation.ForeColor = ColorManager.MemeBase;  // 文字白
-            // リストボックス
-            listBxSituation.BackColor = ColorManager.HikaruLight1; // ひーくん黄色
-            listBxSituation.ForeColor = Color.Black;
-            // グループボックスの枠線
-            grpBxMenu.ForeColor = ColorManager.ShopyBase;
-
-            // リンクラベルの色
-            lnkLbSimulate.LinkColor = Color.FromArgb(255, 102, 255);  // さっくんピンク
-            lnkLbDisplay.LinkColor = ColorManager.KojiBase;    // 康二オレンジ
-            lnkLbStandard.LinkColor = ColorManager.AbeBase;   // 阿部ちゃん緑
-            lnkLbMaster.LinkColor = ColorManager.FukaLight1;    // ふっか紫
-
-            StyleButton(btnEnd, ColorManager.RauBase, ColorManager.DateBase, ColorManager.DateLight1);
-            // マウスイベント追加
-            btnEnd.MouseEnter += Btn_MouseEnter;
-            btnEnd.MouseLeave += Btn_MouseLeave;
-            btnEnd.MouseDown += Btn_MouseDown;
-            btnEnd.MouseUp += Btn_MouseUp;
-        }
-
+        /// <summary>
+        /// アプリ終了ボタンクリック
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void btnEnd_Click(object sender, EventArgs e)
         {
             string lockFilePath = Path.Combine(LockFilePath, "LOCK_sim.txt");
@@ -291,14 +212,15 @@ namespace あすよん月次帳票
                 if (flg)
                     File.Delete(lockFilePath);
             }
+            Form1_FormClosing(sender, new FormClosingEventArgs(CloseReason.UserClosing, false));
             Application.Exit();
         }
-        private void timrLogRenewal_Tick(object sender, EventArgs e)
-        {
-            LoadLogs();
-        }
 
-        // タイマーの起動
+        /// <summary>
+        /// シュミレーションロック解除タイマー(1分)
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void timerReleaseLock_Tick(object sender, EventArgs e)
         {
             string lockFilePath = Path.Combine(LockFilePath, "LOCK_sim.txt");
@@ -326,6 +248,152 @@ namespace あすよん月次帳票
             }
         }
 
+        /// <summary>
+        /// ログ表示更新タイマー(30秒)
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void timrLogRenewal_Tick(object sender, EventArgs e)
+        {
+            LoadLogs();
+        }
+
+        //=================================================================
+        // 処理メソッド
+        //=================================================================
+        ///<summary>
+        /// 個人用ログを追加&ログファイル保存
+        /// </summary>
+        /// <param name="message"></param>
+        public void AddLog(string message)
+        {
+            // Form1のリストに追加
+            listBxログ表示.Items.Add($"{message}");
+            // ファイルに保存
+            File.AppendAllText(logPath, message + Environment.NewLine);
+        }
+
+        ///<summary>
+        /// 全体用ログを追加&ログファイル保存
+        /// </summary>
+        /// <param name="message"></param>
+        public void AddLog2(string message)
+        {
+            string logFilePath = Path.Combine(LogFilePath, $@"{HIZ}\LOG_AllSimulation.txt");
+            // Form1のリストに追加
+            listBxログ表示.Items.Add($"{message}");
+            // ファイルに保存
+            File.AppendAllText(logFilePath, message + Environment.NewLine);
+        }
+
+        /// <summary>
+        /// ログファイル読込&過去3日分表示
+        /// </summary>
+        private void LoadLogs()
+        {
+            listBxログ表示.Items.Clear();
+
+            string AllLogFilePath = Path.Combine(LogFilePath, $@"{HIZ}\LOG_AllSimulation.txt");
+            // --- 個人ログの読込 ---
+            if (!File.Exists(logPath)) return;
+
+            var lines = File.ReadAllLines(logPath);
+            DateTime threshold = DateTime.Now.AddDays(-3);
+
+            foreach (var line in lines)
+            {
+                // ログの日付部分をバース
+                if (DateTime.TryParse(line.Substring(0, 10), out DateTime logDate))
+                {
+                    if (logDate > threshold)
+                    {
+                        listBxログ表示.Items.Add(line);
+                    }
+                }
+            }
+            // --- 全体ログの読込 ---
+            if (!File.Exists(AllLogFilePath)) return;
+            var allLines = File.ReadAllLines(AllLogFilePath);
+            foreach (var line in allLines)
+            {
+                // ログの日付部分をバース
+                if (DateTime.TryParse(line.Substring(0, 10), out DateTime logDate))
+                {
+                    if (logDate > threshold)
+                    {
+                        listBxログ表示.Items.Add(line);
+                    }
+                }
+            }
+
+            var sorted = listBxログ表示.Items.Cast<string>()
+                .OrderByDescending(line =>
+                {
+                    if (DateTime.TryParse(line.Substring(line.IndexOf('2'), 16), out var dt)) return dt;
+                    return DateTime.MinValue;
+                })
+                .ToList();
+
+            listBxログ表示.Items.Clear();
+            foreach (var s in sorted)
+                listBxログ表示.Items.Add(s);
+
+            // listBxSituation.Itemsが0件の場合、ログファイルをリネームして空ファイル再作成
+            if (listBxログ表示.Items.Count == 0)
+            {
+                string backupLogPath = logPath.Replace("log.txt", $"log_backup_{HIZ}_{TIM}.txt");
+                File.Move(logPath, backupLogPath);
+                File.Create(logPath).Close();
+            }
+        }
+
+        /// <summary>
+        /// Form3のログ削除
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void Form1_FormClosing(object sender, FormClosingEventArgs e)
+        {
+            Form3.ClearRuntimeLog();
+        }
+        
+        //=================================================================
+        // デザイン関連メソッド
+        //=================================================================
+        /// <summary>
+        /// Form1にスノーマンの色を適用
+        /// </summary>
+        public void ApplySnowManColors()
+        {
+            // フォーム全体の背景色
+            this.BackColor = ColorManager.RauLight1;  // 背景黒
+            // ラベルの色
+            lbメニュー.ForeColor = ColorManager.MemeBase;  // 白文字
+            lb操作履歴.ForeColor = ColorManager.MemeBase;  // 文字白
+            // リストボックス
+            listBxログ表示.BackColor = ColorManager.HikaruLight1; // ひーくん黄色
+            listBxログ表示.ForeColor = Color.Black;
+            // グループボックスの枠線
+            grpBxメニュー.ForeColor = ColorManager.ShopyBase;
+
+            // リンクラベルの色
+            lnkLbシュミレーション.LinkColor = Color.FromArgb(255, 102, 255);  // さっくんピンク
+            lnkLbデータ抽出.LinkColor = ColorManager.KojiBase;    // 康二オレンジ
+            lnkLb定型帳票.LinkColor = ColorManager.AbeBase;   // 阿部ちゃん緑
+            lnkLbマスタ更新.LinkColor = ColorManager.FukaLight1;    // ふっか紫
+
+            StyleButton(btn終了, ColorManager.RauBase, ColorManager.DateBase, ColorManager.DateLight1);
+            // マウスイベント追加
+            btn終了.MouseEnter += Btn_MouseEnter;
+            btn終了.MouseLeave += Btn_MouseLeave;
+            btn終了.MouseDown += Btn_MouseDown;
+            btn終了.MouseUp += Btn_MouseUp;
+        }
+        /// <summary>
+        /// グループボックスのカスタム枠線描画
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void GroupBoxCustomBorder(object sender, PaintEventArgs e)
         {
             GroupBox box = (GroupBox)sender;

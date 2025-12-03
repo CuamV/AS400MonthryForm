@@ -298,7 +298,7 @@ namespace あすよん月次帳票
         }
 
         /// <summary>
-        /// アプリ終了時に呼ぶとForm3のログも消える
+        /// Form3のログ削除
         /// </summary>
         public static void ClearRuntimeLog()
         {
