@@ -51,7 +51,7 @@
             this.btnCancel.Location = new System.Drawing.Point(495, 92);
             this.btnCancel.Name = "btnCancel";
             this.btnCancel.Size = new System.Drawing.Size(82, 38);
-            this.btnCancel.TabIndex = 13;
+            this.btnCancel.TabIndex = 6;
             this.btnCancel.Text = "Cancel";
             this.btnCancel.UseVisualStyleBackColor = true;
             this.btnCancel.Click += new System.EventHandler(this.btnCancel_Click);
@@ -62,7 +62,7 @@
             this.btnOK.Location = new System.Drawing.Point(495, 37);
             this.btnOK.Name = "btnOK";
             this.btnOK.Size = new System.Drawing.Size(82, 38);
-            this.btnOK.TabIndex = 12;
+            this.btnOK.TabIndex = 5;
             this.btnOK.Text = "OK";
             this.btnOK.UseVisualStyleBackColor = true;
             this.btnOK.Click += new System.EventHandler(this.btnOK_Click);
@@ -73,7 +73,7 @@
             this.btn削除.Location = new System.Drawing.Point(343, 145);
             this.btn削除.Name = "btn削除";
             this.btn削除.Size = new System.Drawing.Size(67, 29);
-            this.btn削除.TabIndex = 11;
+            this.btn削除.TabIndex = 4;
             this.btn削除.Text = "削除";
             this.btn削除.UseVisualStyleBackColor = true;
             this.btn削除.Click += new System.EventHandler(this.btn削除_Click);
@@ -84,7 +84,7 @@
             this.btn追加.Location = new System.Drawing.Point(256, 145);
             this.btn追加.Name = "btn追加";
             this.btn追加.Size = new System.Drawing.Size(67, 29);
-            this.btn追加.TabIndex = 10;
+            this.btn追加.TabIndex = 2;
             this.btn追加.Text = "追加";
             this.btn追加.UseVisualStyleBackColor = true;
             this.btn追加.Click += new System.EventHandler(this.btn追加_Click);
@@ -96,8 +96,9 @@
             this.listBx販売仕入.ItemHeight = 15;
             this.listBx販売仕入.Location = new System.Drawing.Point(363, 180);
             this.listBx販売仕入.Name = "listBx販売仕入";
+            this.listBx販売仕入.SelectionMode = System.Windows.Forms.SelectionMode.MultiExtended;
             this.listBx販売仕入.Size = new System.Drawing.Size(275, 259);
-            this.listBx販売仕入.TabIndex = 9;
+            this.listBx販売仕入.TabIndex = 3;
             // 
             // label1
             // 
@@ -116,7 +117,7 @@
             this.treeView販売仕入.Location = new System.Drawing.Point(16, 180);
             this.treeView販売仕入.Name = "treeView販売仕入";
             this.treeView販売仕入.Size = new System.Drawing.Size(285, 259);
-            this.treeView販売仕入.TabIndex = 7;
+            this.treeView販売仕入.TabIndex = 1;
             this.treeView販売仕入.AfterCheck += new System.Windows.Forms.TreeViewEventHandler(this.TreeView販売仕入_AfterCheck);
             // 
             // grpBx検索
@@ -130,7 +131,7 @@
             this.grpBx検索.Location = new System.Drawing.Point(91, 27);
             this.grpBx検索.Name = "grpBx検索";
             this.grpBx検索.Size = new System.Drawing.Size(370, 101);
-            this.grpBx検索.TabIndex = 14;
+            this.grpBx検索.TabIndex = 0;
             this.grpBx検索.TabStop = false;
             this.grpBx検索.Text = "< 検索 >";
             // 
@@ -140,7 +141,7 @@
             this.btn検索.Location = new System.Drawing.Point(260, 19);
             this.btn検索.Name = "btn検索";
             this.btn検索.Size = new System.Drawing.Size(67, 29);
-            this.btn検索.TabIndex = 19;
+            this.btn検索.TabIndex = 2;
             this.btn検索.Text = "検索";
             this.btn検索.UseVisualStyleBackColor = true;
             this.btn検索.Click += new System.EventHandler(this.btn検索_Click);
@@ -150,7 +151,7 @@
             this.txtBx名称.Location = new System.Drawing.Point(99, 64);
             this.txtBx名称.Name = "txtBx名称";
             this.txtBx名称.Size = new System.Drawing.Size(247, 23);
-            this.txtBx名称.TabIndex = 18;
+            this.txtBx名称.TabIndex = 1;
             // 
             // lb名称
             // 
@@ -175,7 +176,7 @@
             this.txtBxコード.Location = new System.Drawing.Point(99, 23);
             this.txtBxコード.Name = "txtBxコード";
             this.txtBxコード.Size = new System.Drawing.Size(107, 23);
-            this.txtBxコード.TabIndex = 15;
+            this.txtBxコード.TabIndex = 0;
             // 
             // 販売仕入先Form
             // 

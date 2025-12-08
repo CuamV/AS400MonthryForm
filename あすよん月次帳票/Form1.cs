@@ -20,15 +20,8 @@ namespace あすよん月次帳票
         // フィールド変数
         //=========================================================
         private string HIZTIM;
-        private string HIZ = DateTime.Now.ToString("yyyyMMdd");
         private string TIM = DateTime.Now.ToString("HHmmss");
         private Label lb操作履歴;
-
-        private string mfPath = @"\\ohnosv01\OhnoSys\099_sys\mf";
-        private readonly string logPath =
-            Path.Combine(Application.UserAppDataPath, "log.txt");
-        private const string LockFilePath = @"\\ohnosv01\OhnoSys\099_sys\Lock";
-        private const string LogFilePath = @"\\ohnosv01\OhnoSys\099_sys\LOG";
 
         //=========================================================
         // コンストラクタ
@@ -37,20 +30,29 @@ namespace あすよん月次帳票
         {
             InitializeComponent();
 
-            JsonLoader.LoadBumon(mfPath + @"\BUMON.json");
-            JsonLoader.LoadHanbai("オーノ", Path.Combine(mfPath, "DLB01HANBAI.json"));
-            JsonLoader.LoadShiire("オーノ", Path.Combine(mfPath, "DLB01SHIIRE.json"));
-            JsonLoader.LoadHanbai("サンミックダスコン", Path.Combine(mfPath, "DLB02HANBAI.json"));
-            JsonLoader.LoadShiire("サンミックダスコン", Path.Combine(mfPath, "DLB02SHIIRE.json"));
-            JsonLoader.LoadHanbai("サンミックカーペット", Path.Combine(mfPath, "DLB03HANBAI.json"));
-            JsonLoader.LoadShiire("サンミックカーペット", Path.Combine(mfPath, "DLB03SHIIRE.json"));
+            JsonLoader.LoadBumon(CommonData.mfPath + @"\BUMON.json");
+            JsonLoader.LoadHanbai("オーノ", Path.Combine(CommonData.mfPath, "DLB01HANBAI.json"));
+            JsonLoader.LoadShiire("オーノ", Path.Combine(CommonData.mfPath, "DLB01SHIIRE.json"));
+            JsonLoader.LoadHanbai("サンミックダスコン", Path.Combine(CommonData.mfPath, "DLB02HANBAI.json"));
+            JsonLoader.LoadShiire("サンミックダスコン", Path.Combine(CommonData.mfPath, "DLB02SHIIRE.json"));
+            JsonLoader.LoadHanbai("サンミックカーペット", Path.Combine(CommonData.mfPath, "DLB03HANBAI.json"));
+            JsonLoader.LoadShiire("サンミックカーペット", Path.Combine(CommonData.mfPath, "DLB03SHIIRE.json"));
 
             grpBxメニュー.Paint += GroupBoxCustomBorder;
 
+            if (!Directory.Exists(Path.Combine(CommonData.LogPath, CommonData.HIZ)))
+                Directory.CreateDirectory(Path.Combine(CommonData.LogPath, CommonData.HIZ));
+            // 個人用ログファイルパス
+            if (!File.Exists(CommonData.uLog))
+                File.Create(CommonData.uLog).Close();
+            // 全体用ログファイルパス
+            if (!File.Exists(CommonData.conLog))
+                File.Create(CommonData.conLog).Close();
             LoadLogs();
 
             // フェードインイベント追加
             this.Shown += Form1_Shown;
+
         }
 
         /// <summary>
@@ -117,13 +119,13 @@ namespace あすよん月次帳票
                 {
                     // 販売先マスタ取得
                     var hanbai = FormActionMethod.GetHanbaiAll(lib);
-                    var hanbaiFile = $@"{mfPath}\{lib.Replace("SM1", "")}HANBAI.json";
+                    var hanbaiFile = $@"{CommonData.mfPath}\{lib.Replace("SM1", "")}HANBAI.json";
                     FormActionMethod.SaveToJson(hanbaiFile, hanbai);
 
 
                     // 仕入先マスタ取得
                     var shiire = FormActionMethod.GetShiireAll(lib);
-                    var shiireFile = $@"{mfPath}\{lib.Replace("SM1", "")}SHIIRE.json";
+                    var shiireFile = $@"{CommonData.mfPath}\{lib.Replace("SM1", "")}SHIIRE.json";
                     FormActionMethod.SaveToJson(shiireFile, shiire);
                 }
 
@@ -138,11 +140,11 @@ namespace あすよん月次帳票
                 animThread.Join();
 
                 HIZTIM = $"{DateTime.Now:yyyy/MM/dd HH:mm:ss}";
-                string currentUserID = Properties.Settings.Default.UserID;
 
                 MessageBox.Show("マスタ作成が完了しました！", "完了", MessageBoxButtons.OK, MessageBoxIcon.Information);
                 listBxログ表示.Items.Add($"{DateTime.Now:yyyy/MM/dd　HH:mm:ss}　マスタ更新実行");
-                AddLog2($"{HIZTIM} 実行者ID:{currentUserID} がマスタ更新実行しました");
+                AddLog($"{HIZTIM} マスタ更新 0 【ユーザー:{CommonData.UserName}】");
+                AddLog2($"{HIZTIM} マスタ更新 0 【ユーザー:{CommonData.UserName}】マスタ更新が完了しました。");
             }
             catch (Exception ex)
             {
@@ -202,18 +204,21 @@ namespace あすよん月次帳票
         /// <param name="e"></param>
         private void btnEnd_Click(object sender, EventArgs e)
         {
-            string lockFilePath = Path.Combine(LockFilePath, "LOCK_sim.txt");
+            string lockFilePath = Path.Combine(CommonData.LockPath, "LOCK_sim.txt");
             string currentUserID = Properties.Settings.Default.UserID;
 
             if (File.Exists(lockFilePath))
             {
                 // ロックファイルが存在する場合、ロックを解除+削除
-                var flg = FormActionMethod.ReleaseSimulationLock(currentUserID, lockFilePath, LogFilePath);
+                var flg = FormActionMethod.ReleaseSimulationLock(currentUserID, lockFilePath, CommonData.LogPath);
                 if (flg)
                     File.Delete(lockFilePath);
             }
             Form1_FormClosing(sender, new FormClosingEventArgs(CloseReason.UserClosing, false));
             Application.Exit();
+
+            HIZTIM = $"{DateTime.Now:yyyy/MM/dd HH:mm:ss}";
+            AddLog($"{HIZTIM} ログアウト 1 【ユーザー:{CommonData.UserName}】");
         }
 
         /// <summary>
@@ -223,7 +228,7 @@ namespace あすよん月次帳票
         /// <param name="e"></param>
         private void timerReleaseLock_Tick(object sender, EventArgs e)
         {
-            string lockFilePath = Path.Combine(LockFilePath, "LOCK_sim.txt");
+            string lockFilePath = Path.Combine(CommonData.LockPath, "LOCK_sim.txt");
             string currentUserID = Properties.Settings.Default.UserID;
 
             if (File.Exists(lockFilePath))
@@ -241,7 +246,7 @@ namespace あすよん月次帳票
                 // 最終起動から10分経過していたらロック解除
                 if (isExpired)
                 {
-                    var flg = FormActionMethod.ReleaseSimulationLock(currentUserID, lockFilePath, LogFilePath);
+                    var flg = FormActionMethod.ReleaseSimulationLock(currentUserID, lockFilePath, CommonData.LogPath);
                     if (flg)
                         File.Delete(lockFilePath);
                 }
@@ -270,7 +275,7 @@ namespace あすよん月次帳票
             // Form1のリストに追加
             listBxログ表示.Items.Add($"{message}");
             // ファイルに保存
-            File.AppendAllText(logPath, message + Environment.NewLine);
+            File.AppendAllText(CommonData.uLog, message + Environment.NewLine);
         }
 
         ///<summary>
@@ -279,11 +284,10 @@ namespace あすよん月次帳票
         /// <param name="message"></param>
         public void AddLog2(string message)
         {
-            string logFilePath = Path.Combine(LogFilePath, $@"{HIZ}\LOG_AllSimulation.txt");
             // Form1のリストに追加
             listBxログ表示.Items.Add($"{message}");
             // ファイルに保存
-            File.AppendAllText(logFilePath, message + Environment.NewLine);
+            File.AppendAllText(CommonData.conLog, message + Environment.NewLine);
         }
 
         /// <summary>
@@ -293,11 +297,11 @@ namespace あすよん月次帳票
         {
             listBxログ表示.Items.Clear();
 
-            string AllLogFilePath = Path.Combine(LogFilePath, $@"{HIZ}\LOG_AllSimulation.txt");
             // --- 個人ログの読込 ---
-            if (!File.Exists(logPath)) return;
+            if (!File.Exists(CommonData.uLog)) return;
 
-            var lines = File.ReadAllLines(logPath);
+            // 1:年月日 2:時分秒 3:処理ステータス 4:表示フラグ 5:ユーザー
+            var lines = File.ReadAllLines(CommonData.uLog);
             DateTime threshold = DateTime.Now.AddDays(-3);
 
             foreach (var line in lines)
@@ -312,8 +316,8 @@ namespace あすよん月次帳票
                 }
             }
             // --- 全体ログの読込 ---
-            if (!File.Exists(AllLogFilePath)) return;
-            var allLines = File.ReadAllLines(AllLogFilePath);
+            if (!File.Exists(CommonData.conLog)) return;
+            var allLines = File.ReadAllLines(CommonData.conLog);
             foreach (var line in allLines)
             {
                 // ログの日付部分をバース
@@ -338,13 +342,13 @@ namespace あすよん月次帳票
             foreach (var s in sorted)
                 listBxログ表示.Items.Add(s);
 
-            // listBxSituation.Itemsが0件の場合、ログファイルをリネームして空ファイル再作成
-            if (listBxログ表示.Items.Count == 0)
-            {
-                string backupLogPath = logPath.Replace("log.txt", $"log_backup_{HIZ}_{TIM}.txt");
-                File.Move(logPath, backupLogPath);
-                File.Create(logPath).Close();
-            }
+            //// listBxSituation.Itemsが0件の場合、ログファイルをリネームして空ファイル再作成
+            //if (listBxログ表示.Items.Count == 0)
+            //{
+            //    string backupLogPath = logPath.Replace("log.txt", $"log_backup_{HIZ}_{TIM}.txt");
+            //    File.Move(logPath, backupLogPath);
+            //    File.Create(logPath).Close();
+            //}
         }
 
         /// <summary>

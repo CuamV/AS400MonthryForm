@@ -103,6 +103,16 @@ namespace あすよん月次帳票.Properties {
         /// <summary>
         ///   型 System.Drawing.Bitmap のローカライズされたリソースを検索します。
         /// </summary>
+        internal static System.Drawing.Bitmap あすよん月次帳票 {
+            get {
+                object obj = ResourceManager.GetObject("あすよん月次帳票", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   型 System.Drawing.Bitmap のローカライズされたリソースを検索します。
+        /// </summary>
         internal static System.Drawing.Bitmap 鶏_1 {
             get {
                 object obj = ResourceManager.GetObject("鶏-1", resourceCulture);

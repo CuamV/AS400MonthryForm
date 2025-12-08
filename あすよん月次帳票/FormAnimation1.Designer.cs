@@ -75,6 +75,7 @@ namespace あすよん月次帳票
             this.Controls.Add(this.pictBx1);
             this.Controls.Add(this.lblMessage);
             this.Name = "FormAnimation1";
+            this.ShowInTaskbar = false;
             ((System.ComponentModel.ISupportInitialize)(this.pictBx1)).EndInit();
             this.ResumeLayout(false);
 

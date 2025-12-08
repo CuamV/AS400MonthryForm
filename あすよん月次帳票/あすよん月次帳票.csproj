@@ -174,6 +174,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="ColorManager.cs" />
+    <Compile Include="CommonData.cs" />
     <Compile Include="DataProcessor.cs" />
     <Compile Include="DataSummarizeMethod.cs" />
     <Compile Include="Form1.cs">
@@ -223,6 +224,12 @@
     <Compile Include="FormAnimation2.Designer.cs">
       <DependentUpon>FormAnimation2.cs</DependentUpon>
     </Compile>
+    <Compile Include="FormMainTop.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="FormMainTop.Designer.cs">
+      <DependentUpon>FormMainTop.cs</DependentUpon>
+    </Compile>
     <Compile Include="GetDataMethod.cs" />
     <Compile Include="mf.cs" />
     <Compile Include="Program.cs" />
@@ -267,6 +274,9 @@
     <EmbeddedResource Include="FormAnimation3.resx">
       <DependentUpon>FormAnimation3.cs</DependentUpon>
     </EmbeddedResource>
+    <EmbeddedResource Include="FormMainTop.resx">
+      <DependentUpon>FormMainTop.cs</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Include="Properties\Resources.resx">
       <Generator>ResXFileCodeGenerator</Generator>
       <LastGenOutput>Resources.Designer.cs</LastGenOutput>
@@ -304,6 +314,7 @@
   <ItemGroup>
     <Content Include="ic_all_csm02.ico" />
     <Content Include="memo.txt" />
+    <None Include="Resources\あすよん月次帳票.png" />
     <None Include="Resources\Infiter_Small.gif" />
     <None Include="Resources\free_snowman.gif" />
     <None Include="Resources\鶏-1.gif" />

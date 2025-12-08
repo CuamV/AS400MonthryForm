@@ -72,5 +72,15 @@ namespace あすよん月次帳票
             if (e.Button == MouseButtons.Left)
                 isMouseDown = false;
         }
+
+        /// <summary>
+        /// 最小化ボタンクリック
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void btnMin_Click(object sender, EventArgs e)
+        {
+            this.WindowState = FormWindowState.Minimized;
+        }
     }
 }

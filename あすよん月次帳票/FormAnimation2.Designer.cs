@@ -28,8 +28,10 @@
         /// </summary>
         private void InitializeComponent()
         {
+            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(FormAnimation2));
             this.lblMessage = new System.Windows.Forms.Label();
             this.pictBx2 = new System.Windows.Forms.PictureBox();
+            this.btnMin = new System.Windows.Forms.Button();
             ((System.ComponentModel.ISupportInitialize)(this.pictBx2)).BeginInit();
             this.SuspendLayout();
             // 
@@ -54,13 +56,29 @@
             this.pictBx2.TabIndex = 5;
             this.pictBx2.TabStop = false;
             // 
+            // btnMin
+            // 
+            this.btnMin.BackColor = System.Drawing.Color.NavajoWhite;
+            this.btnMin.Font = new System.Drawing.Font("Meiryo UI", 6.75F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(128)));
+            this.btnMin.Location = new System.Drawing.Point(188, 6);
+            this.btnMin.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
+            this.btnMin.Name = "btnMin";
+            this.btnMin.Size = new System.Drawing.Size(33, 20);
+            this.btnMin.TabIndex = 80;
+            this.btnMin.Text = "―";
+            this.btnMin.UseVisualStyleBackColor = false;
+            this.btnMin.Click += new System.EventHandler(this.btnMin_Click);
+            // 
             // FormAnimation2
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 12F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(228, 138);
+            this.ControlBox = false;
+            this.Controls.Add(this.btnMin);
             this.Controls.Add(this.pictBx2);
             this.Controls.Add(this.lblMessage);
+            this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
             this.Name = "FormAnimation2";
             this.Text = "FormAnimatuin2";
             ((System.ComponentModel.ISupportInitialize)(this.pictBx2)).EndInit();
@@ -70,5 +88,6 @@
 
         #endregion
         private System.Windows.Forms.PictureBox pictBx2;
+        private System.Windows.Forms.Button btnMin;
     }
 }

@@ -14,6 +14,8 @@ namespace あすよん月次帳票
         {
             InitializeComponent();
 
+            this.TopMost = false; // 最前面表示を一時的に解除
+
             pictBx1.Image = Image.FromFile(@"\\ohnosv01\OhnoSys\099_sys\Images\Infiter_Big.gif");
             pictBx1.SizeMode = PictureBoxSizeMode.Zoom; // PictureBoxに合わせて拡大縮小
             // 画面中央に表示

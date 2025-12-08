@@ -38,10 +38,6 @@ namespace あすよん月次帳票
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(Form3));
             this.lbSituation = new System.Windows.Forms.Label();
             this.listBxSituation = new System.Windows.Forms.ListBox();
-            this.lbPASS = new System.Windows.Forms.Label();
-            this.txtBxPASS = new System.Windows.Forms.TextBox();
-            this.txtBxID = new System.Windows.Forms.TextBox();
-            this.IbID = new System.Windows.Forms.Label();
             this.chkBxSuncar = new System.Windows.Forms.CheckBox();
             this.lbBumon = new System.Windows.Forms.Label();
             this.chkBxOhno = new System.Windows.Forms.CheckBox();
@@ -60,7 +56,7 @@ namespace あすよん月次帳票
             // 
             this.lbSituation.AutoSize = true;
             this.lbSituation.Font = new System.Drawing.Font("Meiryo UI", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(128)));
-            this.lbSituation.Location = new System.Drawing.Point(12, 163);
+            this.lbSituation.Location = new System.Drawing.Point(12, 52);
             this.lbSituation.Name = "lbSituation";
             this.lbSituation.Size = new System.Drawing.Size(125, 17);
             this.lbSituation.TabIndex = 25;
@@ -71,55 +67,19 @@ namespace あすよん月次帳票
             this.listBxSituation.Font = new System.Drawing.Font("Meiryo UI", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(128)));
             this.listBxSituation.FormattingEnabled = true;
             this.listBxSituation.ItemHeight = 15;
-            this.listBxSituation.Location = new System.Drawing.Point(15, 192);
+            this.listBxSituation.Location = new System.Drawing.Point(15, 81);
             this.listBxSituation.Name = "listBxSituation";
-            this.listBxSituation.Size = new System.Drawing.Size(378, 124);
-            this.listBxSituation.TabIndex = 24;
-            // 
-            // lbPASS
-            // 
-            this.lbPASS.AutoSize = true;
-            this.lbPASS.Font = new System.Drawing.Font("Meiryo UI", 11.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(128)));
-            this.lbPASS.Location = new System.Drawing.Point(32, 102);
-            this.lbPASS.Name = "lbPASS";
-            this.lbPASS.Size = new System.Drawing.Size(54, 19);
-            this.lbPASS.TabIndex = 31;
-            this.lbPASS.Text = "PASS:";
-            // 
-            // txtBxPASS
-            // 
-            this.txtBxPASS.Font = new System.Drawing.Font("Meiryo UI", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(128)));
-            this.txtBxPASS.Location = new System.Drawing.Point(88, 102);
-            this.txtBxPASS.Name = "txtBxPASS";
-            this.txtBxPASS.Size = new System.Drawing.Size(115, 24);
-            this.txtBxPASS.TabIndex = 30;
-            // 
-            // txtBxID
-            // 
-            this.txtBxID.Font = new System.Drawing.Font("Meiryo UI", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(128)));
-            this.txtBxID.Location = new System.Drawing.Point(88, 69);
-            this.txtBxID.Name = "txtBxID";
-            this.txtBxID.Size = new System.Drawing.Size(115, 24);
-            this.txtBxID.TabIndex = 28;
-            // 
-            // IbID
-            // 
-            this.IbID.AutoSize = true;
-            this.IbID.Font = new System.Drawing.Font("Meiryo UI", 11.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(128)));
-            this.IbID.Location = new System.Drawing.Point(54, 70);
-            this.IbID.Name = "IbID";
-            this.IbID.Size = new System.Drawing.Size(32, 19);
-            this.IbID.TabIndex = 29;
-            this.IbID.Text = "ID:";
+            this.listBxSituation.Size = new System.Drawing.Size(405, 94);
+            this.listBxSituation.TabIndex = 0;
             // 
             // chkBxSuncar
             // 
             this.chkBxSuncar.AutoSize = true;
             this.chkBxSuncar.Font = new System.Drawing.Font("Meiryo UI", 11.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(128)));
-            this.chkBxSuncar.Location = new System.Drawing.Point(429, 251);
+            this.chkBxSuncar.Location = new System.Drawing.Point(15, 276);
             this.chkBxSuncar.Name = "chkBxSuncar";
             this.chkBxSuncar.Size = new System.Drawing.Size(134, 23);
-            this.chkBxSuncar.TabIndex = 37;
+            this.chkBxSuncar.TabIndex = 3;
             this.chkBxSuncar.Text = "サンミックカーペット";
             this.chkBxSuncar.UseVisualStyleBackColor = true;
             this.chkBxSuncar.Click += new System.EventHandler(this.Company_CheckedChanged);
@@ -128,7 +88,7 @@ namespace あすよん月次帳票
             // 
             this.lbBumon.AutoSize = true;
             this.lbBumon.Font = new System.Drawing.Font("Meiryo UI", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(128)));
-            this.lbBumon.Location = new System.Drawing.Point(426, 299);
+            this.lbBumon.Location = new System.Drawing.Point(149, 188);
             this.lbBumon.Name = "lbBumon";
             this.lbBumon.Size = new System.Drawing.Size(48, 17);
             this.lbBumon.TabIndex = 34;
@@ -138,10 +98,10 @@ namespace あすよん月次帳票
             // 
             this.chkBxOhno.AutoSize = true;
             this.chkBxOhno.Font = new System.Drawing.Font("Meiryo UI", 11.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(128)));
-            this.chkBxOhno.Location = new System.Drawing.Point(429, 193);
+            this.chkBxOhno.Location = new System.Drawing.Point(15, 218);
             this.chkBxOhno.Name = "chkBxOhno";
             this.chkBxOhno.Size = new System.Drawing.Size(61, 23);
-            this.chkBxOhno.TabIndex = 32;
+            this.chkBxOhno.TabIndex = 1;
             this.chkBxOhno.Text = "オーノ";
             this.chkBxOhno.UseVisualStyleBackColor = true;
             this.chkBxOhno.Click += new System.EventHandler(this.Company_CheckedChanged);
@@ -150,10 +110,10 @@ namespace あすよん月次帳票
             // 
             this.chkBxSundus.AutoSize = true;
             this.chkBxSundus.Font = new System.Drawing.Font("Meiryo UI", 11.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(128)));
-            this.chkBxSundus.Location = new System.Drawing.Point(429, 222);
+            this.chkBxSundus.Location = new System.Drawing.Point(15, 247);
             this.chkBxSundus.Name = "chkBxSundus";
             this.chkBxSundus.Size = new System.Drawing.Size(122, 23);
-            this.chkBxSundus.TabIndex = 33;
+            this.chkBxSundus.TabIndex = 2;
             this.chkBxSundus.Text = "サンミックダスコン";
             this.chkBxSundus.UseVisualStyleBackColor = true;
             this.chkBxSundus.Click += new System.EventHandler(this.Company_CheckedChanged);
@@ -162,7 +122,7 @@ namespace あすよん月次帳票
             // 
             this.lbCompany.AutoSize = true;
             this.lbCompany.Font = new System.Drawing.Font("Meiryo UI", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(128)));
-            this.lbCompany.Location = new System.Drawing.Point(426, 163);
+            this.lbCompany.Location = new System.Drawing.Point(12, 188);
             this.lbCompany.Name = "lbCompany";
             this.lbCompany.Size = new System.Drawing.Size(48, 17);
             this.lbCompany.TabIndex = 35;
@@ -172,21 +132,21 @@ namespace あすよん月次帳票
             // 
             this.btnSimulation.BackColor = System.Drawing.SystemColors.Control;
             this.btnSimulation.Font = new System.Drawing.Font("Meiryo UI", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(128)));
-            this.btnSimulation.Location = new System.Drawing.Point(337, 67);
+            this.btnSimulation.Location = new System.Drawing.Point(324, 233);
             this.btnSimulation.Name = "btnSimulation";
-            this.btnSimulation.Size = new System.Drawing.Size(121, 35);
-            this.btnSimulation.TabIndex = 38;
-            this.btnSimulation.Text = "シュミレーション実行";
+            this.btnSimulation.Size = new System.Drawing.Size(85, 27);
+            this.btnSimulation.TabIndex = 5;
+            this.btnSimulation.Text = "実行";
             this.btnSimulation.UseVisualStyleBackColor = false;
             this.btnSimulation.Click += new System.EventHandler(this.btnSimulation_Click);
             // 
             // btnForm1Back
             // 
             this.btnForm1Back.Font = new System.Drawing.Font("Meiryo UI", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(128)));
-            this.btnForm1Back.Location = new System.Drawing.Point(468, 67);
+            this.btnForm1Back.Location = new System.Drawing.Point(324, 272);
             this.btnForm1Back.Name = "btnForm1Back";
-            this.btnForm1Back.Size = new System.Drawing.Size(108, 35);
-            this.btnForm1Back.TabIndex = 65;
+            this.btnForm1Back.Size = new System.Drawing.Size(85, 27);
+            this.btnForm1Back.TabIndex = 6;
             this.btnForm1Back.Text = "戻る";
             this.btnForm1Back.UseVisualStyleBackColor = true;
             this.btnForm1Back.Click += new System.EventHandler(this.btnForm1Back_Click);
@@ -195,10 +155,10 @@ namespace あすよん月次帳票
             // 
             this.cmbxBumon.Font = new System.Drawing.Font("Meiryo UI", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(128)));
             this.cmbxBumon.FormattingEnabled = true;
-            this.cmbxBumon.Location = new System.Drawing.Point(429, 333);
+            this.cmbxBumon.Location = new System.Drawing.Point(152, 218);
             this.cmbxBumon.Name = "cmbxBumon";
-            this.cmbxBumon.Size = new System.Drawing.Size(155, 25);
-            this.cmbxBumon.TabIndex = 66;
+            this.cmbxBumon.Size = new System.Drawing.Size(141, 25);
+            this.cmbxBumon.TabIndex = 4;
             // 
             // pictureBox1
             // 
@@ -223,10 +183,10 @@ namespace あすよん月次帳票
             // btnMin
             // 
             this.btnMin.Font = new System.Drawing.Font("Meiryo UI", 8.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(128)));
-            this.btnMin.Location = new System.Drawing.Point(554, 10);
+            this.btnMin.Location = new System.Drawing.Point(381, 10);
             this.btnMin.Name = "btnMin";
             this.btnMin.Size = new System.Drawing.Size(39, 20);
-            this.btnMin.TabIndex = 73;
+            this.btnMin.TabIndex = 7;
             this.btnMin.Text = "―";
             this.btnMin.UseVisualStyleBackColor = true;
             this.btnMin.Click += new System.EventHandler(this.btnMin_Click);
@@ -235,7 +195,7 @@ namespace あすよん月次帳票
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 12F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(604, 386);
+            this.ClientSize = new System.Drawing.Size(435, 324);
             this.Controls.Add(this.btnMin);
             this.Controls.Add(this.lbTitleSimulation);
             this.Controls.Add(this.pictureBox1);
@@ -247,10 +207,6 @@ namespace あすよん月次帳票
             this.Controls.Add(this.chkBxOhno);
             this.Controls.Add(this.chkBxSundus);
             this.Controls.Add(this.lbCompany);
-            this.Controls.Add(this.lbPASS);
-            this.Controls.Add(this.txtBxPASS);
-            this.Controls.Add(this.txtBxID);
-            this.Controls.Add(this.IbID);
             this.Controls.Add(this.lbSituation);
             this.Controls.Add(this.listBxSituation);
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.None;
@@ -269,10 +225,6 @@ namespace あすよん月次帳票
 
         private System.Windows.Forms.Label lbSituation;
         private System.Windows.Forms.ListBox listBxSituation;
-        private System.Windows.Forms.Label lbPASS;
-        private System.Windows.Forms.TextBox txtBxPASS;
-        private System.Windows.Forms.TextBox txtBxID;
-        private System.Windows.Forms.Label IbID;
         private System.Windows.Forms.CheckBox chkBxSuncar;
         private System.Windows.Forms.Label lbBumon;
         private System.Windows.Forms.CheckBox chkBxOhno;

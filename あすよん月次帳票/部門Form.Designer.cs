@@ -73,7 +73,7 @@
             this.btn追加.Location = new System.Drawing.Point(171, 75);
             this.btn追加.Name = "btn追加";
             this.btn追加.Size = new System.Drawing.Size(67, 29);
-            this.btn追加.TabIndex = 3;
+            this.btn追加.TabIndex = 1;
             this.btn追加.Text = "追加";
             this.btn追加.UseVisualStyleBackColor = true;
             this.btn追加.Click += new System.EventHandler(this.btn追加_Click);
@@ -84,7 +84,7 @@
             this.btn削除.Location = new System.Drawing.Point(249, 75);
             this.btn削除.Name = "btn削除";
             this.btn削除.Size = new System.Drawing.Size(67, 29);
-            this.btn削除.TabIndex = 4;
+            this.btn削除.TabIndex = 3;
             this.btn削除.Text = "削除";
             this.btn削除.UseVisualStyleBackColor = true;
             this.btn削除.Click += new System.EventHandler(this.btn削除_Click);
@@ -95,7 +95,7 @@
             this.btnOK.Location = new System.Drawing.Point(374, 12);
             this.btnOK.Name = "btnOK";
             this.btnOK.Size = new System.Drawing.Size(82, 38);
-            this.btnOK.TabIndex = 5;
+            this.btnOK.TabIndex = 4;
             this.btnOK.Text = "OK";
             this.btnOK.UseVisualStyleBackColor = true;
             this.btnOK.Click += new System.EventHandler(this.btnOK_Click);
@@ -106,7 +106,7 @@
             this.btnCancel.Location = new System.Drawing.Point(374, 56);
             this.btnCancel.Name = "btnCancel";
             this.btnCancel.Size = new System.Drawing.Size(82, 38);
-            this.btnCancel.TabIndex = 6;
+            this.btnCancel.TabIndex = 5;
             this.btnCancel.Text = "Cancel";
             this.btnCancel.UseVisualStyleBackColor = true;
             this.btnCancel.Click += new System.EventHandler(this.btnCancel_Click);

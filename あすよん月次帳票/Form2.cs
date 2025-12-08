@@ -330,12 +330,41 @@ namespace あすよん月次帳票
             // ★表示＆Excelのデータ抽出(明細)
             //----------------------------------------------------
             // メインデータ作成処理(メインスレッドでデータ抽出) 
-            var (slprResult, stockDtNow, stockDtOld, selDatas, selAggregte, selBookName, conList) = MakeMainData();
+            (DataTable slprResult, DataTable stockDtNow, DataTable stockDtOld,
+                List<string> selDatas, string selAggregte, string selBookName, Dictionary<string, List<string>> conList) result;
 
+            try
+            {
+                // 初回トライ
+                result = MakeMainData();
+            }
+            catch (Ohno.Db.ConnectionFailedException)
+            {
+                // 「Ohno.Db.ConnectionFailedException:
+                // '以下のエラーが発生したため、データベースに接続できませんでした。 ネットワークに問題があるため、データベースに接続できません。
+                await Task.Delay(500);
+
+                try
+                {
+                    // リトライ
+                    result = MakeMainData();
+                }
+                catch (Exception ex) 
+                {
+                    // 2回とも失敗→アニメーションを閉じてユーザー通知
+                    CloseAnimation(anim, animThread);
+
+                    MessageBox.Show("AS400への接続に失敗しました。\n" +
+                        "ネットワークを確認して、再度お試しください。\n\n" +
+                        $"【詳細】{ex.Message}", "接続エラー", MessageBoxButtons.OK, MessageBoxIcon.Error);
+
+                    return;
+                }
+            }
             // ----------------------------------------------------
             // ★集計処理
             // ----------------------------------------------------
-            var displayData = DoSummary(slprResult, stockDtNow, stockDtOld, selDatas, selAggregte);
+            var displayData = DoSummary(result.slprResult, result.stockDtNow, result.stockDtOld, result.selDatas, result.selAggregte);
 
             // ----------------------------------------------------
             // ★表示用フォーム起動
@@ -345,7 +374,7 @@ namespace あすよん月次帳票
                 // Form2_DataView をモードレスで開く場合（閉じてもForm2が残る）
                 Form2_DataView view = new Form2_DataView();
                 view.DisplayData = displayData;
-                view.SelectedConditions = conList ?? new Dictionary<string, List<string>>();
+                view.SelectedConditions = result.conList ?? new Dictionary<string, List<string>>();
                 view.Show();
             }
             else
@@ -354,8 +383,10 @@ namespace あすよん月次帳票
             }
 
             //----------------------------------------------------
-            // ★アニメーションフォーム閉じる
+            // ★アニメーションフォーム閉じる  [修正前]
             //----------------------------------------------------
+            CloseAnimation(anim, animThread);
+
             await Task.Delay(300);
             if (anim != null && !anim.IsDisposed)
                 anim.Invoke(new Action(() => anim.CloseForm()));
@@ -976,7 +1007,9 @@ namespace あすよん月次帳票
         /// 表示＆Excelのデータ抽出(明細)
         /// </summary>
         /// <returns></returns>
-        private (DataTable, DataTable, DataTable, List<string>, string, string, Dictionary<string, List<string>>) MakeMainData()
+        private (
+            DataTable slprResult, DataTable stockDtNow, DataTable stockDtOld, List<string> selDatas,
+            string selAggregte, string selBookName, Dictionary<string, List<string>> conList) MakeMainData()
         {
             // =====================================================================================
             // ★メインデータ作成処理
@@ -1190,6 +1223,27 @@ namespace あすよん月次帳票
                 }
             }
             return displayData;
+        }
+
+        ///<summary>
+        /// アニメーションを閉じる
+        ///</summary>
+        ///
+        private void CloseAnimation(FormAnimation2 anim, Thread animThread)
+        {
+            try
+            {
+                if (anim != null && !anim.IsDisposed)
+                    anim.CloseForm();
+            }
+            catch { }
+
+            try
+            {
+                if (animThread != null && animThread.IsAlive)
+                    animThread.Join();
+            }
+            catch { }
         }
 
         //==============================================================

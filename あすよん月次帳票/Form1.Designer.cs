@@ -50,7 +50,7 @@ namespace あすよん月次帳票
             this.listBxログ表示.Location = new System.Drawing.Point(33, 43);
             this.listBxログ表示.Name = "listBxログ表示";
             this.listBxログ表示.Size = new System.Drawing.Size(563, 184);
-            this.listBxログ表示.TabIndex = 28;
+            this.listBxログ表示.TabIndex = 0;
             // 
             // btn終了
             // 
@@ -58,7 +58,7 @@ namespace あすよん月次帳票
             this.btn終了.Location = new System.Drawing.Point(476, 421);
             this.btn終了.Name = "btn終了";
             this.btn終了.Size = new System.Drawing.Size(102, 35);
-            this.btn終了.TabIndex = 1;
+            this.btn終了.TabIndex = 2;
             this.btn終了.Text = "終了";
             this.btn終了.UseVisualStyleBackColor = true;
             this.btn終了.Click += new System.EventHandler(this.btnEnd_Click);
@@ -131,7 +131,7 @@ namespace あすよん月次帳票
             this.grpBxメニュー.Location = new System.Drawing.Point(83, 284);
             this.grpBxメニュー.Name = "grpBxメニュー";
             this.grpBxメニュー.Size = new System.Drawing.Size(461, 118);
-            this.grpBxメニュー.TabIndex = 76;
+            this.grpBxメニュー.TabIndex = 1;
             this.grpBxメニュー.TabStop = false;
             // 
             // lbメニュー

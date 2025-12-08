@@ -30,6 +30,7 @@
         {
             this.lblMessage = new System.Windows.Forms.Label();
             this.pictBx3 = new System.Windows.Forms.PictureBox();
+            this.btnMin = new System.Windows.Forms.Button();
             ((System.ComponentModel.ISupportInitialize)(this.pictBx3)).BeginInit();
             this.SuspendLayout();
             // 
@@ -55,11 +56,26 @@
             this.pictBx3.TabIndex = 5;
             this.pictBx3.TabStop = false;
             // 
+            // btnMin
+            // 
+            this.btnMin.BackColor = System.Drawing.Color.SeaShell;
+            this.btnMin.Font = new System.Drawing.Font("Meiryo UI", 6.75F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(128)));
+            this.btnMin.Location = new System.Drawing.Point(274, 4);
+            this.btnMin.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
+            this.btnMin.Name = "btnMin";
+            this.btnMin.Size = new System.Drawing.Size(33, 20);
+            this.btnMin.TabIndex = 81;
+            this.btnMin.Text = "―";
+            this.btnMin.UseVisualStyleBackColor = false;
+            this.btnMin.Click += new System.EventHandler(this.btnMin_Click);
+            // 
             // FormAnimation3
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 12F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(312, 159);
+            this.ControlBox = false;
+            this.Controls.Add(this.btnMin);
             this.Controls.Add(this.pictBx3);
             this.Controls.Add(this.lblMessage);
             this.Name = "FormAnimation3";
@@ -72,5 +88,6 @@
         #endregion
 
         private System.Windows.Forms.PictureBox pictBx3;
+        private System.Windows.Forms.Button btnMin;
     }
 }

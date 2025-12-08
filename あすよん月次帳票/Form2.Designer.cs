@@ -107,7 +107,7 @@ namespace あすよん月次帳票
             this.lbTitleDisplay.Location = new System.Drawing.Point(44, 10);
             this.lbTitleDisplay.Name = "lbTitleDisplay";
             this.lbTitleDisplay.Size = new System.Drawing.Size(92, 17);
-            this.lbTitleDisplay.TabIndex = 71;
+            this.lbTitleDisplay.TabIndex = 1;
             this.lbTitleDisplay.Text = "< データ抽出>";
             // 
             // lb抽出期間
@@ -132,7 +132,7 @@ namespace あすよん月次帳票
             this.grpBx抽出期間.Name = "grpBx抽出期間";
             this.grpBx抽出期間.Padding = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.grpBx抽出期間.Size = new System.Drawing.Size(279, 82);
-            this.grpBx抽出期間.TabIndex = 74;
+            this.grpBx抽出期間.TabIndex = 1;
             this.grpBx抽出期間.TabStop = false;
             this.grpBx抽出期間.Text = "【抽出期間】";
             // 
@@ -175,7 +175,7 @@ namespace あすよん月次帳票
             this.grpBxBtn.Name = "grpBxBtn";
             this.grpBxBtn.Padding = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.grpBxBtn.Size = new System.Drawing.Size(363, 62);
-            this.grpBxBtn.TabIndex = 73;
+            this.grpBxBtn.TabIndex = 10;
             this.grpBxBtn.TabStop = false;
             // 
             // btnExportExcel
@@ -227,7 +227,7 @@ namespace あすよん月次帳票
             this.grpBx組織.Name = "grpBx組織";
             this.grpBx組織.Padding = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.grpBx組織.Size = new System.Drawing.Size(395, 177);
-            this.grpBx組織.TabIndex = 76;
+            this.grpBx組織.TabIndex = 2;
             this.grpBx組織.TabStop = false;
             this.grpBx組織.Text = "【組織】";
             // 
@@ -328,7 +328,7 @@ namespace あすよん月次帳票
             this.grpBxクラス区分.Name = "grpBxクラス区分";
             this.grpBxクラス区分.Padding = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.grpBxクラス区分.Size = new System.Drawing.Size(363, 101);
-            this.grpBxクラス区分.TabIndex = 77;
+            this.grpBxクラス区分.TabIndex = 5;
             this.grpBxクラス区分.TabStop = false;
             this.grpBxクラス区分.Text = "【クラス区分】";
             // 
@@ -472,7 +472,7 @@ namespace あすよん月次帳票
             this.grpBxデータ区分.Name = "grpBxデータ区分";
             this.grpBxデータ区分.Padding = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.grpBxデータ区分.Size = new System.Drawing.Size(279, 58);
-            this.grpBxデータ区分.TabIndex = 78;
+            this.grpBxデータ区分.TabIndex = 4;
             this.grpBxデータ区分.TabStop = false;
             this.grpBxデータ区分.Text = "【データ区分】";
             // 
@@ -483,7 +483,7 @@ namespace あすよん月次帳票
             this.btnMin.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.btnMin.Name = "btnMin";
             this.btnMin.Size = new System.Drawing.Size(33, 20);
-            this.btnMin.TabIndex = 79;
+            this.btnMin.TabIndex = 11;
             this.btnMin.Text = "―";
             this.btnMin.UseVisualStyleBackColor = true;
             this.btnMin.Click += new System.EventHandler(this.btnMin_Click);
@@ -524,7 +524,7 @@ namespace あすよん月次帳票
             this.grpBx取引先.Name = "grpBx取引先";
             this.grpBx取引先.Padding = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.grpBx取引先.Size = new System.Drawing.Size(460, 175);
-            this.grpBx取引先.TabIndex = 82;
+            this.grpBx取引先.TabIndex = 3;
             this.grpBx取引先.TabStop = false;
             this.grpBx取引先.Text = "【取引先】";
             // 
@@ -582,7 +582,7 @@ namespace あすよん月次帳票
             this.grpBx売仕集計区分.Name = "grpBx売仕集計区分";
             this.grpBx売仕集計区分.Padding = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.grpBx売仕集計区分.Size = new System.Drawing.Size(335, 51);
-            this.grpBx売仕集計区分.TabIndex = 86;
+            this.grpBx売仕集計区分.TabIndex = 8;
             this.grpBx売仕集計区分.TabStop = false;
             this.grpBx売仕集計区分.Text = "【売上・仕入集計区分】";
             // 
@@ -607,7 +607,7 @@ namespace あすよん月次帳票
             this.txtBx名称.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.txtBx名称.Name = "txtBx名称";
             this.txtBx名称.Size = new System.Drawing.Size(194, 24);
-            this.txtBx名称.TabIndex = 7;
+            this.txtBx名称.TabIndex = 0;
             // 
             // lb名称
             // 
@@ -640,7 +640,7 @@ namespace あすよん月次帳票
             this.grpBx在集計区分.Name = "grpBx在集計区分";
             this.grpBx在集計区分.Padding = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.grpBx在集計区分.Size = new System.Drawing.Size(154, 51);
-            this.grpBx在集計区分.TabIndex = 89;
+            this.grpBx在集計区分.TabIndex = 9;
             this.grpBx在集計区分.TabStop = false;
             this.grpBx在集計区分.Text = "【在庫集計区分】";
             // 
@@ -684,7 +684,7 @@ namespace あすよん月次帳票
             this.grpBx在庫種別.Name = "grpBx在庫種別";
             this.grpBx在庫種別.Padding = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.grpBx在庫種別.Size = new System.Drawing.Size(363, 73);
-            this.grpBx在庫種別.TabIndex = 90;
+            this.grpBx在庫種別.TabIndex = 6;
             this.grpBx在庫種別.TabStop = false;
             this.grpBx在庫種別.Text = "【在庫種別】";
             // 

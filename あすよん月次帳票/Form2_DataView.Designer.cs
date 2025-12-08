@@ -47,7 +47,7 @@ namespace あすよん月次帳票
             this.dgvData.Name = "dgvData";
             this.dgvData.RowTemplate.Height = 21;
             this.dgvData.Size = new System.Drawing.Size(1441, 600);
-            this.dgvData.TabIndex = 63;
+            this.dgvData.TabIndex = 1;
             // 
             // lb条件
             // 
@@ -64,8 +64,9 @@ namespace あすよん月次帳票
             this.txtBx条件.Location = new System.Drawing.Point(25, 27);
             this.txtBx条件.Multiline = true;
             this.txtBx条件.Name = "txtBx条件";
-            this.txtBx条件.Size = new System.Drawing.Size(239, 143);
-            this.txtBx条件.TabIndex = 65;
+            this.txtBx条件.ScrollBars = System.Windows.Forms.ScrollBars.Vertical;
+            this.txtBx条件.Size = new System.Drawing.Size(344, 143);
+            this.txtBx条件.TabIndex = 0;
             // 
             // Form2_DataView
             // 

@@ -16,7 +16,7 @@ namespace あすよん月次帳票
         {
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
-            Application.Run(new Form1());
+            Application.Run(new FormMainTop());
         }
     }
 }

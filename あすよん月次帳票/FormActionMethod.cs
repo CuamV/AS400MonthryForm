@@ -8,6 +8,7 @@ using System.IO;
 using System.Linq;
 using System.Net.Sockets;
 using System.Security.Cryptography;
+using System.Text;
 using System.Text.Json;
 using System.Text.RegularExpressions;
 using System.Windows.Forms;
@@ -30,6 +31,42 @@ namespace あすよん月次帳票
 
         // =======================================================================
         // 【マスターデータ取得メソッド】
+        //  <FormMainTop>
+        /// <summary>
+        /// ◆ユーザー名取得
+        /// </summary>
+        /// <param name="id"></param>
+        /// <param name="mf"></param>
+        /// <returns></returns>
+        public static string GetUserName(string id,string mf)
+        {
+            try
+            {
+                if (!File.Exists(mf))
+                    return string.Empty;
+
+                foreach (var line in File.ReadLines(mf, Encoding.UTF8))
+                {
+                    if (string.IsNullOrWhiteSpace(line)) continue;
+
+                    // CSVカンマ区切り
+                    var parts = line.Split(',');
+                    if (parts.Length < 2) continue;
+
+                    // CSV特有のダブルクオーテーション除去
+                    parts[0] = parts[0].Trim().Trim('"');
+                    parts[1] = parts[1].Trim().Trim('"');
+
+                    // ID一致で2つ目の要素(名前)を返す
+                    if (parts[0] == id)
+                        return parts[1];
+                }
+            }
+            catch
+            { 
+            }
+            return string.Empty;
+        }
         //  <Form1>
         //   ◆販売先マスター取得
         public static Dictionary<string, List<mf_HANBAI>> GetHanbaiAll(string lib)
@@ -419,6 +456,11 @@ namespace あすよん月次帳票
                 {
                     string yy = dtMonth.Year.ToString();
                     string mm = dtMonth.Month.ToString("D2");
+                    //==============================================================
+                    //  1:ZGZKSB(在庫種別)     2:SHCLAS(クラス)      3:ZGBMCD(部門コード) 4:ZGWHCD(倉庫コード)  5:倉庫名
+                    //  6:ZGAZCD(預り先コード) 7:預り先名            8:品名               9:ZGHMCD(品名コード) 10:ZGHSCD(品種コード)
+                    // 11:ZGCLCD(色コード)    12:ZGTZQT(当月残数量) 13:ZGTGZA(当月残金額) 
+                    //==============================================================
                     var IVdata = GetDataMethod.GetStockData(lib, yy, mm);
 
                     if (IVdata != null && IVdata.Rows.Count > 0)
@@ -439,12 +481,17 @@ namespace あすよん月次帳票
                             {
                                 r["SHCLAS"] = classMap[code];
                             }
-                            else
-                            {
-                                // マッピングが見つからない場合はコードをそのまま使用
-                            }
                         }
 
+                        // 年月列追加共通処理
+                        string ym = yy + mm;
+                        IVdata = AddYearMonthColum(IVdata, ym);
+
+                        //==============================================================
+                        //  1:年月                2:ZGZKSB(在庫種別)     3:SHCLAS(クラス)      4:ZGBMCD(部門コード)  5:ZGWHCD(倉庫コード)
+                        //  6:倉庫名              7:ZGAZCD(預り先コード) 8:預り先名            9:品名               10:ZHHMCD(品名コード)
+                        // 11:ZHHSCD(品種コード) 12:ZGCLCD(色コード)    13:ZGTZQT(当月残数量) 14:ZGTGZA(当月残金額) 
+                        //==============================================================
                         // 縦連結
                         if (IVdataAll == null)
                             IVdataAll = IVdata.Clone(); // スキーマコピー
@@ -452,19 +499,7 @@ namespace あすよん月次帳票
                             IVdataAll.ImportRow(r);
                     }
                 }
-                //==============================================================
-                //  1:ZGZKSB(在庫種別)     2:SHCLAS(クラス)      3:ZGBMCD(部門コード) 4:ZGWHCD(倉庫コード)  5:倉庫名
-                //  6:ZGAZCD(預り先コード) 7:預り先名            8:品名               9:ZGHMCD(品名コード) 10:ZGHSCD(品種コード)
-                // 11:ZGCLCD(色コード)    12:ZGTZQT(当月残数量) 13:ZGTGZA(当月残金額) 
-                //==============================================================
                 dtOld = IVdataAll ?? new DataTable(); // データなしは空テーブル
-
-                //==============================================================
-                //  1:年月                2:ZGZKSB(在庫種別)     3:SHCLAS(クラス)      4:ZGBMCD(部門コード)  5:ZGWHCD(倉庫コード)
-                //  6:倉庫名              7:ZGAZCD(預り先コード) 8:預り先名            9:品名               10:ZHHMCD(品名コード)
-                // 11:ZHHSCD(品種コード) 12:ZGCLCD(色コード)    13:ZGTZQT(当月残数量) 14:ZGTGZA(当月残金額) 
-                //==============================================================
-                dtOld = AddYearMonthColum(dtOld, startYM);
             }
             return (dtNow,dtOld);
         }
@@ -1091,6 +1126,8 @@ namespace あすよん月次帳票
         // =======================================================================
 
         // =======================================================================
+        // 【ログ関連メソッド】
+        
         private static void AppendLog(string logFilePath, string message)
         {
             Directory.CreateDirectory(Path.GetDirectoryName(logFilePath));
@@ -1129,6 +1166,35 @@ namespace あすよん月次帳票
             {
                 listBxSituation.Items.Add(log);
             }
+        }
+        public static string GetShowLLog(string id, string mf)
+        {
+            try
+            {
+                if (!File.Exists(mf))
+                    return string.Empty;
+
+                foreach (var line in File.ReadLines(mf, Encoding.UTF8))
+                {
+                    if (string.IsNullOrWhiteSpace(line)) continue;
+
+                    // CSVカンマ区切り
+                    var parts = line.Split(',');
+                    if (parts.Length < 2) continue;
+
+                    // CSV特有のダブルクオーテーション除去
+                    parts[0] = parts[0].Trim().Trim('"');
+                    parts[1] = parts[1].Trim().Trim('"');
+
+                    // ID一致で2つ目の要素(名前)を返す
+                    if (parts[0] == id)
+                        return parts[1];
+                }
+            }
+            catch
+            {
+            }
+            return string.Empty;
         }
         // =======================================================================
 
