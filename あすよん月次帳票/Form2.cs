@@ -18,6 +18,8 @@ namespace あすよん月次帳票
     //==========================================================
     public partial class Form2 : Form
     {
+        CommonData cm = new CommonData();
+        FormActionMethod fam = new FormActionMethod();
         //=========================================================
         // 【フィールド変数】
         //=========================================================
@@ -65,6 +67,10 @@ namespace あすよん月次帳票
             // RplForm2の全グループボックスを配列化して共通のPaintイベントを設定
             foreach (var gb in cBoxList)
                 gb.Paint += GroupBoxCustomBorder;
+
+            // Form2読込ログ
+            HIZTIM = $"{DateTime.Now:yyyy/MM/dd HH:mm:ss}";
+            fam.AddLog($"{HIZTIM} FormOpen 1 {cm.UserName} Form2");
 
             this.Load += Form2_Load;
 
@@ -115,6 +121,9 @@ namespace あすよん月次帳票
         /// <param name="e"></param>
         private void chkBxControl(object sender, EventArgs e)
         {
+            HIZTIM = $"{DateTime.Now:yyyy/MM/dd HH:mm:ss}";
+            fam.AddLog($"{HIZTIM} コントロール 1 {cm.UserName} chkBxControl");
+
             bool showSd = chkBxSundus.Checked;
             bool showSl = chkBxSl.Checked;
             bool showPr = chkBxPr.Checked;
@@ -196,6 +205,8 @@ namespace あすよん月次帳票
         /// <param name="e"></param>
         public void linkLb部門_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
         {
+            HIZTIM = $"{DateTime.Now:yyyy/MM/dd HH:mm:ss}";
+            fam.AddLog($"{HIZTIM} コントロール 1 {cm.UserName} linkLb部門_LinkClicked");
             // 部門Formを作成
             using (var BuForm = new 部門Form(selBumons))
             {
@@ -226,6 +237,8 @@ namespace あすよん月次帳票
         /// <param name="e"></param>
         private void linkLb販売先_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
         {
+            HIZTIM = $"{DateTime.Now:yyyy/MM/dd HH:mm:ss}";
+            fam.AddLog($"{HIZTIM} コントロール 1 {cm.UserName} linkLb販売先_LinkClicked");
             using (var frm = new 販売仕入先Form("HANBAI", selSelleres, salesDeptMap))
             {
                 if (frm.ShowDialog() == DialogResult.OK)
@@ -266,6 +279,9 @@ namespace あすよん月次帳票
         /// <param name="e"></param>
         private void linkLb仕入先_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
         {
+            HIZTIM = $"{DateTime.Now:yyyy/MM/dd HH:mm:ss}";
+            fam.AddLog($"{HIZTIM} コントロール 1 {cm.UserName} linkLb仕入先_LinkClicked");
+
             using (var frm = new 販売仕入先Form("SHIIRE", selSupplieres, supplierDeptMap))
             {
                 if (frm.ShowDialog() == DialogResult.OK)
@@ -293,6 +309,7 @@ namespace あすよん月次帳票
         private async void btnReadData_Click(object sender, EventArgs e)
         {
             HIZTIM = $"{DateTime.Now:yyyy/MM/dd HH:mm:ss}";
+            fam.AddLog($"{HIZTIM} コントロール 1 {cm.UserName} btnReadData_Click");
 
             //---------------------------------------------------- 
             // ★ エラーチェック
@@ -402,8 +419,10 @@ namespace あすよん月次帳票
         /// <param name="e"></param>
         private async void btnExportExcel_Click(object sender, EventArgs e)
         {
-            DataProcessor processor = new DataProcessor();
             HIZTIM = $"{DateTime.Now:yyyy/MM/dd HH:mm:ss}";
+            fam.AddLog($"{HIZTIM} コントロール 1 {cm.UserName} btnExportExcel_Click");
+
+            DataProcessor processor = new DataProcessor();
             Hiz = DateTime.Now.ToString("yyyyMMdd");
             Tim = DateTime.Now.ToString("HHmmss");
 
@@ -761,7 +780,8 @@ namespace あすよん月次帳票
             }
 
             // ログ追加             
-            if (Application.OpenForms["Form1"] is Form1 form1) form1.AddLog($"{HIZTIM}　Excelエクスポート完了");
+            HIZTIM = $"{DateTime.Now:yyyy/MM/dd HH:mm:ss}";
+            fam.AddLog($"{HIZTIM} Excelエクスポート 1 {cm.UserName}");
             // ↑↑----------- Excelエクスポート -----------↑↑
 
         }
@@ -773,6 +793,8 @@ namespace あすよん月次帳票
         /// <param name="e"></param>
         private void btnForm1Back_Click(object sender, EventArgs e)
         {
+            HIZTIM = $"{DateTime.Now:yyyy/MM/dd HH:mm:ss}";
+            fam.AddLog($"{HIZTIM} コントロール 1 {cm.UserName} btnForm1Back_Click");
             // Form1 のインスタンスを取得して表示
             if (Application.OpenForms["Form1"] is Form1 form1)
             {
@@ -794,6 +816,9 @@ namespace あすよん月次帳票
         // MouseDown
         private void RplForm2_MouseDown(object sender, MouseEventArgs e)
         {
+            HIZTIM = $"{DateTime.Now:yyyy/MM/dd HH:mm:ss}";
+            fam.AddLog($"{HIZTIM} コントロール 1 {cm.UserName} RplForm2_MouseDown");
+
             if (e.Button == MouseButtons.Left)
             {
                 isMouseDown = true;
@@ -809,6 +834,9 @@ namespace あすよん月次帳票
         // MouseMove
         private void RplForm2_MouseMove(object sender, MouseEventArgs e)
         {
+            HIZTIM = $"{DateTime.Now:yyyy/MM/dd HH:mm:ss}";
+            fam.AddLog($"{HIZTIM} コントロール 1 {cm.UserName} RplForm2_MouseMove");
+
             if (isMouseDown)
             {
                 Point mousePos = Control.MousePosition;
@@ -825,6 +853,9 @@ namespace あすよん月次帳票
         // MouseUp
         private void RplForm2_MouseUp(object sender, MouseEventArgs e)
         {
+            HIZTIM = $"{DateTime.Now:yyyy/MM/dd HH:mm:ss}";
+            fam.AddLog($"{HIZTIM} コントロール 1 {cm.UserName} RplForm2_MouseUp");
+
             if (e.Button == MouseButtons.Left)
                 isMouseDown = false;
         }
@@ -836,6 +867,9 @@ namespace あすよん月次帳票
         /// <param name="e"></param>
         private void btnMin_Click(object sender, EventArgs e)
         {
+            HIZTIM = $"{DateTime.Now:yyyy/MM/dd HH:mm:ss}";
+            fam.AddLog($"{HIZTIM} コントロール 1 {cm.UserName} btnMin_Click");
+
             this.WindowState = FormWindowState.Minimized;
         }
 
@@ -848,6 +882,9 @@ namespace あすよん月次帳票
         /// <param name="bumons"></param>
         private void UpdateCompanyCheckboxesFromBumon(List<Department> bumons)
         {
+            HIZTIM = $"{DateTime.Now:yyyy/MM/dd HH:mm:ss}";
+            fam.AddLog($"{HIZTIM} 処理メソッド 1 {cm.UserName} UpdateCompanyCheckboxesFromBumon");
+
             // 部門に基づいて会社のチェックボックスを更新
             chkBxOhno.Checked = bumons.Any(d => d.Company == "オーノ");
             chkBxSuncar.Checked = bumons.Any(d => d.Company == "サンミックカーペット");
@@ -860,6 +897,9 @@ namespace あすよん月次帳票
         /// <param name="torihikis"></param>
         private void UpdateBumonAndCompanyFromTorihiki(List<Torihiki> torihikis)
         {
+            HIZTIM = $"{DateTime.Now:yyyy/MM/dd HH:mm:ss}";
+            fam.AddLog($"{HIZTIM} 処理メソッド 1 {cm.UserName} UpdateBumonAndCompanyFromTorihiki");
+
             // 取引先が空なら会社チェック・部門リストもクリア
             if (torihikis == null || torihikis.Count == 0)
             {
@@ -904,7 +944,10 @@ namespace あすよん月次帳票
         /// <param name="ts"></param>
         private void AddDeptMap(Dictionary<string, HashSet<string>> deptmap, Torihiki ts)
         {
-            if(!deptmap.TryGetValue(ts.Code,out var set))
+            HIZTIM = $"{DateTime.Now:yyyy/MM/dd HH:mm:ss}";
+            fam.AddLog($"{HIZTIM} 処理メソッド 1 {cm.UserName} AddDeptMap");
+
+            if (!deptmap.TryGetValue(ts.Code,out var set))
             {
                 set = new HashSet<string>();
                 deptmap[ts.Code] = set;
@@ -919,7 +962,10 @@ namespace あすよん月次帳票
         /// <param name="ts"></param>
         private void AddDeptMapRange(Dictionary<string, HashSet<string>> deptmap, IEnumerable<Torihiki> ts)
         {
-            foreach(var t in ts)
+            HIZTIM = $"{DateTime.Now:yyyy/MM/dd HH:mm:ss}";
+            fam.AddLog($"{HIZTIM} 処理メソッド 1 {cm.UserName} AddDeptMapRange");
+
+            foreach (var t in ts)
             {
                 AddDeptMap(deptmap, t);
             }
@@ -932,6 +978,9 @@ namespace あすよん月次帳票
         /// <param name="items"></param>
         private void RefreshListBx(ListBox listBox, List<Torihiki> items)
         {
+            HIZTIM = $"{DateTime.Now:yyyy/MM/dd HH:mm:ss}";
+            fam.AddLog($"{HIZTIM} 処理メソッド 1 {cm.UserName} RefreshListBx");
+
             listBox.Items.Clear();
 
             // 選択アイテムがなければ終了
@@ -954,12 +1003,15 @@ namespace あすよん月次帳票
         /// <returns></returns>
         private bool ErrCheck()
         {
+            HIZTIM = $"{DateTime.Now:yyyy/MM/dd HH:mm:ss}";
+            fam.AddLog($"{HIZTIM} 処理メソッド 1 {cm.UserName} ErrCheck");
+
             // =====================================================================================
             // ★ エラーチェック
             // =====================================================================================
             //  ＊年月入力チェック
-            if (!FormActionMethod.TryParseYearMonth(txtBxStrYearMonth, out int strY, out int strM) ||
-                !FormActionMethod.TryParseYearMonth(txtBxEndYearMonth, out int endY, out int endM))
+            if (!fam.TryParseYearMonth(txtBxStrYearMonth, out int strY, out int strM) ||
+                !fam.TryParseYearMonth(txtBxEndYearMonth, out int endY, out int endM))
             {
                 MessageBox.Show("年月は6桁の数字(yyyyMM)で入力してください。", "警告", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 return true;
@@ -1011,20 +1063,23 @@ namespace あすよん月次帳票
             DataTable slprResult, DataTable stockDtNow, DataTable stockDtOld, List<string> selDatas,
             string selAggregte, string selBookName, Dictionary<string, List<string>> conList) MakeMainData()
         {
+            HIZTIM = $"{DateTime.Now:yyyy/MM/dd HH:mm:ss}";
+            fam.AddLog($"{HIZTIM} 処理メソッド 1 {cm.UserName} MakeMainData");
+
             // =====================================================================================
             // ★メインデータ作成処理
             // =====================================================================================
             // 条件選択内容取得
-            FormActionMethod.TryParseYearMonth(txtBxStrYearMonth, out int strY, out int strM);
-            FormActionMethod.TryParseYearMonth(txtBxEndYearMonth, out int endY, out int endM);
+            fam.TryParseYearMonth(txtBxStrYearMonth, out int strY, out int strM);
+            fam.TryParseYearMonth(txtBxEndYearMonth, out int endY, out int endM);
 
-            string selBookName = FormActionMethod.GetBookName(txtBx名称);  // 帳票名称
-            (string startDate, string endDate) = FormActionMethod.GetStartEndDate(strY, strM, endY, endM);　// 開始・終了日付
-            var selCompanies = FormActionMethod.GetCompany(chkBxOhno, chkBxSundus, chkBxSuncar); // 会社
-            var selBumons = FormActionMethod.GetSelectedBumons(listBx部門);  // 部門（先頭空白行は無視して取得）
-            var selSelleres = FormActionMethod.GetSallerOrSupplier(listBx販売先);  // 販売先 （先頭空白行は無視）
-            var selSupplieres = FormActionMethod.GetSallerOrSupplier(listBx仕入先);  // 仕入先 （先頭空白行は無視）
-            var selDatas = FormActionMethod.GetSalseProduct(chkBxSl, chkBxPr, chkBxIv);  // データ区分
+            string selBookName = fam.GetBookName(txtBx名称);  // 帳票名称
+            (string startDate, string endDate) = fam.GetStartEndDate(strY, strM, endY, endM);　// 開始・終了日付
+            var selCompanies = fam.GetCompany(chkBxOhno, chkBxSundus, chkBxSuncar); // 会社
+            var selBumons = fam.GetSelectedBumons(listBx部門);  // 部門（先頭空白行は無視して取得）
+            var selSelleres = fam.GetSallerOrSupplier(listBx販売先);  // 販売先 （先頭空白行は無視）
+            var selSupplieres = fam.GetSallerOrSupplier(listBx仕入先);  // 仕入先 （先頭空白行は無視）
+            var selDatas = fam.GetSalseProduct(chkBxSl, chkBxPr, chkBxIv);  // データ区分
             List<string> selSlPrProducts = null;
             List<string> selIvProducts = null;
             string selAggregte = null;
@@ -1032,23 +1087,23 @@ namespace あすよん月次帳票
 
             if (chkBxSl.Checked || chkBxPr.Checked)
             {
-                selSlPrProducts = FormActionMethod.GetProduct(chkBx原材料, chkBx半製品, chkBx製品,
+                selSlPrProducts = fam.GetProduct(chkBx原材料, chkBx半製品, chkBx製品,
                                                                 chkBxOhno, chkBxSundus, chkBxSuncar);  // 売・仕クラス区分
-                selAggregte = FormActionMethod.GetAggregte(grpBx売仕集計区分);  // 売仕集計区分
+                selAggregte = fam.GetAggregte(grpBx売仕集計区分);  // 売仕集計区分
             }
             if (chkBxIv.Checked)
             {
-                selIvProducts = FormActionMethod.GetProduct(chkBx原材料, chkBx半製品, chkBx製品,
+                selIvProducts = fam.GetProduct(chkBx原材料, chkBx半製品, chkBx製品,
                                                             chkBx加工T, chkBx預りT, chkBx預けT,
                                                             chkBxOhno, chkBxSundus, chkBxSuncar);  // 在クラス区分
-                selIvTypes = FormActionMethod.GetIvType(chkBx自社, chkBx預け, chkBx預り, chkBx投入);  // 在庫種別
-                selAggregte = FormActionMethod.GetAggregte(grpBx在集計区分);  // 在庫集計区分
+                selIvTypes = fam.GetIvType(chkBx自社, chkBx預け, chkBx預り, chkBx投入);  // 在庫種別
+                selAggregte = fam.GetAggregte(grpBx在集計区分);  // 在庫集計区分
             }
 
 
             // 条件フィルター
             // データ取得・加工処理
-            var (slprResult, stockDtNow, stockDtOld) = FormActionMethod.FilterData(startDate, endDate,
+            var (slprResult, stockDtNow, stockDtOld) = fam.FilterData(startDate, endDate,
                                                                                    selCompanies, selBumons,
                                                                                    selSelleres, selSupplieres,
                                                                                    selDatas, selSlPrProducts, selIvProducts,
@@ -1153,6 +1208,9 @@ namespace あすよん月次帳票
         /// <returns></returns>
         private DataTable DoSummary(DataTable slprResult, DataTable stockDtNow, DataTable stockDtOld, List<string> selDatas, string selAggregte)
         {
+            HIZTIM = $"{DateTime.Now:yyyy/MM/dd HH:mm:ss}";
+            fam.AddLog($"{HIZTIM} 処理メソッド 1 {cm.UserName} DoSummary");
+
             // =====================================================================================
             // ★集計処理
             // =====================================================================================
@@ -1231,6 +1289,9 @@ namespace あすよん月次帳票
         ///
         private void CloseAnimation(FormAnimation2 anim, Thread animThread)
         {
+            HIZTIM = $"{DateTime.Now:yyyy/MM/dd HH:mm:ss}";
+            fam.AddLog($"{HIZTIM} 処理メソッド 1 {cm.UserName} CloseAnimation");
+
             try
             {
                 if (anim != null && !anim.IsDisposed)
@@ -1254,6 +1315,9 @@ namespace あすよん月次帳票
         /// </summary>
         private void ApplySnowManColors()
         {
+            HIZTIM = $"{DateTime.Now:yyyy/MM/dd HH:mm:ss}";
+            fam.AddLog($"{HIZTIM} デザイン関連メソッド 1 {cm.UserName} ApplySnowManColors");
+
             // フォーム全体の背景
             this.BackColor = Color.FromArgb(255, 220, 150);
 
@@ -1308,6 +1372,9 @@ namespace あすよん月次帳票
         /// <param name="e"></param>
         private void GroupBoxCustomBorder(object sender, PaintEventArgs e)
         {
+            HIZTIM = $"{DateTime.Now:yyyy/MM/dd HH:mm:ss}";
+            fam.AddLog($"{HIZTIM} デザイン関連メソッド 1 {cm.UserName} GroupBoxCustomBorder");
+
             GroupBox box = (GroupBox)sender;
             e.Graphics.Clear(box.BackColor);
 

@@ -3,31 +3,28 @@ using OHNO.PComm;
 using System;
 using System.Collections.Generic;
 using System.Data;
-using System.Diagnostics;
 using System.IO;
 using System.Linq;
-using System.Net.Sockets;
-using System.Security.Cryptography;
 using System.Text;
 using System.Text.Json;
 using System.Text.RegularExpressions;
 using System.Windows.Forms;
-using System.Windows.Navigation;
-using System.Xml.Linq;
 
 namespace あすよん月次帳票
 {
 
     internal class FormActionMethod
     {
+        CommonData cm = new CommonData();
+
         static public string ctl = "[enter]";  // Ctlr(実行)
         static public string f3 = "[pf3]";  // F3(終了)
         static public string tb = "[tab]"; // Tab(カーソル次送り)
         static public string ent = "[fldext]"; // Enter(カーソル位置以降の入力exit)
 
-        private static string HIZ = DateTime.Now.ToString("yyyyMMdd");
+        private string HIZTIM;
 
-        private static List<string> runtimelog = new List<string>();
+        private List<string> runtimelog = new List<string>();
 
         // =======================================================================
         // 【マスターデータ取得メソッド】
@@ -38,7 +35,7 @@ namespace あすよん月次帳票
         /// <param name="id"></param>
         /// <param name="mf"></param>
         /// <returns></returns>
-        public static string GetUserName(string id,string mf)
+        public string GetUserName(string id,string mf)
         {
             try
             {
@@ -69,7 +66,7 @@ namespace あすよん月次帳票
         }
         //  <Form1>
         //   ◆販売先マスター取得
-        public static Dictionary<string, List<mf_HANBAI>> GetHanbaiAll(string lib)
+        public Dictionary<string, List<mf_HANBAI>> GetHanbaiAll(string lib)
         {
             var result = new Dictionary<string, List<mf_HANBAI>>();
             var dbManager = (DbManager_Db2)DbManager.CreateDbManager(OhnoSysDBName.Db2);
@@ -104,7 +101,7 @@ namespace あすよん月次帳票
             return result;
         }
         //   ◆仕入先マスター取得
-        public static Dictionary<string, List<mf_SHIIRE>> GetShiireAll(string lib)
+        public Dictionary<string, List<mf_SHIIRE>> GetShiireAll(string lib)
         {
             var result = new Dictionary<string, List<mf_SHIIRE>>();
             var dbManager = (DbManager_Db2)DbManager.CreateDbManager(OhnoSysDBName.Db2);
@@ -140,7 +137,7 @@ namespace あすよん月次帳票
         // 【JSON操作メソッド】
         ///  <Form1>
         ///   ◆JSONファイル保存
-        public static void SaveToJson<T>(string filePath, T data)
+        public void SaveToJson<T>(string filePath, T data)
         {
             var json = JsonSerializer.Serialize(data, new JsonSerializerOptions { WriteIndented = true });
             File.WriteAllText(filePath, json);
@@ -151,7 +148,7 @@ namespace あすよん月次帳票
         // 【エラーチェックメソッド】
         //  <RplForm2>
         //   ◆年月入力チェック(yyyyMM形式)
-        public static bool TryParseYearMonth(TextBox txtBox, out int year, out int month)
+        public bool TryParseYearMonth(TextBox txtBox, out int year, out int month)
         {
             year = 0;
             month = 0;
@@ -177,12 +174,12 @@ namespace あすよん月次帳票
         // 【条件選択取得メソッド】
         //  <RplForm2>
         //   ◆帳票名選択
-        public static string GetBookName(TextBox txtBox)
+        public string GetBookName(TextBox txtBox)
         {
             return txtBox.Text.Trim();
         }
         //   ◆年月選択
-        public static (string startDate, string endDate) GetStartEndDate(int syear, int smonth, int eyear, int emonth)
+        public (string startDate, string endDate) GetStartEndDate(int syear, int smonth, int eyear, int emonth)
         {
             string startDate = new DateTime(syear, smonth, 1).ToString("yyyyMMdd");
             int lastDay = DateTime.DaysInMonth(eyear, emonth);
@@ -190,7 +187,7 @@ namespace あすよん月次帳票
             return (startDate, endDate);
         }
         //   ◆会社選択
-        public static List<string> GetCompany(CheckBox chkBxOhno, CheckBox chkBxSundus, CheckBox chkBxSuncar)
+        public List<string> GetCompany(CheckBox chkBxOhno, CheckBox chkBxSundus, CheckBox chkBxSuncar)
         {
             var selectedCompanies = new List<string>();
             if (chkBxOhno.Checked) selectedCompanies.Add("オーノ");
@@ -199,7 +196,7 @@ namespace あすよん月次帳票
             return selectedCompanies;
         }
         //   ◆部門選択
-        public static List<string> GetSelectedBumons(ListBox listBxB)
+        public List<string> GetSelectedBumons(ListBox listBxB)
         {
             var result = new List<string>();
 
@@ -216,7 +213,7 @@ namespace あすよん月次帳票
             return result;
         }
         //   ◆販売先/仕入先選択
-        public static List<string> GetSallerOrSupplier(ListBox listbx)
+        public List<string> GetSallerOrSupplier(ListBox listbx)
         {
             var result = new List<string>();
             foreach (var item in listbx.Items)
@@ -226,7 +223,7 @@ namespace あすよん月次帳票
             return result;
         }
         //   ◆データ区分選択
-        public static List<string> GetSalseProduct(CheckBox chkBxSl, CheckBox chkBxPr, CheckBox chkBxIv)
+        public List<string> GetSalseProduct(CheckBox chkBxSl, CheckBox chkBxPr, CheckBox chkBxIv)
         {
             var selectedSlProduct = new List<string>();
             if (chkBxSl.Checked) selectedSlProduct.Add("売上");
@@ -236,7 +233,7 @@ namespace あすよん月次帳票
         }
         //   ◆クラス区分選択
         //    ＊売上・仕入
-        public static List<string> GetProduct(CheckBox chkBxRawMaterials, CheckBox chkBxSemiFinProducts, CheckBox chkBxProduct,
+        public List<string> GetProduct(CheckBox chkBxRawMaterials, CheckBox chkBxSemiFinProducts, CheckBox chkBxProduct,
                                               CheckBox chkBxOhno, CheckBox chkBxSundus, CheckBox chkBxSuncar)
         {
             var selectedSlPrProduct = new List<string>();
@@ -248,7 +245,7 @@ namespace あすよん月次帳票
             return selectedSlPrProduct;
         }
         //    ＊在庫
-        public static List<string> GetProduct(CheckBox chkBxRawMaterials, CheckBox chkBxSemiFinProducts, CheckBox chkBxProduct,
+        public List<string> GetProduct(CheckBox chkBxRawMaterials, CheckBox chkBxSemiFinProducts, CheckBox chkBxProduct,
                                               CheckBox chkBxProcess, CheckBox chkBxCustody, CheckBox chkEntrust,
                                               CheckBox chkBxOhno, CheckBox chkBxSundus, CheckBox chkBxSuncar)
         {
@@ -306,7 +303,7 @@ namespace あすよん月次帳票
             return selectedIvProduct.Distinct().ToList();
         }
         //   ◆在庫種別選択
-        public static Dictionary<string, string> GetIvType(CheckBox chkBxOneCom, CheckBox chkBxCustody, CheckBox chkBxEntrust, CheckBox chkBxProcess)
+        public Dictionary<string, string> GetIvType(CheckBox chkBxOneCom, CheckBox chkBxCustody, CheckBox chkBxEntrust, CheckBox chkBxProcess)
         {
             // 0=自社,1=預り,2=預け,3=投入
             var selIvType = new Dictionary<string, string>();
@@ -319,7 +316,7 @@ namespace あすよん月次帳票
             return selIvType;
         }
         //   ◆売上・仕入・在庫集計区分選択
-        public static string GetAggregte(GroupBox grpBox)
+        public string GetAggregte(GroupBox grpBox)
         {
             return grpBox.Controls
                 .OfType<RadioButton>()
@@ -332,7 +329,7 @@ namespace あすよん月次帳票
         // 【データ取得メソッド】
         //  <RplForm2>
         //   ◆売上・仕入データ取得
-        public static DataTable MakeReadData_SLPR(string startDate, string endDate, string company, string kubun)
+        public DataTable MakeReadData_SLPR(string startDate, string endDate, string company, string kubun)
 
         {
             DataTable dt = new DataTable();
@@ -352,7 +349,7 @@ namespace あすよん月次帳票
             return dt;
         }
         //   ◆在庫データ取得
-        public static (DataTable, DataTable) MakeReadData_IV(string startDate, string endDate, string company, List<string> selIvProducts)
+        public (DataTable, DataTable) MakeReadData_IV(string startDate, string endDate, string company, List<string> selIvProducts)
         {
             string monthlyFile = @"\\ohnosv01\OhnoSys\099_sys\mf\Monthly.txt";
             string firstLine = File.ReadLines(monthlyFile).FirstOrDefault();
@@ -504,7 +501,7 @@ namespace あすよん月次帳票
             return (dtNow,dtOld);
         }
         //   ◆年月列追加共通処理
-        public static DataTable AddYearMonthColum(DataTable dt, string startYM)
+        public DataTable AddYearMonthColum(DataTable dt, string startYM)
         {
             // 🔸 共通：年月列を追加
             if (dt != null && !dt.Columns.Contains("年月"))
@@ -523,7 +520,7 @@ namespace あすよん月次帳票
             return dt;
         }
         //   ◆フィルター処理
-        public static (DataTable, DataTable, DataTable) FilterData(string startDate, string endDate,
+        public (DataTable, DataTable, DataTable) FilterData(string startDate, string endDate,
                                                                    List<string> selCompanies, List<string> selBumons,
                                                                    List<string> selSelleres, List<string> selSupplieres,
                                                                    List<string> selSlCategories, List<string> selSlPrProducts, List<string> selIvProducts,
@@ -789,7 +786,7 @@ namespace あすよん月次帳票
 
             return(slprResult,stockDtNow, stockDtOld);
         }
-        public static DataTable MargeAndFormat_StockData(DataTable ohnoStock,DataTable suncarStock, DataTable sundusStock, bool newold)
+        public DataTable MargeAndFormat_StockData(DataTable ohnoStock,DataTable suncarStock, DataTable sundusStock, bool newold)
         {
             DataTable stockDt = null;
             var stockList = new List<DataTable>();
@@ -816,24 +813,23 @@ namespace あすよん月次帳票
         // 【シュミレーションメソッド】
         //  <Form3>
         //   ◆シュミレーションロックチェック
-        public static bool CheckAndLockSimulation(string currentUID, string lockFilePath, string LogFilePath, int lockMinutes)
+        public bool CheckAndLockSimulation(int lockMinutes)
         {
-            string logFilePath = Path.Combine(LogFilePath, $@"{HIZ}\LOG_Simulation.txt");
-            string AllLogFilePath = Path.Combine(LogFilePath, $@"{HIZ}\LOG_AllSimulation.txt");
+            string lockFile = Path.Combine(cm.LockPath, "LOCK_sim.txt");
             try
             {
                 // ロックファイルのディレクトリがなければ作成
-                Directory.CreateDirectory(Path.GetDirectoryName(lockFilePath));
+                Directory.CreateDirectory(Path.GetDirectoryName(lockFile));
 
                 // ファイルが存在しない＝実施者なし→新規作成してロックし、処理実施
-                if (!File.Exists(lockFilePath))
+                if (!File.Exists(lockFile))
                 {
-                    WriteLockFile(lockFilePath, currentUID);
-                    AppendLog(logFilePath, $"[{DateTime.Now:yyyy/MM/dd HH:mm:ss}] LOCKED by {currentUID}");
+                    WriteLockFile(lockFile, cm.UserID);
+                    AppendLog(cm.sLog, $"[{DateTime.Now:yyyy/MM/dd HH:mm:ss}] LOCKED by {cm.UserID}");
                     return true;
                 }
                 // ファイルが存在する＝他のユーザーが使用中(ロック中)
-                var lines = File.ReadAllLines(lockFilePath);
+                var lines = File.ReadAllLines(lockFile);
                 string lockUser = lines.FirstOrDefault(l => l.StartsWith("UserID="))?.Split('=')[1];
                 string timeStr = lines.FirstOrDefault(l => l.StartsWith("StartTime="))?.Split('=')[1];
 
@@ -842,10 +838,10 @@ namespace あすよん月次帳票
                     var elapsed = DateTime.Now - lockTime;
 
                     // 同一ユーザーなら上書きしてOK
-                    if (lockUser == currentUID)
+                    if (lockUser == cm.UserID)
                     {
-                        WriteLockFile(lockFilePath, currentUID);
-                        AppendLog(logFilePath, $"[{DateTime.Now:yyyy/MM/dd HH:mm:ss}] RE-LOCKED by same user {currentUID}");
+                        WriteLockFile(lockFile, cm.UserID);
+                        AppendLog(cm.sLog, $"[{DateTime.Now:yyyy/MM/dd HH:mm:ss}] RE-LOCKED by same user {cm.UserID}");
                         return true;
                     }
 
@@ -861,9 +857,9 @@ namespace あすよん月次帳票
                     }
                 }
                 // ここまで来たら新規ロックまたは上書き
-                WriteLockFile(lockFilePath, currentUID);
+                WriteLockFile(lockFile, cm.UserID);
                 // ログ追記
-                AppendLog(logFilePath, $"LOCKED by {currentUID}");
+                AppendLog(cm.sLog, $"LOCKED by {cm.UserID}");
                 return true;
 
             }
@@ -874,7 +870,7 @@ namespace あすよん月次帳票
             }
         }
         //   ◆ロックファイル書き込み
-        public static void WriteLockFile(string path, string uid)
+        public void WriteLockFile(string path, string uid)
         {
             File.WriteAllLines(path, new[]
             {
@@ -885,29 +881,28 @@ namespace あすよん月次帳票
             });
         }
         //   ◆シュミレーションロック解除
-        public static bool ReleaseSimulationLock(string currentUID, string lockFilePath, string LogFilePath)
+        public bool ReleaseSimulationLock()
         {
-            string logFilePath = Path.Combine(LogFilePath, $@"{HIZ}\LOG_Simulation.txt");
-            string AllLogFilePath = Path.Combine(LogFilePath, $@"{HIZ}\LOG_AllSimulation.txt");
-            string HIZTIM = $"{DateTime.Now:yyyy/MM/dd HH:mm:ss}";
+            string lockFile = Path.Combine(cm.LockPath, "LOCK_sim.txt");
+            HIZTIM = $"{DateTime.Now:yyyy/MM/dd HH:mm:ss}";
             try
             {
-                if (!File.Exists(lockFilePath))
+                if (!File.Exists(cm.LockPath))
                     // ロックファイルが存在しないときは何もしない
                     return false;
 
-                var lines = File.ReadAllLines(lockFilePath);
+                var lines = File.ReadAllLines(lockFile);
                 string lockUser = lines.FirstOrDefault(l => l.StartsWith("UserID="))?.Split('=')[1];
                 string timeLine = lines.FirstOrDefault(l => l.StartsWith("Time="))?.Split('=')[1];
 
-                if (lockUser == currentUID)
+                if (lockUser == cm.UserID)
                 {
                     // 実行者本人のときはロック解除+ログ記録
                     lines[3] = "Status=RELEASED";
-                    File.WriteAllLines(lockFilePath, lines);
+                    File.WriteAllLines(lockFile, lines);
 
-                    AppendLog(logFilePath, $"RELEASED by {currentUID}");
-                    if (Application.OpenForms["Form1"] is Form1 form1) form1.AddLog2($"{HIZTIM} 実行者ID:{currentUID} ロック解除");
+                    AppendLog(cm.sLog, $"RELEASED by {cm.UserID}");
+                    AddLog2($"{HIZTIM} 実行者ID:{cm.UserID} ロック解除");
                     return true;
                 }
                 else
@@ -1082,6 +1077,12 @@ namespace あすよん月次帳票
             PCommOperator.SendKeys(tb, 10, 28);  // 品名選択は変更なしでクラスへ移動
             PCommOperator.SendKeys(cls + ctl + ctl, 12, 14);  // 原材料決定＋実行
             PCommOperator.Wait(3000);  // 3秒待機
+            var txt = PCommOperator.GetText(24, 1, 30).Trim();
+            if (txt.Contains("作表データがありません"))
+            {
+                PCommOperator.SendKeys(f3, 5, 14);  // 印刷完了後、1つ戻る
+                return;
+            }
             PCommOperator.SendKeys("OHNOQ" + ctl, 10, 40);  // OHNOQへ印刷実行
             PCommOperator.SendKeys(f3, 5, 14);  // 印刷完了後、1つ戻る
         }
@@ -1127,8 +1128,25 @@ namespace あすよん月次帳票
 
         // =======================================================================
         // 【ログ関連メソッド】
-        
-        private static void AppendLog(string logFilePath, string message)
+        ///<summary>
+        /// 個人用ログを追加&ログファイル保存
+        /// </summary>
+        /// <param name="message"></param>
+        public void AddLog(string message)
+        {
+            //  ログファイルに保存
+            File.AppendAllText(cm.uLog, message + Environment.NewLine);
+        }
+        ///<summary>
+        /// 全体用ログを追加&ログファイル保存
+        /// </summary>
+        /// <param name="message"></param>
+        public void AddLog2(string message)
+        {
+            // ログファイルに保存
+            File.AppendAllText(cm.conLog, message + Environment.NewLine);
+        }
+        private void AppendLog(string logFilePath, string message)
         {
             Directory.CreateDirectory(Path.GetDirectoryName(logFilePath));
             File.AppendAllText(logFilePath,
@@ -1167,7 +1185,7 @@ namespace あすよん月次帳票
                 listBxSituation.Items.Add(log);
             }
         }
-        public static string GetShowLLog(string id, string mf)
+        public string GetShowLLog(string id, string mf)
         {
             try
             {
@@ -1200,7 +1218,7 @@ namespace あすよん月次帳票
 
 
         // 以下のメソッドは不要なため後ほど削除
-        public static void ShowBumon(Form form, ListBox listBxBumon, ListBox listBxSaller, ListBox listBxSupplier,
+        public void ShowBumon(Form form, ListBox listBxBumon, ListBox listBxSaller, ListBox listBxSupplier,
                                      CheckBox chkBxOhno, CheckBox chkBxSundus, CheckBox chkBxSuncar)
         {
             // Invokeで後回しにしなくてOK（選択状態はすでに反映済み）
@@ -1211,12 +1229,12 @@ namespace あすよん月次帳票
 
             Bumon_selectedChanged(selBumon, listBxSaller, listBxSupplier, chkBxOhno, chkBxSundus, chkBxSuncar);
         }
-        public static void SelectCompany_Bumon(CheckBox chkBxOhno, CheckBox chkBxSundus, CheckBox chkBxSuncar, ListBox listBxBumon)
+        public void SelectCompany_Bumon(CheckBox chkBxOhno, CheckBox chkBxSundus, CheckBox chkBxSuncar, ListBox listBxBumon)
         {
             listBxBumon.Items.Clear();
 
             // 会社選択確認
-            var selctedComp = FormActionMethod.GetCompany(chkBxOhno, chkBxSundus, chkBxSuncar);
+            var selctedComp = GetCompany(chkBxOhno, chkBxSundus, chkBxSuncar);
 
             // 先頭に空白行を追加
             listBxBumon.Items.Add(string.Empty);
@@ -1228,8 +1246,8 @@ namespace あすよん月次帳票
             }
             listBxBumon.SelectedIndex = 0; // 空白行を選択状態にする
         }
-        private static bool isUpdating = false;
-        private static void Bumon_selectedChanged(List<string> selBumon, ListBox listBxSaller, ListBox listBxSupplier,
+        private bool isUpdating = false;
+        private void Bumon_selectedChanged(List<string> selBumon, ListBox listBxSaller, ListBox listBxSupplier,
                                                  CheckBox chkBxOhno, CheckBox chkBxSundus, CheckBox chkBxSuncar)
         {
             if (isUpdating) return; // 再入防止
@@ -1246,7 +1264,7 @@ namespace あすよん月次帳票
                 }
 
                 // 会社選択確認
-                var selctedComp = FormActionMethod.GetCompany(chkBxOhno, chkBxSundus, chkBxSuncar);
+                var selctedComp = GetCompany(chkBxOhno, chkBxSundus, chkBxSuncar);
 
                 // 部門ごとに販売先リストを取得
                 var sallerList = new List<mf_HANBAI>();
