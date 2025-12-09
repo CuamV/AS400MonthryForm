@@ -38,6 +38,9 @@ namespace あすよん月次帳票
                 CreateRoundRectRgn(0, 0, this.Width, this.Height, 40, 40));
 
             string mf = Path.Combine(CommonData.mfPath, $"Employee.csv");
+
+            // Form3読込ログ
+            AddLog($"{HIZTIM} FormOpen 1 {CommonData.UserName} Form3");
         }
 
         [DllImport("Gdi32.dll", EntryPoint = "CreateRoundRectRgn")]
@@ -167,7 +170,7 @@ namespace あすよん月次帳票
             sundusuid = "S" + idText;
             sunduspass = "S" + passText;
 
-            string monthlyFile = Path.Combine(CommonData.mfPath, @"\Monthly.txt");
+            string monthlyFile = Path.Combine(CommonData.mfPath, "Monthly.txt");
             string firstLine = File.ReadLines(monthlyFile).FirstOrDefault();
             string sumirateYM = firstLine.Substring(0, 6); // 先頭6文字を取得(当月)
             FormActionMethod formActionMethod = new FormActionMethod();
@@ -187,7 +190,7 @@ namespace あすよん月次帳票
                     formActionMethod.AddLog("オーノ_シュミレーション実行", listBxSituation);
                     if (Application.OpenForms["Form1"] is Form1 form1)
                     {
-                        form1.AddLog($"{HIZTIM} シュミレーション 0 【ユーザー:{CommonData.UserName}】 オーノ全部門");
+                        form1.AddLog($"{HIZTIM} シュミレーション 0 {CommonData.UserName} オーノ全部門");
                         form1.AddLog2($"{HIZTIM} シュミレーション 0 【ユーザー:{CommonData.UserName}】 シュミレーション使用中です");
                     }
                 }
@@ -198,7 +201,7 @@ namespace あすよん月次帳票
                     formActionMethod.AddLog($"オーノ({selectedBumon}) のシュミレーション実行", listBxSituation);
                     if (Application.OpenForms["Form1"] is Form1 form1)
                     {
-                        form1.AddLog($"{HIZTIM} シュミレーション 0 【ユーザー:{CommonData.UserName}】 部門:{selectedBumon}");
+                        form1.AddLog($"{HIZTIM} シュミレーション 0 {CommonData.UserName} 部門:{selectedBumon}");
                         form1.AddLog2($"{HIZTIM} シュミレーション 0 【ユーザー:{CommonData.UserName}】 シュミレーション使用中です");
                     }
                 }
@@ -211,7 +214,7 @@ namespace あすよん月次帳票
                 formActionMethod.AddLog("サンミック(ダスコン)のシュミレーション実行", listBxSituation);
                 if (Application.OpenForms["Form1"] is Form1 form1)
                 {
-                    form1.AddLog($"{HIZTIM} シュミレーション 0 【ユーザー:{CommonData.UserName}】 サンミック(ダスコン)");
+                    form1.AddLog($"{HIZTIM} シュミレーション 0 {CommonData.UserName} サンミック(ダスコン)");
                     form1.AddLog2($"{HIZTIM} シュミレーション 0 【ユーザー:{CommonData.UserName}】 シュミレーション使用中です");
                 }
 
@@ -223,7 +226,7 @@ namespace あすよん月次帳票
                 formActionMethod.AddLog("サンミック(カーペット)のシュミレーション実行", listBxSituation);
                 if (Application.OpenForms["Form1"] is Form1 form1)
                 {
-                    form1.AddLog($"{HIZTIM} シュミレーション 0 【ユーザー:{CommonData.UserName}】サンミック(カーペット)");
+                    form1.AddLog($"{HIZTIM} シュミレーション 0 {CommonData.UserName} サンミック(カーペット)");
                     form1.AddLog2($"{HIZTIM} シュミレーション 0 【ユーザー:{CommonData.UserName}】 シュミレーション使用中です");
                 }
             }

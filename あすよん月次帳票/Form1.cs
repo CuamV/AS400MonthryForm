@@ -1,7 +1,9 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Drawing;
 using System.IO;
 using System.Linq;
+using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
@@ -20,7 +22,6 @@ namespace あすよん月次帳票
         // フィールド変数
         //=========================================================
         private string HIZTIM;
-        private string TIM = DateTime.Now.ToString("HHmmss");
         private Label lb操作履歴;
 
         //=========================================================
@@ -48,11 +49,15 @@ namespace あすよん月次帳票
             // 全体用ログファイルパス
             if (!File.Exists(CommonData.conLog))
                 File.Create(CommonData.conLog).Close();
-            LoadLogs();
+
+            // Form1読込ログ
+            AddLog($"{HIZTIM} FormOpen 1 {CommonData.UserName} Form1");
 
             // フェードインイベント追加
             this.Shown += Form1_Shown;
-
+            
+            // ログ読込　　　　　
+            LoadLogs();
         }
 
         /// <summary>
@@ -142,9 +147,9 @@ namespace あすよん月次帳票
                 HIZTIM = $"{DateTime.Now:yyyy/MM/dd HH:mm:ss}";
 
                 MessageBox.Show("マスタ作成が完了しました！", "完了", MessageBoxButtons.OK, MessageBoxIcon.Information);
-                listBxログ表示.Items.Add($"{DateTime.Now:yyyy/MM/dd　HH:mm:ss}　マスタ更新実行");
-                AddLog($"{HIZTIM} マスタ更新 0 【ユーザー:{CommonData.UserName}】");
-                AddLog2($"{HIZTIM} マスタ更新 0 【ユーザー:{CommonData.UserName}】マスタ更新が完了しました。");
+                AddLog($"{HIZTIM} マスタ更新 0 {CommonData.UserName}");
+                AddLog2($"{HIZTIM} マスタ更新 0 {CommonData.UserName} マスタ更新が完了しました。");
+                LoadLogs();
             }
             catch (Exception ex)
             {
@@ -272,9 +277,7 @@ namespace あすよん月次帳票
         /// <param name="message"></param>
         public void AddLog(string message)
         {
-            // Form1のリストに追加
-            listBxログ表示.Items.Add($"{message}");
-            // ファイルに保存
+            //  ログファイルに保存
             File.AppendAllText(CommonData.uLog, message + Environment.NewLine);
         }
 
@@ -284,9 +287,7 @@ namespace あすよん月次帳票
         /// <param name="message"></param>
         public void AddLog2(string message)
         {
-            // Form1のリストに追加
-            listBxログ表示.Items.Add($"{message}");
-            // ファイルに保存
+            // ログファイルに保存
             File.AppendAllText(CommonData.conLog, message + Environment.NewLine);
         }
 
@@ -295,45 +296,67 @@ namespace あすよん月次帳票
         /// </summary>
         private void LoadLogs()
         {
-            listBxログ表示.Items.Clear();
-
-            // --- 個人ログの読込 ---
             if (!File.Exists(CommonData.uLog)) return;
+            if (!File.Exists(CommonData.conLog)) return;
 
-            // 1:年月日 2:時分秒 3:処理ステータス 4:表示フラグ 5:ユーザー
-            var lines = File.ReadAllLines(CommonData.uLog);
-            DateTime threshold = DateTime.Now.AddDays(-3);
+            List<string> dispList = new List<string>(); // 表示用リスト
+            string display;
+
+            // ログ(uLog,conLog)レイアウト [スペース区切り]
+            // 1:年月日 2:時分秒 3:処理ステータス 4:表示フラグ 5:ユーザー 6:備考
+            //=======================================================================
+            // --- 個人ログの読込 ---
+            var lines = File.ReadLines(CommonData.uLog, Encoding.UTF8);
 
             foreach (var line in lines)
             {
-                // ログの日付部分をバース
-                if (DateTime.TryParse(line.Substring(0, 10), out DateTime logDate))
+                // 空行スキップ
+                if (string.IsNullOrWhiteSpace(line)) continue;
+                // スペース区切りで分割(項目を配列に)
+                var parts = line.Split(' ');
+                // 項目数不足スキップ
+                if (parts.Length < 5) continue;
+
+                if (parts[3] == "0")
                 {
-                    if (logDate > threshold)
-                    {
-                        listBxログ表示.Items.Add(line);
-                    }
+                    // 必要項目のみ再構築(1,2,3,5(,6))
+                    if (parts.Length < 6)
+                        display = $"{parts[0]} {parts[1]} 【{parts[2]}:{parts[4]}】";
+                    else
+                        display = $"{parts[0]} {parts[1]} 【{parts[2]}:{parts[4]}】 <{parts[5]}>";
+
+                    dispList.Add(display);
                 }
+
             }
             // --- 全体ログの読込 ---
-            if (!File.Exists(CommonData.conLog)) return;
-            var allLines = File.ReadAllLines(CommonData.conLog);
+            var allLines = File.ReadLines(CommonData.conLog,Encoding.UTF8);
+
             foreach (var line in allLines)
             {
-                // ログの日付部分をバース
-                if (DateTime.TryParse(line.Substring(0, 10), out DateTime logDate))
+                // 空行スキップ
+                if (string.IsNullOrWhiteSpace(line)) continue;
+                // スペース区切りで分割(項目を配列に)
+                var parts = line.Split(' ');
+                // 項目不足スキップ
+                if (parts.Length < 5) continue;
+
+                if (parts[3] == "0")
                 {
-                    if (logDate > threshold)
-                    {
-                        listBxログ表示.Items.Add(line);
-                    }
+                    // 必要項目のみ再構築(1,2,3,5(,6))
+                    if (parts.Length < 6)
+                        display = $"{parts[0]} {parts[1]} 【{parts[2]}:{parts[4]}】";
+                    else
+                        display = $"{parts[0]} {parts[1]} 【{parts[2]}:{parts[4]}】 <{parts[5]}>";
+
+                    dispList.Add(display);
                 }
             }
-
-            var sorted = listBxログ表示.Items.Cast<string>()
-                .OrderByDescending(line =>
+            // --- ソート(年月日＋時分秒で降順) ---
+            var sorted = dispList.OrderByDescending(line =>
                 {
-                    if (DateTime.TryParse(line.Substring(line.IndexOf('2'), 16), out var dt)) return dt;
+                    // 例: "2025/02/03 12:34:56 【OK:USER】 <備考>"
+                    if (DateTime.TryParse(line.Substring(0, 19), out var dt)) return dt;
                     return DateTime.MinValue;
                 })
                 .ToList();
@@ -341,14 +364,6 @@ namespace あすよん月次帳票
             listBxログ表示.Items.Clear();
             foreach (var s in sorted)
                 listBxログ表示.Items.Add(s);
-
-            //// listBxSituation.Itemsが0件の場合、ログファイルをリネームして空ファイル再作成
-            //if (listBxログ表示.Items.Count == 0)
-            //{
-            //    string backupLogPath = logPath.Replace("log.txt", $"log_backup_{HIZ}_{TIM}.txt");
-            //    File.Move(logPath, backupLogPath);
-            //    File.Create(logPath).Close();
-            //}
         }
 
         /// <summary>

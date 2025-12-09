@@ -1,12 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
-using System.Drawing;
 using System.IO;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows.Forms;
 
 namespace あすよん月次帳票
@@ -26,7 +19,6 @@ namespace あすよん月次帳票
             txtBxID.Text = Properties.Settings.Default.UserID;
             txtBxPASS.Text = Properties.Settings.Default.Password;
         }
-
 
         /// <summary>
         /// Form1ボタンクリック
@@ -59,22 +51,31 @@ namespace あすよん月次帳票
             CommonData.LogPath = @"\\ohnosv01\OhnoSys\099_sys\LOG"; // ログファイルパス
             CommonData.UserID = idText;
             CommonData.Pass = passText;
-            string mf = Path.Combine(CommonData.mfPath, $"Employee.csv");
+            string mf = Path.Combine(CommonData.mfPath, "Employee.csv");
             CommonData.UserName = FormActionMethod.GetUserName(idText, mf);
-            CommonData.HIZ = DateTime.Now.ToString("yyyyMM");
+            if (string.IsNullOrEmpty(CommonData.UserName))
+            {
+                CommonData.UserName = "ゲストユーザー";
+                var form1 = Application.OpenForms["Form1"] as Form1;
+                form1.AddLog($"{HIZTIM} ユーザー名 1 {CommonData.UserName} ユーザー名取得不可");
+            }
+            CommonData.HIZ = DateTime.Now.ToString("yyyyMMdd");
             CommonData.uLog = Path.Combine(CommonData.LogPath, CommonData.HIZ, $"LOG.{CommonData.UserID}.txt");
             CommonData.conLog = Path.Combine(CommonData.LogPath, CommonData.HIZ, $"LOG_ControlAction.txt");
 
-            // Form1を作成
-            Form1 form1 = new Form1();
-            // Form1を表示
-            form1.Show();
             // ログイン情報をForm1に渡す
-            if (Application.OpenForms["Form1"] is Form1 f1)
+            var form1Existing = Application.OpenForms["Form1"] as Form1;
+            if (form1Existing != null)
             {
-                f1.AddLog($"{HIZTIM} ログイン 0 【ユーザー:{CommonData.UserName}】");
-                f1.AddLog($"{HIZTIM} ログイン 1 【ユーザーID:{CommonData.UserID}/ユーザーPass:{CommonData.Pass}】");
+                form1Existing.AddLog($"{HIZTIM} ログイン 0 {CommonData.UserName}");
+                form1Existing.AddLog($"{HIZTIM} ログイン 1 【ユーザーID:{CommonData.UserID}/ユーザーPass:{CommonData.Pass}】");
             }
+
+            // Form1を作成
+            Form1 form1New = new Form1();
+            // Form1を表示
+            form1New.Show();
+
             // FormMainTopを非表示
             this.Hide();
         }

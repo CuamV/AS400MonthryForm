@@ -244,6 +244,7 @@ namespace あすよん月次帳票
                 await Task.Delay(20); // 20ミリ秒待機,速度調整（小さくすると早く出る)
                 this.Opacity += 0.05; // 徐々に不透明に
             }
+            LoadLogs(); // ログの初期読み込み
         }
 
         /// <summary>
