@@ -6,9 +6,7 @@ using System.Windows.Forms;
 
 namespace あすよん月次帳票
 {
-
-
-    public partial class 販売仕入先Form : Form
+    internal partial class 販売仕入先Form : Form
     {
         private string mode;  // "HANBAI" or "SHIIRE"
         private List<Torihiki> initialSelected;  // RplForm2 から受け取る
@@ -16,7 +14,7 @@ namespace あすよん月次帳票
         private Dictionary<string, List<dynamic>> jsonData;  // JSON読込結果
         private Dictionary<string, HashSet<string>> preselectedMap; // RplForm2 から受け取る事前選択データマップ
 
-        public 販売仕入先Form(string mode, List<Torihiki> selectedItems, Dictionary<string, HashSet<string>> existingMap)
+        internal 販売仕入先Form(string mode, List<Torihiki> selectedItems, Dictionary<string, HashSet<string>> existingMap)
         {
             InitializeComponent();
             this.Load += 販売仕入先Form_Load;
@@ -28,7 +26,7 @@ namespace あすよん月次帳票
             treeView販売仕入.NodeMouseClick += TreeView販売仕入_NodeMouseClick;
         }
 
-        public void 販売仕入先Form_Load(object sender, EventArgs e)
+        internal void 販売仕入先Form_Load(object sender, EventArgs e)
         {
             // 部門CD→会社マッピング作成
             deptCodeToCompany = new Dictionary<string, string>();
@@ -108,7 +106,7 @@ namespace あすよん月次帳票
             }
         }
 
-        public void InitTreeView(IEnumerable<dynamic> filteredItems = null)
+        private void InitTreeView(IEnumerable<dynamic> filteredItems = null)
         {
             treeView販売仕入.Nodes.Clear();
             var companyNodes = new Dictionary<string, TreeNode>();
@@ -193,7 +191,7 @@ namespace あすよん月次帳票
         }
 
         // クリックでチェック切替
-        public void TreeView販売仕入_NodeMouseClick(object sender, TreeNodeMouseClickEventArgs e)
+        private void TreeView販売仕入_NodeMouseClick(object sender, TreeNodeMouseClickEventArgs e)
         {
             if (e.Button == MouseButtons.Left && e.Node.Parent != null && e.Node.Nodes.Count == 0)
                 // 子ノード(取引先)のみチェック可能
@@ -250,7 +248,7 @@ namespace あすよん月次帳票
             }
         }
 
-        public void btn検索_Click(object sender, EventArgs e)
+        private void btn検索_Click(object sender, EventArgs e)
         {
             // 現在のチェック状態を保持
             var selectedCodes = GetSelectedItems().Select(s => s.Code).ToList();
@@ -279,13 +277,13 @@ namespace あすよん月次帳票
             RestoreTreeViewChecked(treeView販売仕入.Nodes);
         }
 
-        public void btn追加_Click(object sender, EventArgs e)
+        private void btn追加_Click(object sender, EventArgs e)
         {
             foreach (TreeNode node in treeView販売仕入.Nodes)
                 AddCheckedNodesToListBox(node);
         }
 
-        public void AddCheckedNodesToListBox(TreeNode node)
+        private void AddCheckedNodesToListBox(TreeNode node)
         {
             if (node.Checked && node.Parent != null && node.Nodes.Count == 0) // 子ノードのみ対象
             {
@@ -319,7 +317,7 @@ namespace あすよん月次帳票
                 AddCheckedNodesToListBox(child);
         }
 
-        public void btn削除_Click(object sender, EventArgs e)
+        private void btn削除_Click(object sender, EventArgs e)
         {
             var selected = listBx販売仕入.SelectedItems.Cast<Torihiki>().ToList();
             foreach (var s in selected)
@@ -356,7 +354,7 @@ namespace あすよん月次帳票
             }
         }
 
-        public List<Torihiki> GetSelectedItems()
+        internal List<Torihiki> GetSelectedItems()
         {
             var result = new List<Torihiki>();
 

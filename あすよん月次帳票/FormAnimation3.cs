@@ -1,19 +1,14 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
 using System.Drawing;
-using System.Linq;
 using System.Runtime.InteropServices;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows.Forms;
 
 namespace あすよん月次帳票
 {
-    public partial class FormAnimation3 : Form
+    internal partial class FormAnimation3 : Form
     {
-        public FormAnimation3()
+        ColorManager clrmg = new ColorManager();
+        internal FormAnimation3()
         {
             InitializeComponent();
 
@@ -24,7 +19,7 @@ namespace あすよん月次帳票
 
             // フォーム設定
             this.FormBorderStyle = FormBorderStyle.None;
-            this.BackColor = ColorManager.RauBase;
+            this.BackColor = clrmg.RauBase;
             this.Opacity = 0.95;
             this.ShowInTaskbar = false;
             this.TopMost = true;
@@ -41,13 +36,13 @@ namespace あすよん月次帳票
             int nLeftRect, int nTopRect, int nRightRect, int nBottomRect,
             int nWidthEllipse, int nHeightEllipse);
 
-        public void CloseForm()
+        internal void CloseForm()
         {
             this.Invoke((Action)(() => this.Close()));
         }
 
-        // lblMessage フィールドのアクセス修飾子を public に変更
-        public Label lblMessage;
+        // lblMessage フィールドのアクセス修飾子を internal に変更
+        internal Label lblMessage;
 
         // フィールドに追加
         private Point mouseOffset;

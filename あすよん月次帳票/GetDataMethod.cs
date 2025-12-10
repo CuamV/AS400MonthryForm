@@ -1,21 +1,14 @@
 ﻿using IBM.Data.DB2.iSeries;
 using Ohno.Db;
-using System;
 using System.Collections.Generic;
 using System.Data;
-using System.Linq;
-using System.Security.Cryptography;
-using System.Text;
-using System.Threading.Tasks;
-using System.Windows.Forms;
-using Excel = Microsoft.Office.Interop.Excel;
 
 namespace あすよん月次帳票
 {
     internal class GetDataMethod
     {
         // 売上データ取得
-        public static DataTable GetSalesData(string symd, string eymd, string lib)
+        internal DataTable GetSalesData(string symd, string eymd, string lib)
         {
             //  1:[2]URNHNO(納品書No)   2:[3]URNHEB(納品書枝番    3:[5]URSBKB(サブシステム区分) 4:URTRKB(取引区分)
             //  5:[6]URDNDT(伝票日付)   6:[1]URBMCD(部門CD)       7:[4]M4.SHCLAS(クラス)        8:[8]URHBSC(販売先CD)
@@ -49,7 +42,7 @@ namespace あすよん月次帳票
         }
 
         // 仕入データ取得
-        public static DataTable GetPurchaseData(string symd, string eymd, string lib, string code = "")
+        internal DataTable GetPurchaseData(string symd, string eymd, string lib, string code = "")
         {
             //  1:[5]SRSRNO(仕入No)     2:[6]SRSREB(仕入枝番)     3:[7]SRSBKB(サブシステム区分) 4:SRTRKB(取引区分)
             //  5:[9]SRDNDT(伝票日付)   6:[1]SRBMCD(部門CD)       7:[4]M4.SHCLAS(クラス)        8:[3]SRSRCD(仕入先CD)
@@ -84,7 +77,7 @@ namespace あすよん月次帳票
         }
 
         // 当月在庫データ取得
-        public static DataTable GetStockData(string file)
+        internal DataTable GetStockData(string file)
         {
             var dbManager = (DbManager_Db2)DbManager.CreateDbManager(OhnoSysDBName.Db2);
             
@@ -105,7 +98,7 @@ namespace あすよん月次帳票
         }
 
         // 過去月在庫データ取得
-        public static DataTable GetStockData(string lib, string yy, string mm)
+        internal DataTable GetStockData(string lib, string yy, string mm)
         {
             var dbManager = (DbManager_Db2)DbManager.CreateDbManager(OhnoSysDBName.Db2);
 
@@ -152,8 +145,5 @@ namespace あすよん月次帳票
 
             return dt;
         }
-
-        
-
     }
 }

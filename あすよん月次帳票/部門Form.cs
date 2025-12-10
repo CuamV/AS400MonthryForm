@@ -6,14 +6,14 @@ using System.Windows.Forms;
 
 namespace あすよん月次帳票
 {
-    public partial class 部門Form : Form
+    internal partial class 部門Form : Form
     {
         public string Code { get; set; }
         public string Name { get; set; }
 
         private List<Department> initialSelected;  // ★ RplForm2 から受け取る
 
-        public 部門Form(List<Department> selectedItems)
+        internal 部門Form(List<Department> selectedItems)
         {
             InitializeComponent();
             this.Load += 部門Form_Load;
@@ -23,7 +23,7 @@ namespace あすよん月次帳票
             treeView部門.NodeMouseClick += TreeView部門_NodeMouseClick;
         }
 
-        public void 部門Form_Load(object sender, EventArgs e)
+        internal void 部門Form_Load(object sender, EventArgs e)
         {
             InitTreeView();
 
@@ -46,7 +46,7 @@ namespace あすよん月次帳票
             }));
         }
 
-        public void InitTreeView()
+        private void InitTreeView()
         {
             // TreeViewを初期化
             treeView部門.Nodes.Clear();
@@ -108,7 +108,7 @@ namespace あすよん月次帳票
         }
 
         // クリックでチェック切替
-        public void TreeView部門_NodeMouseClick(object sender, TreeNodeMouseClickEventArgs e)
+        private void TreeView部門_NodeMouseClick(object sender, TreeNodeMouseClickEventArgs e)
         {
             if (e.Button == MouseButtons.Left && e.Node.Parent != null && e.Node.Nodes.Count == 0)
                 // 子ノード(取引先)のみチェック可能

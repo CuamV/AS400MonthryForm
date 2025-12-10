@@ -16,10 +16,12 @@ namespace あすよん月次帳票
     //==========================================================
     // --------Form1(トップフォーム)クラス--------
     //==========================================================
-    public partial class Form1 : Form
+    internal partial class Form1 : Form
     {
-        CommonData cm = new CommonData();
-        FormActionMethod fam = new FormActionMethod();
+        internal CommonData cmg;
+        internal FormActionMethod famg;
+        ColorManager clrmg = new ColorManager();
+
         //=========================================================
         // フィールド変数
         //=========================================================
@@ -29,32 +31,35 @@ namespace あすよん月次帳票
         //=========================================================
         // コンストラクタ
         //=========================================================
-        public Form1()
+        internal Form1(CommonData common)
         {
             InitializeComponent();
 
-            JsonLoader.LoadBumon(cm.mfPath + @"\BUMON.json");
-            JsonLoader.LoadHanbai("オーノ", Path.Combine(cm.mfPath, "DLB01HANBAI.json"));
-            JsonLoader.LoadShiire("オーノ", Path.Combine(cm.mfPath, "DLB01SHIIRE.json"));
-            JsonLoader.LoadHanbai("サンミックダスコン", Path.Combine(cm.mfPath, "DLB02HANBAI.json"));
-            JsonLoader.LoadShiire("サンミックダスコン", Path.Combine(cm.mfPath, "DLB02SHIIRE.json"));
-            JsonLoader.LoadHanbai("サンミックカーペット", Path.Combine(cm.mfPath, "DLB03HANBAI.json"));
-            JsonLoader.LoadShiire("サンミックカーペット", Path.Combine(cm.mfPath, "DLB03SHIIRE.json"));
+            cmg = common;
+            famg = new FormActionMethod(cmg);
+
+            JsonLoader.LoadBumon(cmg.mfPath + @"\BUMON.json");
+            JsonLoader.LoadHanbai("オーノ", Path.Combine(cmg.mfPath, "DLB01HANBAI.json"));
+            JsonLoader.LoadShiire("オーノ", Path.Combine(cmg.mfPath, "DLB01SHIIRE.json"));
+            JsonLoader.LoadHanbai("サンミックダスコン", Path.Combine(cmg.mfPath, "DLB02HANBAI.json"));
+            JsonLoader.LoadShiire("サンミックダスコン", Path.Combine(cmg.mfPath, "DLB02SHIIRE.json"));
+            JsonLoader.LoadHanbai("サンミックカーペット", Path.Combine(cmg.mfPath, "DLB03HANBAI.json"));
+            JsonLoader.LoadShiire("サンミックカーペット", Path.Combine(cmg.mfPath, "DLB03SHIIRE.json"));
 
             grpBxメニュー.Paint += GroupBoxCustomBorder;
 
-            if (!Directory.Exists(Path.Combine(cm.LogPath, cm.HIZ)))
-                Directory.CreateDirectory(Path.Combine(cm.LogPath, cm.HIZ));
+            if (!Directory.Exists(Path.Combine(cmg.LogPath, cmg.HIZ)))
+                Directory.CreateDirectory(Path.Combine(cmg.LogPath, cmg.HIZ));
             // 個人用ログファイルパス
-            if (!File.Exists(cm.uLog))
-                File.Create(cm.uLog).Close();
+            if (!File.Exists(cmg.uLog))
+                File.Create(cmg.uLog).Close();
             // 全体用ログファイルパス
-            if (!File.Exists(cm.conLog))
-                File.Create(cm.conLog).Close();
+            if (!File.Exists(cmg.conLog))
+                File.Create(cmg.conLog).Close();
 
             // Form1読込ログ
             HIZTIM = $"{DateTime.Now:yyyy/MM/dd HH:mm:ss}";
-            fam.AddLog($"{HIZTIM} FormOpen 1 {cm.UserName} Form1");
+            famg.AddLog($"{HIZTIM} FormOpen 1 {cmg.UserName} Form1");
 
             // フェードインイベント追加
             this.Shown += Form1_Shown;
@@ -65,7 +70,7 @@ namespace あすよん月次帳票
         /// </summary>
         /// <param name="sender"></param>
         /// <param name="e"></param>
-        private void Form1_Load(object sender, EventArgs e)
+        internal void Form1_Load(object sender, EventArgs e)
         {
             ApplySnowManColors();
 
@@ -92,7 +97,7 @@ namespace あすよん月次帳票
         private async void lnkLbMaster_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
         {
             HIZTIM = $"{DateTime.Now:yyyy/MM/dd HH:mm:ss}";
-            fam.AddLog($"{HIZTIM} コントロール 1 {cm.UserName} lnkLbMaster_LinkClicked");
+            famg.AddLog($"{HIZTIM} コントロール 1 {cmg.UserName} lnkLbMaster_LinkClicked");
             try
             {
                 FormAnimation2 anim = null;
@@ -110,7 +115,7 @@ namespace あすよん月次帳票
                             a.Invoke((Action)(() =>
                             {
                                 anim.lblMessage.Text = "あすよん月次帳票専用\r\nマスタ更新中です…\r\n";
-                                anim.BackColor = ColorManager.FukaLight1;
+                                anim.BackColor = clrmg.FukaLight1;
                             }));
                         };
                         Application.Run(a); // GIF表示
@@ -128,15 +133,15 @@ namespace あすよん月次帳票
                 foreach (var lib in libs)
                 {
                     // 販売先マスタ取得
-                    var hanbai = fam.GetHanbaiAll(lib);
-                    var hanbaiFile = $@"{cm.mfPath}\{lib.Replace("SM1", "")}HANBAI.json";
-                    fam.SaveToJson(hanbaiFile, hanbai);
+                    var hanbai = famg.GetHanbaiAll(lib);
+                    var hanbaiFile = $@"{cmg.mfPath}\{lib.Replace("SM1", "")}HANBAI.json";
+                    famg.SaveToJson(hanbaiFile, hanbai);
 
 
                     // 仕入先マスタ取得
-                    var shiire = fam.GetShiireAll(lib);
-                    var shiireFile = $@"{cm.mfPath}\{lib.Replace("SM1", "")}SHIIRE.json";
-                    fam.SaveToJson(shiireFile, shiire);
+                    var shiire = famg.GetShiireAll(lib);
+                    var shiireFile = $@"{cmg.mfPath}\{lib.Replace("SM1", "")}SHIIRE.json";
+                    famg.SaveToJson(shiireFile, shiire);
                 }
 
                 // --- 終了したらアニメーション閉じる ---
@@ -152,8 +157,8 @@ namespace あすよん月次帳票
                 HIZTIM = $"{DateTime.Now:yyyy/MM/dd HH:mm:ss}";
 
                 MessageBox.Show("マスタ作成が完了しました！", "完了", MessageBoxButtons.OK, MessageBoxIcon.Information);
-                fam.AddLog($"{HIZTIM} マスタ更新 0 {cm.UserName}");
-                fam.AddLog2($"{HIZTIM} マスタ更新 0 {cm.UserName} マスタ更新が完了しました。");
+                famg.AddLog($"{HIZTIM} マスタ更新 0 {cmg.UserName}");
+                famg.AddLog2($"{HIZTIM} マスタ更新 0 {cmg.UserName} マスタ更新が完了しました。");
                 LoadLogs();
             }
             catch (Exception ex)
@@ -170,9 +175,9 @@ namespace あすよん月次帳票
         private void lnkLbSimulate_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
         {
             HIZTIM = $"{DateTime.Now:yyyy/MM/dd HH:mm:ss}";
-            fam.AddLog($"{HIZTIM} コントロール 1 {cm.UserName} lnkLbSimulate_LinkClicked");
+            famg.AddLog($"{HIZTIM} コントロール 1 {cmg.UserName} lnkLbSimulate_LinkClicked");
             // Form3を作成
-            var form3 = new Form3();
+            var form3 = new Form3(cmg);
             // Form3を表示
             form3.Show();
             // Form1を非表示
@@ -187,9 +192,9 @@ namespace あすよん月次帳票
         private void lnkLbDisplay_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
         {
             HIZTIM = $"{DateTime.Now:yyyy/MM/dd HH:mm:ss}";
-            fam.AddLog($"{HIZTIM} コントロール 1 {cm.UserName} lnkLbDisplay_LinkClicked");
+            famg.AddLog($"{HIZTIM} コントロール 1 {cmg.UserName} lnkLbDisplay_LinkClicked");
             // Form2を作成
-            var form2 = new Form2();
+            var form2 = new Form2(cmg);
             // Form2を表示
             form2.Show();
             // Form1を非表示
@@ -204,7 +209,7 @@ namespace あすよん月次帳票
         private void lnkLbStandard_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
         {
             HIZTIM = $"{DateTime.Now:yyyy/MM/dd HH:mm:ss}";
-            fam.AddLog($"{HIZTIM} コントロール 1 {cm.UserName} lnkLbStandard_LinkClicked");
+            famg.AddLog($"{HIZTIM} コントロール 1 {cmg.UserName} lnkLbStandard_LinkClicked");
             // Form5を作成
             var form5 = new Form5();
             // Form5を表示
@@ -221,15 +226,15 @@ namespace あすよん月次帳票
         private void btnEnd_Click(object sender, EventArgs e)
         {
             HIZTIM = $"{DateTime.Now:yyyy/MM/dd HH:mm:ss}";
-            fam.AddLog($"{HIZTIM} コントロール 1 {cm.UserName} btnEnd_Click");
+            famg.AddLog($"{HIZTIM} コントロール 1 {cmg.UserName} btnEnd_Click");
 
-            string lockFilePath = Path.Combine(cm.LockPath, "LOCK_sim.txt");
+            string lockFilePath = Path.Combine(cmg.LockPath, "LOCK_sim.txt");
             string currentUserID = Properties.Settings.Default.UserID;
 
             if (File.Exists(lockFilePath))
             {
                 // ロックファイルが存在する場合、ロックを解除+削除
-                var flg = fam.ReleaseSimulationLock();
+                var flg = famg.ReleaseSimulationLock();
                 if (flg)
                     File.Delete(lockFilePath);
             }
@@ -237,7 +242,7 @@ namespace あすよん月次帳票
             Application.Exit();
 
             HIZTIM = $"{DateTime.Now:yyyy/MM/dd HH:mm:ss}";
-            fam.AddLog($"{HIZTIM} ログアウト 0 【ユーザー:{cm.UserName}】");
+            famg.AddLog($"{HIZTIM} ログアウト 0 【ユーザー:{cmg.UserName}】");
         }
 
         /// <summary>
@@ -248,9 +253,9 @@ namespace あすよん月次帳票
         private void timerReleaseLock_Tick(object sender, EventArgs e)
         {
             HIZTIM = $"{DateTime.Now:yyyy/MM/dd HH:mm:ss}";
-            fam.AddLog($"{HIZTIM} コントロール 1 {cm.UserName} timerReleaseLock_Tick");
+            famg.AddLog($"{HIZTIM} コントロール 1 {cmg.UserName} timerReleaseLock_Tick");
 
-            string lockFilePath = Path.Combine(cm.LockPath, "LOCK_sim.txt");
+            string lockFilePath = Path.Combine(cmg.LockPath, "LOCK_sim.txt");
             string currentUserID = Properties.Settings.Default.UserID;
 
             if (File.Exists(lockFilePath))
@@ -268,7 +273,7 @@ namespace あすよん月次帳票
                 // 最終起動から10分経過していたらロック解除
                 if (isExpired)
                 {
-                    var flg = fam.ReleaseSimulationLock();
+                    var flg = famg.ReleaseSimulationLock();
                     if (flg)
                         File.Delete(lockFilePath);
                 }
@@ -283,7 +288,7 @@ namespace あすよん月次帳票
         private void timrLogRenewal_Tick(object sender, EventArgs e)
         {
             HIZTIM = $"{DateTime.Now:yyyy/MM/dd HH:mm:ss}";
-            fam.AddLog($"{HIZTIM} コントロール 1 {cm.UserName} timrLogRenewal_Tick");
+            famg.AddLog($"{HIZTIM} コントロール 1 {cmg.UserName} timrLogRenewal_Tick");
             LoadLogs();
         }
 
@@ -296,10 +301,10 @@ namespace あすよん月次帳票
         private void LoadLogs()
         {
             HIZTIM = $"{DateTime.Now:yyyy/MM/dd HH:mm:ss}";
-            fam.AddLog($"{HIZTIM} 処理メソッド 1 {cm.UserName} LoadLogs");
+            famg.AddLog($"{HIZTIM} 処理メソッド 1 {cmg.UserName} LoadLogs");
 
-            if (!File.Exists(cm.uLog)) return;
-            if (!File.Exists(cm.conLog)) return;
+            if (!File.Exists(cmg.uLog)) return;
+            if (!File.Exists(cmg.conLog)) return;
 
             List<string> dispList = new List<string>(); // 表示用リスト
             string display;
@@ -308,7 +313,7 @@ namespace あすよん月次帳票
             // 1:年月日 2:時分秒 3:処理ステータス 4:表示フラグ 5:ユーザー 6:備考
             //=======================================================================
             // --- 個人ログの読込 ---
-            var lines = File.ReadLines(cm.uLog, Encoding.UTF8);
+            var lines = File.ReadLines(cmg.uLog, Encoding.UTF8);
 
             foreach (var line in lines)
             {
@@ -332,7 +337,7 @@ namespace あすよん月次帳票
 
             }
             // --- 全体ログの読込 ---
-            var allLines = File.ReadLines(cm.conLog,Encoding.UTF8);
+            var allLines = File.ReadLines(cmg.conLog,Encoding.UTF8);
 
             foreach (var line in allLines)
             {
@@ -376,7 +381,7 @@ namespace あすよん月次帳票
         private void Form1_FormClosing(object sender, FormClosingEventArgs e)
         {
             HIZTIM = $"{DateTime.Now:yyyy/MM/dd HH:mm:ss}";
-            fam.AddLog($"{HIZTIM} 処理メソッド 1 {cm.UserName} Form1_FormClosing");
+            famg.AddLog($"{HIZTIM} 処理メソッド 1 {cmg.UserName} Form1_FormClosing");
 
             Form3.ClearRuntimeLog();
         }
@@ -387,28 +392,28 @@ namespace あすよん月次帳票
         /// <summary>
         /// Form1にスノーマンの色を適用
         /// </summary>
-        public void ApplySnowManColors()
+        private void ApplySnowManColors()
         {
             HIZTIM = $"{DateTime.Now:yyyy/MM/dd HH:mm:ss}";
-            fam.AddLog($"{HIZTIM} デザイン関連メソッド 1 {cm.UserName} ApplySnowManColors");
+            famg.AddLog($"{HIZTIM} デザイン関連メソッド 1 {cmg.UserName} ApplySnowManColors");
             // フォーム全体の背景色
-            this.BackColor = ColorManager.RauLight1;  // 背景黒
+            this.BackColor = clrmg.RauLight1;  // 背景黒
             // ラベルの色
-            lbメニュー.ForeColor = ColorManager.MemeBase;  // 白文字
-            lb操作履歴.ForeColor = ColorManager.MemeBase;  // 文字白
+            lbメニュー.ForeColor = clrmg.MemeBase;  // 白文字
+            lb操作履歴.ForeColor = clrmg.MemeBase;  // 文字白
             // リストボックス
-            listBxログ表示.BackColor = ColorManager.HikaruLight1; // ひーくん黄色
+            listBxログ表示.BackColor = clrmg.HikaruLight1; // ひーくん黄色
             listBxログ表示.ForeColor = Color.Black;
             // グループボックスの枠線
-            grpBxメニュー.ForeColor = ColorManager.ShopyBase;
+            grpBxメニュー.ForeColor = clrmg.ShopyBase;
 
             // リンクラベルの色
             lnkLbシュミレーション.LinkColor = Color.FromArgb(255, 102, 255);  // さっくんピンク
-            lnkLbデータ抽出.LinkColor = ColorManager.KojiBase;    // 康二オレンジ
-            lnkLb定型帳票.LinkColor = ColorManager.AbeBase;   // 阿部ちゃん緑
-            lnkLbマスタ更新.LinkColor = ColorManager.FukaLight1;    // ふっか紫
+            lnkLbデータ抽出.LinkColor = clrmg.KojiBase;    // 康二オレンジ
+            lnkLb定型帳票.LinkColor = clrmg.AbeBase;   // 阿部ちゃん緑
+            lnkLbマスタ更新.LinkColor = clrmg.FukaLight1;    // ふっか紫
 
-            StyleButton(btn終了, ColorManager.RauBase, ColorManager.DateBase, ColorManager.DateLight1);
+            StyleButton(btn終了, clrmg.RauBase, clrmg.DateBase, clrmg.DateLight1);
             // マウスイベント追加
             btn終了.MouseEnter += Btn_MouseEnter;
             btn終了.MouseLeave += Btn_MouseLeave;
@@ -423,7 +428,7 @@ namespace あすよん月次帳票
         private void GroupBoxCustomBorder(object sender, PaintEventArgs e)
         {
             HIZTIM = $"{DateTime.Now:yyyy/MM/dd HH:mm:ss}";
-            fam.AddLog($"{HIZTIM} デザイン関連メソッド 1 {cm.UserName} GroupBoxCustomBorder");
+            famg.AddLog($"{HIZTIM} デザイン関連メソッド 1 {cmg.UserName} GroupBoxCustomBorder");
 
             GroupBox box = (GroupBox)sender;
             e.Graphics.Clear(box.BackColor);
@@ -435,7 +440,7 @@ namespace あすよん月次帳票
             SizeF textSize = e.Graphics.MeasureString(box.Text, box.Font);
 
             // 枠線色
-            using (Pen pen = new Pen(ColorManager.ShopyBase, 1.5f))
+            using (Pen pen = new Pen(clrmg.ShopyBase, 1.5f))
             {
                 int textPadding = 8;  // 左の余白
                 int textWidth = (int)textSize.Width;
@@ -448,7 +453,7 @@ namespace あすよん月次帳票
                 e.Graphics.DrawLine(pen, box.Width - 2, (int)(textSize.Height / 2), box.Width - 2, box.Height - 2); // 右線
 
                 // テキストを描画
-                using (SolidBrush brush = new SolidBrush(ColorManager.MemeDark1))
+                using (SolidBrush brush = new SolidBrush(clrmg.MemeDark1))
                 {
                     e.Graphics.DrawString(box.Text, box.Font, brush, 8, 0);
                 }

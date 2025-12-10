@@ -190,7 +190,7 @@ namespace あすよん月次帳票
             // ボタン初期色を設定
             btn.BackColor = backColor;
             btn.ForeColor = foreColor;
-            btn.FlatAppearance.BorderColor = borderColor ?? ColorManager.MemeDark1;
+            btn.FlatAppearance.BorderColor = borderColor ?? clrmg.MemeDark1;
 
             // 角丸設定
             using (var path = new System.Drawing.Drawing2D.GraphicsPath())
@@ -339,7 +339,7 @@ namespace あすよん月次帳票
         {
             if (sender is Button btn)
             {
-                btn.BackColor = ColorManager.MemeLight2; // ホバー時の色
+                btn.BackColor = clrmg.MemeLight2; // ホバー時の色
                 await AnimateButton(btn);
             }
         }

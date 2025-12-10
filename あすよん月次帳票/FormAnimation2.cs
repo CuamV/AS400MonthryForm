@@ -5,9 +5,10 @@ using System.Windows.Forms;
 
 namespace あすよん月次帳票
 {
-    public partial class FormAnimation2 : Form
+    internal partial class FormAnimation2 : Form
     {
-        public FormAnimation2()
+        ColorManager clrmg = new ColorManager();
+        internal FormAnimation2()
         {
             InitializeComponent();
 
@@ -18,7 +19,7 @@ namespace あすよん月次帳票
 
             // フォーム設定
             this.FormBorderStyle = FormBorderStyle.None;
-            this.BackColor = ColorManager.RauBase;
+            this.BackColor = clrmg.RauBase;
             this.Opacity = 0.95;
             this.ShowInTaskbar = false;
             this.TopMost = true;
@@ -34,13 +35,13 @@ namespace あすよん月次帳票
             int nLeftRect, int nTopRect, int nRightRect, int nBottomRect,
             int nWidthEllipse, int nHeightEllipse);
 
-        public void CloseForm()
+        internal void CloseForm()
         {
             this.Invoke((Action)(() => this.Close()));
         }
 
-        // lblMessage フィールドのアクセス修飾子を public に変更
-        public Label lblMessage;
+        // lblMessage フィールドのアクセス修飾子を internal に変更
+        internal Label lblMessage;
 
 
         // フィールドに追加

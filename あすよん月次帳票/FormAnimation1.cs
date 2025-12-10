@@ -6,11 +6,11 @@ using System.Runtime.InteropServices;
 namespace あすよん月次帳票
 {
 
-    public partial class FormAnimation1 : Form
+    internal partial class FormAnimation1 : Form
     {
         private Timer closeTimer;
 
-        public FormAnimation1()
+        internal FormAnimation1()
         {
             InitializeComponent();
 
@@ -41,7 +41,7 @@ namespace あすよん月次帳票
             int nLeftRect, int nTopRect, int nRightRect, int nBottomRect,
             int nWidthEllipse, int nHeightEllipse);
 
-        public void CloseForm()
+        internal void CloseForm()
         {
             this.Invoke((Action)(() => this.Close()));
         }

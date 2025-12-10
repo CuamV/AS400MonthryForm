@@ -12,7 +12,7 @@ namespace あすよん月次帳票
         /// 売上・仕入をマージして列名を統一する
         /// </summary>
 
-        public DataTable MergeSalesPurchase(DataTable salesDt, DataTable purchaseDt,bool fmFlg)
+        internal DataTable MergeSalesPurchase(DataTable salesDt, DataTable purchaseDt,bool fmFlg)
         {
             if (salesDt == null) salesDt = new DataTable();
             if (purchaseDt == null) purchaseDt = new DataTable();
@@ -60,7 +60,7 @@ namespace あすよん月次帳票
             return dv;
         }
 
-        public DataTable SortData(DataTable dt)
+        internal DataTable SortData(DataTable dt)
         {
             var dv = dt.DefaultView;
             List<string> sortColumns = new List<string>();
@@ -73,7 +73,7 @@ namespace あすよん月次帳票
             return dv.ToTable();
         }
 
-        public DataTable SortData(DataTable dt, string[] sortcols)
+        internal DataTable SortData(DataTable dt, string[] sortcols)
         {
             var dv = dt.DefaultView;
             List<string> sortColumns = new List<string>();
@@ -89,7 +89,7 @@ namespace あすよん月次帳票
         /// <summary>
         /// 売上・仕入の列名を統一する
         /// </summary>
-        public DataTable NormalizeColumnNames(DataTable dt, string type)
+        internal DataTable NormalizeColumnNames(DataTable dt, string type)
         {
             if (dt == null) return new DataTable();
             DataTable dtCopy = dt.Copy();
@@ -162,7 +162,7 @@ namespace あすよん月次帳票
         }
 
         // カテゴリ列追加＆欠損値０埋め
-        public DataTable ProsessStockTable(DataTable dt, string file)
+        internal DataTable ProsessStockTable(DataTable dt, string file)
         {
             foreach (DataRow row in dt.Rows)
             {
@@ -188,7 +188,7 @@ namespace あすよん月次帳票
         }
 
         // 複数DataTableを縦にマージ
-        public DataTable MergeData(params DataTable[] tables)
+        internal DataTable MergeData(params DataTable[] tables)
         {
             //==============================================================
             // 「 Now 」
@@ -220,7 +220,7 @@ namespace あすよん月次帳票
         }
 
         // レイアウト調整
-        public DataTable FormatStockTable(DataTable dt)
+        internal DataTable FormatStockTable(DataTable dt)
         {
             DataTable formated = new DataTable();
             //==============================================================
@@ -266,7 +266,7 @@ namespace あすよん月次帳票
             
             return dv.ToTable();
         }
-        public DataTable FormatStockTable(DataTable dt, bool newold)
+        internal DataTable FormatStockTable(DataTable dt, bool newold)
         {
             DataTable formated = new DataTable();
             //==============================================================
@@ -325,7 +325,7 @@ namespace あすよん月次帳票
 
         }
 
-        public DataTable CustFilter(DataTable filtered, DataTable dt, List<string> selected, string cutCD)
+        internal DataTable CustFilter(DataTable filtered, DataTable dt, List<string> selected, string cutCD)
         {
             string filter = string.Join(" OR ", selected.Select(code => $"{cutCD} = '{code}'"));
             DataRow[] rows = dt.Select(filter);
@@ -335,7 +335,7 @@ namespace あすよん月次帳票
         }
 
         // 在庫種別フィルター
-        public DataTable IvTypeFilter(DataTable filtered, Dictionary<string, string> selected)
+        internal DataTable IvTypeFilter(DataTable filtered, Dictionary<string, string> selected)
         {
             // ZGZKSB: 在庫種別
             // 0=自社,1=預り,2=預け,3=投入
@@ -357,7 +357,7 @@ namespace あすよん月次帳票
         }
         // クラス区分フィルター
         //   売上・仕入
-        public DataTable ProductFileter(DataTable filtered, Dictionary<string, string> classProduct, List<string> selected)
+        internal DataTable ProductFileter(DataTable filtered, Dictionary<string, string> classProduct, List<string> selected)
         {
             DataTable tmp = filtered.Clone();
             foreach (DataRow row in filtered.Rows)
@@ -373,7 +373,7 @@ namespace あすよん月次帳票
             return tmp;
         }
         // 在庫
-        public DataTable ProductFileter(DataTable filtered, List<string> selected)
+        internal DataTable ProductFileter(DataTable filtered, List<string> selected)
         {
             DataTable tmp = filtered.Clone();
             foreach (DataRow row in filtered.Rows)
@@ -387,7 +387,7 @@ namespace あすよん月次帳票
             return tmp;
         }
 
-        public DataTable BumonFilter(DataTable filtered, List<string> selected, string bCD)
+        internal DataTable BumonFilter(DataTable filtered, List<string> selected, string bCD)
         {
             DataTable tmp = filtered.Clone();
             foreach (DataRow row in filtered.Rows)

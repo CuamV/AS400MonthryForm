@@ -1,14 +1,9 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
+﻿using System.Collections.Generic;
 using System.IO;
 using System.Text.Json;
-using System.Windows.Forms;
-using System.Threading.Tasks;
 
 namespace あすよん月次帳票
 {
-
     internal class mf_BUMON
     {
         public string Code { get; set; }
@@ -39,7 +34,7 @@ namespace あすよん月次帳票
         private static Dictionary<string, Dictionary<string, List<mf_SHIIRE>>> _SHIIRES
             = new Dictionary<string, Dictionary<string, List<mf_SHIIRE>>>();
 
-        public static void LoadBumon(string filePath)
+        internal static void LoadBumon(string filePath)
         {
             if (!File.Exists(filePath))
                 throw new FileNotFoundException("部門マスタがみつかりません", filePath);
@@ -48,7 +43,7 @@ namespace あすよん月次帳票
             _BUMONS = JsonSerializer.Deserialize<Dictionary<string, List<mf_BUMON>>>(json) ?? new Dictionary<string, List<mf_BUMON>>();
         }
 
-        public static void LoadHanbai(string company, string filePath)
+        internal static void LoadHanbai(string company, string filePath)
         {
             if (!File.Exists(filePath))
                 throw new FileNotFoundException("販売先マスタがみつかりません", filePath);
@@ -67,7 +62,7 @@ namespace あすよん月次帳票
             _HANBAIS[company] = normalized;
         }
 
-        public static void LoadShiire(string company, string filePath)
+        internal static void LoadShiire(string company, string filePath)
         {
             if (!File.Exists(filePath))
                 throw new FileNotFoundException("仕入先マスタがみつかりません", filePath);
@@ -87,7 +82,7 @@ namespace あすよん月次帳票
         }
 
         // 部門の取得
-        public static IEnumerable<mf_BUMON> GetBUMONs(params string[] companies)
+        internal static IEnumerable<mf_BUMON> GetBUMONs(params string[] companies)
         {
             foreach (var company in companies)
             {
@@ -100,7 +95,7 @@ namespace あすよん月次帳票
         }
 
         // 会社→部門にぶら下がる販売先取得
-        public static IEnumerable<mf_HANBAI> GetMf_HANBAIs(string company, IEnumerable<string> bumonCodes)
+        internal static IEnumerable<mf_HANBAI> GetMf_HANBAIs(string company, IEnumerable<string> bumonCodes)
         {
             if (!_HANBAIS.ContainsKey(company)) yield break;
 
@@ -124,7 +119,7 @@ namespace あすよん月次帳票
         }
 
         // 会社→部門にぶら下がる仕入先取得
-        public static IEnumerable<mf_SHIIRE> GetMf_SHIIREs(string company, IEnumerable<string> bumonCodes)
+        internal static IEnumerable<mf_SHIIRE> GetMf_SHIIREs(string company, IEnumerable<string> bumonCodes)
         {
             if (!_SHIIRES.ContainsKey(company)) yield break;
 
@@ -147,12 +142,12 @@ namespace あすよん月次帳票
         }
 
         // デバッグ用：会社のキー一覧を取得するヘルパー
-        public static IEnumerable<string> GetHanbaiKeys(string company)
+        internal static IEnumerable<string> GetHanbaiKeys(string company)
         {
             if (!_HANBAIS.ContainsKey(company)) yield break;
             foreach (var k in _HANBAIS[company].Keys) yield return k;
         }
-        public static IEnumerable<string> GetShiireKeys(string company)
+        internal static IEnumerable<string> GetShiireKeys(string company)
         {
             if (!_SHIIRES.ContainsKey(company)) yield break;
             foreach (var k in _SHIIRES[company].Keys) yield return k;

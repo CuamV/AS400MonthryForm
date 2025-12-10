@@ -2,18 +2,13 @@
 using System.Collections.Generic;
 using System.Data;
 using System.Linq;
-using System.Security.Claims;
-using System.Text;
-using System.Threading.Tasks;
-using System.Xml.Linq;
 
 namespace あすよん月次帳票
 {
     internal class DataSummarizeMethod
     {
-        
 
-        public static DataTable SumData(DataTable data, List<string> groupKeys, string[] sortcols, string type, string ptn)
+        internal DataTable SumData(DataTable data, List<string> groupKeys, string[] sortcols, string type, string ptn)
         {
             if (data == null || data.Rows.Count == 0) return new DataTable();
 
@@ -181,7 +176,7 @@ namespace あすよん月次帳票
         }
         //====================================================================
         // ◆社長用集計
-        public static DataTable SummarizeSalesPurchase(DataTable dt)
+        internal DataTable SummarizeSalesPurchase(DataTable dt)
         {
             DataTable summary = new DataTable();
             summary.Columns.Add("年月", typeof(string));
@@ -231,7 +226,7 @@ namespace あすよん月次帳票
             return summary;
         }
 
-        public static DataTable MergedSummary(List<DataTable> allTables)
+        internal DataTable MergedSummary(List<DataTable> allTables)
         {
             DataTable mergedSummary = new DataTable();
 
@@ -274,7 +269,7 @@ namespace あすよん月次帳票
             return dv.ToTable();
         }
 
-        public static DataTable SummarizeByCategoryTypeDept(DataTable mergedSummary)
+        internal DataTable SummarizeByCategoryTypeDept(DataTable mergedSummary)
         {
             DataTable summary = new DataTable();
             summary.Columns.Add("年月", typeof(string));

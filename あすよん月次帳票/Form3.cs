@@ -7,14 +7,20 @@ using System.Runtime.InteropServices;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
-//using static あすよん月次帳票.Form1;
+using Action = System.Action;
+using Application = System.Windows.Forms.Application;
+using CheckBox = System.Windows.Forms.CheckBox;
+using GroupBox = System.Windows.Forms.GroupBox;
+using Point = System.Drawing.Point;
 
 namespace あすよん月次帳票
 {
-    public partial class Form3 : Form
+    internal partial class Form3 : Form
     {
-        CommonData cm = new CommonData();
-        FormActionMethod fam = new FormActionMethod();
+        internal CommonData cmg;
+        internal FormActionMethod famg;
+        ColorManager clrmg = new ColorManager();
+
         private string HIZTIM;
 
         private static List<string> runtimelog = new List<string>();
@@ -22,18 +28,22 @@ namespace あすよん月次帳票
         private string TIM = DateTime.Now.ToString("HHmmss");
         private const int lockMinutes = 10; // ← ロック保持時間（10分）
 
-        public Form3()
+        internal Form3(CommonData common)
         {
             InitializeComponent();
+
+            cmg = common;
+            famg = new FormActionMethod(cmg);
+
             this.Load += Form3_Load;
 
             this.Region = System.Drawing.Region.FromHrgn(
                 CreateRoundRectRgn(0, 0, this.Width, this.Height, 40, 40));
 
-            string mf = Path.Combine(cm.mfPath, $"Employee.csv");
+            string mf = Path.Combine(cmg.mfPath, $"Employee.csv");
 
             // Form3読込ログ
-            fam.AddLog($"{HIZTIM} FormOpen 1 {cm.UserName} Form3");
+            famg.AddLog($"{HIZTIM} FormOpen 1 {cmg.UserName} Form3");
         }
 
         [DllImport("Gdi32.dll", EntryPoint = "CreateRoundRectRgn")]
@@ -41,7 +51,7 @@ namespace あすよん月次帳票
             int nLeftRect, int nTopRect, int nRightRect, int nBottomRect,
             int nWidthEllipse, int nHeightEllipse);
 
-        private void Form3_Load(object sender, EventArgs e)
+        internal void Form3_Load(object sender, EventArgs e)
         {
             LoadRuntimeLog();
 
@@ -57,7 +67,7 @@ namespace あすよん月次帳票
         /// </summary>
         /// <param name="sender"></param>
         /// <param name="e"></param>
-        public void AddLog(string message)
+        internal void AddLog(string message)
         {
             string logMessage = $"{DateTime.Now:yyyy/MM/dd HH:mm:ss} {message}";
             runtimelog.Add(logMessage);
@@ -67,7 +77,7 @@ namespace あすよん月次帳票
         /// <summary>
         /// Form3を表示するたびに既存ログもListBoxに表示
         /// </summary>
-        public void LoadRuntimeLog()
+        internal void LoadRuntimeLog()
         {
             listBxSituation.Items.Clear();
             foreach (var log in runtimelog)
@@ -78,13 +88,13 @@ namespace あすよん月次帳票
 
         private async void btnSimulation_Click(object sender, EventArgs e)
         {
-            string lockFilePath = Path.Combine(cm.LockPath, "LOCK_sim.txt");
+            string lockFilePath = Path.Combine(cmg.LockPath, "LOCK_sim.txt");
             bool locked = false; // ← ロック取得済みフラグ
 
             //try
             //{
             // ロック確認と取得
-            if (!fam.CheckAndLockSimulation(lockMinutes))
+            if (!famg.CheckAndLockSimulation(lockMinutes))
             {
                 return; // 他のユーザーが実行中なら処理を中止
             }
@@ -137,15 +147,13 @@ namespace あすよん月次帳票
             animThread.Join();
         }
 
-
-        public void RunSimulation()
+        private void RunSimulation()
         {
             HIZTIM = $"{DateTime.Now:yyyy/MM/dd HH:mm:ss}";
 
-            string monthlyFile = Path.Combine(cm.mfPath, "Monthly.txt");
+            string monthlyFile = Path.Combine(cmg.mfPath, "Monthly.txt");
             string firstLine = File.ReadLines(monthlyFile).FirstOrDefault();
             string sumirateYM = firstLine.Substring(0, 6); // 先頭6文字を取得(当月)
-            FormActionMethod formActionMethod = new FormActionMethod();
 
             // 選択部門コード取得
             string selectedBumon = cmbxBumon.Invoke(new Func<string>(() =>
@@ -158,36 +166,36 @@ namespace あすよん月次帳票
                 if (string.IsNullOrEmpty(selectedBumon))
                 {
                     // 部門未選択 → 全部門でシミュレーション
-                    formActionMethod.SimulateIZAIKO_Ohno(cm.ohuid, cm.ohpass, sumirateYM);
+                    famg.SimulateIZAIKO_Ohno(cmg.ohuid, cmg.ohpass, sumirateYM);
                     AddLog("オーノ_シュミレーション実行");
-                    fam.AddLog($"{HIZTIM} シュミレーション 0 {cm.UserName} オーノ全部門");
-                    fam.AddLog2($"{HIZTIM} シュミレーション 0 【ユーザー:{cm.UserName}】 シュミレーション使用中です");
+                    famg.AddLog($"{HIZTIM} シュミレーション 0 {cmg.UserName} オーノ全部門");
+                    famg.AddLog2($"{HIZTIM} シュミレーション 0 【ユーザー:{cmg.UserName}】 シュミレーション使用中です");
                 }
                 else
                 {
                     // 部門1つ選択 → 部門指定シミュレーション
-                    formActionMethod.SimulateIZAIKO_Ohno(cm.ohuid, cm.ohpass, sumirateYM, selectedBumon);
+                    famg.SimulateIZAIKO_Ohno(cmg.ohuid, cmg.ohpass, sumirateYM, selectedBumon);
                     AddLog("オーノ({selectedBumon}) のシュミレーション実行");
-                    fam.AddLog($"{HIZTIM} シュミレーション 0 {cm.UserName} 部門:{selectedBumon}");
-                    fam.AddLog2($"{HIZTIM} シュミレーション 0 【ユーザー:{cm.UserName}】 シュミレーション使用中です");
+                    famg.AddLog($"{HIZTIM} シュミレーション 0 {cmg.UserName} 部門:{selectedBumon}");
+                    famg.AddLog2($"{HIZTIM} シュミレーション 0 【ユーザー:{cmg.UserName}】 シュミレーション使用中です");
                 }
             }
 
             // --- サンミック(ダスコン) ---
             if (chkBxSundus.Checked)
             {
-                formActionMethod.SimulateIZAIKO_Sun(cm.sundusuid, cm.sunduspass, sumirateYM, "SD");
+                famg.SimulateIZAIKO_Sun(cmg.sundusuid, cmg.sunduspass, sumirateYM, "SD");
                 AddLog("サンミック(ダスコン)のシュミレーション実行");
-                fam.AddLog($"{HIZTIM} シュミレーション 0 {cm.UserName} サンミック(ダスコン)");
-                fam.AddLog2($"{HIZTIM} シュミレーション 0 【ユーザー:{cm.UserName}】 シュミレーション使用中です");
+                famg.AddLog($"{HIZTIM} シュミレーション 0 {cmg.UserName} サンミック(ダスコン)");
+                famg.AddLog2($"{HIZTIM} シュミレーション 0 【ユーザー:{cmg.UserName}】 シュミレーション使用中です");
             }
             // --- サンミック(カーペット) ---
             if (chkBxSuncar.Checked)
             {
-                formActionMethod.SimulateIZAIKO_Sun(cm.suncaruid, cm.suncarpass, sumirateYM, "SC");
+                famg.SimulateIZAIKO_Sun(cmg.suncaruid, cmg.suncarpass, sumirateYM, "SC");
                 AddLog("サンミック(カーペット)のシュミレーション実行");
-                fam.AddLog($"{HIZTIM} シュミレーション 0 {cm.UserName} サンミック(カーペット)");
-                fam.AddLog2($"{HIZTIM} シュミレーション 0 【ユーザー:{cm.UserName}】 シュミレーション使用中です");
+                famg.AddLog($"{HIZTIM} シュミレーション 0 {cmg.UserName} サンミック(カーペット)");
+                famg.AddLog2($"{HIZTIM} シュミレーション 0 【ユーザー:{cmg.UserName}】 シュミレーション使用中です");
             }
         }
 
@@ -207,7 +215,7 @@ namespace あすよん月次帳票
             cmbxBumon.Items.Clear();
 
             // 会社選択確認
-            var selctedComp = fam.GetCompany(chkBxOhno, chkBxSundus, chkBxSuncar);
+            var selctedComp = famg.GetCompany(chkBxOhno, chkBxSundus, chkBxSuncar);
 
             // 空のアイテムを追加(部門未選択用)
             cmbxBumon.Items.Add("");
@@ -224,34 +232,34 @@ namespace あすよん月次帳票
         /// <summary>
         /// Form3のログ削除
         /// </summary>
-        public static void ClearRuntimeLog()
+        internal static void ClearRuntimeLog()
         {
             runtimelog.Clear();
         }
         private void ApplySnowManColors()
         {
             // フォーム全体の背景
-            this.BackColor = ColorManager.SakuLight2;
+            this.BackColor = clrmg.SakuLight2;
 
             // ボタンに色を適用
-            StyleButton(btnSimulation, ColorManager.SakuBase, Color.White);
-            StyleButton(btnForm1Back, ColorManager.SakuLight1, Color.White);
+            StyleButton(btnSimulation, clrmg.SakuBase, Color.White);
+            StyleButton(btnForm1Back, clrmg.SakuLight1, Color.White);
 
             // ラベル類
-            lbBumon.ForeColor = ColorManager.MemeBase;
-            lbCompany.ForeColor = ColorManager.MemeBase;
-            lbSituation.ForeColor = ColorManager.MemeBase;
+            lbBumon.ForeColor = clrmg.MemeBase;
+            lbCompany.ForeColor = clrmg.MemeBase;
+            lbSituation.ForeColor = clrmg.MemeBase;
 
             // ListBox やチェックボックスの背景と文字色
-            listBxSituation.BackColor = ColorManager.HikaruLight2;
-            listBxSituation.ForeColor = ColorManager.MemeDark1;
+            listBxSituation.BackColor = clrmg.HikaruLight2;
+            listBxSituation.ForeColor = clrmg.MemeDark1;
 
             foreach (Control ctrl in this.Controls)
             {
                 if (ctrl is CheckBox chk)
                 {
-                    chk.BackColor = ColorManager.SakuLight2;
-                    chk.ForeColor = ColorManager.SakuDark2;
+                    chk.BackColor = clrmg.SakuLight2;
+                    chk.ForeColor = clrmg.SakuDark2;
                 }
             }
 
@@ -260,8 +268,8 @@ namespace あすよん月次帳票
             {
                 if (ctrl is GroupBox gb)
                 {
-                    gb.BackColor = ColorManager.SakuLight2;
-                    gb.ForeColor = ColorManager.SakuDark1; // 囲い線やラベルに濃いピンク
+                    gb.BackColor = clrmg.SakuLight2;
+                    gb.ForeColor = clrmg.SakuDark1; // 囲い線やラベルに濃いピンク
                 }
             }
 
@@ -271,8 +279,8 @@ namespace あすよん月次帳票
             //txtBxID.ForeColor = Color.Black;
             //txtBxPASS.ForeColor = Color.Black;
 
-            StyleButton(btnSimulation, "saku", ColorManager.SakuBase, borderColor: ColorManager.SakuDark1, Color.White);
-            StyleButton(btnForm1Back, "saku", ColorManager.SakuLight1, borderColor: ColorManager.SakuDark2, Color.White);
+            StyleButton(btnSimulation, "saku", clrmg.SakuBase, borderColor: clrmg.SakuDark1, Color.White);
+            StyleButton(btnForm1Back, "saku", clrmg.SakuLight1, borderColor: clrmg.SakuDark2, Color.White);
         }
 
         // フィールドに追加

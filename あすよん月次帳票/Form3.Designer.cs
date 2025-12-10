@@ -246,7 +246,7 @@ namespace あすよん月次帳票
             btn.BackColor = backColor;
             btn.ForeColor = foreColor;
             btn.FlatStyle = FlatStyle.Flat;
-            btn.FlatAppearance.BorderColor = ColorManager.SakuDark2; // 枠線は濃いめピンク
+            btn.FlatAppearance.BorderColor = clrmg.SakuDark2; // 枠線は濃いめピンク
             btn.FlatAppearance.BorderSize = 1;
             btn.Font = new System.Drawing.Font("Meiryo UI", 9.75F, FontStyle.Regular);
         }
@@ -255,7 +255,7 @@ namespace あすよん月次帳票
         {
             // -- ボタンのスタイル設定 --
             Color baseColor = backColor ?? Color.White;
-            Color bdColor = borderColor ?? ColorManager.MemeDark1;
+            Color bdColor = borderColor ?? clrmg.MemeDark1;
             Color ftColor = foreColor ?? Color.Black;
 
             btn.BackColor = baseColor;
@@ -271,14 +271,14 @@ namespace あすよん月次帳票
             if (!string.IsNullOrEmpty(snowManName))
             {
                 string name = snowManName.ToLower();
-                if (name == "fuka") borderColor = borderColor ?? ColorManager.FukaLight2;
-                else if (name == "meme") borderColor = borderColor ?? ColorManager.MemeBase;
-                else if (name == "shopy") borderColor = borderColor ?? ColorManager.ShopyBase;
-                else if (name == "abe") borderColor = borderColor ?? ColorManager.AbeBase;
-                else if (name == "hikaru") borderColor = borderColor ?? ColorManager.HikaruBase;
-                else if (name == "koji") borderColor = borderColor ?? ColorManager.KojiBase;
-                else if (name == "saku") borderColor = borderColor ?? ColorManager.SakuBase;
-                else if (name == "rau") borderColor = borderColor ?? ColorManager.RauLight2;
+                if (name == "fuka") borderColor = borderColor ?? clrmg.FukaLight2;
+                else if (name == "meme") borderColor = borderColor ?? clrmg.MemeBase;
+                else if (name == "shopy") borderColor = borderColor ?? clrmg.ShopyBase;
+                else if (name == "abe") borderColor = borderColor ?? clrmg.AbeBase;
+                else if (name == "hikaru") borderColor = borderColor ?? clrmg.HikaruBase;
+                else if (name == "koji") borderColor = borderColor ?? clrmg.KojiBase;
+                else if (name == "saku") borderColor = borderColor ?? clrmg.SakuBase;
+                else if (name == "rau") borderColor = borderColor ?? clrmg.RauLight2;
                 // 他のSnowMan名も必要に応じて追加
             }
             
