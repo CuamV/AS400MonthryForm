@@ -12,38 +12,47 @@ using Application = System.Windows.Forms.Application;
 using CheckBox = System.Windows.Forms.CheckBox;
 using GroupBox = System.Windows.Forms.GroupBox;
 using Point = System.Drawing.Point;
+using CMD = あすよん月次帳票.CommonData;
 
 namespace あすよん月次帳票
 {
+    //==========================================================
+    // --------Form3(シュミレーション)クラス--------
+    //==========================================================
     internal partial class Form3 : Form
     {
-        internal CommonData cmg;
-        internal FormActionMethod famg;
+        //==========================================================
+        // インスタンス
+        //==========================================================
+        FormActionMethod famg = new FormActionMethod();
         ColorManager clrmg = new ColorManager();
 
+        // フィールド変数
+        private Point mouseOffset;
+        private bool isMouseDown = false;
+        private FormAnimation1 animForm;
         private string HIZTIM;
+        private const int lockMinutes = 10; // ← ロック保持時間（10分）
 
         private static List<string> runtimelog = new List<string>();
 
-        private string TIM = DateTime.Now.ToString("HHmmss");
-        private const int lockMinutes = 10; // ← ロック保持時間（10分）
-
-        internal Form3(CommonData common)
+        //=========================================================
+        // コンストラクタ
+        //=========================================================
+        internal Form3()
         {
             InitializeComponent();
-
-            cmg = common;
-            famg = new FormActionMethod(cmg);
 
             this.Load += Form3_Load;
 
             this.Region = System.Drawing.Region.FromHrgn(
                 CreateRoundRectRgn(0, 0, this.Width, this.Height, 40, 40));
 
-            string mf = Path.Combine(cmg.mfPath, $"Employee.csv");
+            string mf = Path.Combine(CMD.mfPath, $"Employee.csv");
 
             // Form3読込ログ
-            famg.AddLog($"{HIZTIM} FormOpen 1 {cmg.UserName} Form3");
+            HIZTIM = $"{DateTime.Now:yyyy/MM/dd HH:mm:ss}";
+            famg.AddLog($"{HIZTIM} FormOpen 1 {CMD.UserName} Form3");
         }
 
         [DllImport("Gdi32.dll", EntryPoint = "CreateRoundRectRgn")]
@@ -62,33 +71,17 @@ namespace あすよん月次帳票
             ApplySnowManColors();
         }
 
+        //=========================================================
+        // 【コントロール実行メソッド】
+        //=========================================================
         /// <summary>
-        /// Form3のListBoxとメモリ上にログ追加
+        /// シュミレーションボタンクリック
         /// </summary>
         /// <param name="sender"></param>
         /// <param name="e"></param>
-        internal void AddLog(string message)
-        {
-            string logMessage = $"{DateTime.Now:yyyy/MM/dd HH:mm:ss} {message}";
-            runtimelog.Add(logMessage);
-            listBxSituation.Items.Add(logMessage);
-        }
-
-        /// <summary>
-        /// Form3を表示するたびに既存ログもListBoxに表示
-        /// </summary>
-        internal void LoadRuntimeLog()
-        {
-            listBxSituation.Items.Clear();
-            foreach (var log in runtimelog)
-            {
-                listBxSituation.Items.Add(log);
-            }
-        }
-
         private async void btnSimulation_Click(object sender, EventArgs e)
         {
-            string lockFilePath = Path.Combine(cmg.LockPath, "LOCK_sim.txt");
+            string lockFilePath = Path.Combine(CMD.LockPath, "LOCK_sim.txt");
             bool locked = false; // ← ロック取得済みフラグ
 
             //try
@@ -147,58 +140,11 @@ namespace あすよん月次帳票
             animThread.Join();
         }
 
-        private void RunSimulation()
-        {
-            HIZTIM = $"{DateTime.Now:yyyy/MM/dd HH:mm:ss}";
-
-            string monthlyFile = Path.Combine(cmg.mfPath, "Monthly.txt");
-            string firstLine = File.ReadLines(monthlyFile).FirstOrDefault();
-            string sumirateYM = firstLine.Substring(0, 6); // 先頭6文字を取得(当月)
-
-            // 選択部門コード取得
-            string selectedBumon = cmbxBumon.Invoke(new Func<string>(() =>
-                cmbxBumon.SelectedItem != null ? cmbxBumon.SelectedItem.ToString().Split(':')[0] : null
-            )) as string;
-
-            // --- オーノ ---
-            if (chkBxOhno.Checked)
-            {
-                if (string.IsNullOrEmpty(selectedBumon))
-                {
-                    // 部門未選択 → 全部門でシミュレーション
-                    famg.SimulateIZAIKO_Ohno(cmg.ohuid, cmg.ohpass, sumirateYM);
-                    AddLog("オーノ_シュミレーション実行");
-                    famg.AddLog($"{HIZTIM} シュミレーション 0 {cmg.UserName} オーノ全部門");
-                    famg.AddLog2($"{HIZTIM} シュミレーション 0 【ユーザー:{cmg.UserName}】 シュミレーション使用中です");
-                }
-                else
-                {
-                    // 部門1つ選択 → 部門指定シミュレーション
-                    famg.SimulateIZAIKO_Ohno(cmg.ohuid, cmg.ohpass, sumirateYM, selectedBumon);
-                    AddLog("オーノ({selectedBumon}) のシュミレーション実行");
-                    famg.AddLog($"{HIZTIM} シュミレーション 0 {cmg.UserName} 部門:{selectedBumon}");
-                    famg.AddLog2($"{HIZTIM} シュミレーション 0 【ユーザー:{cmg.UserName}】 シュミレーション使用中です");
-                }
-            }
-
-            // --- サンミック(ダスコン) ---
-            if (chkBxSundus.Checked)
-            {
-                famg.SimulateIZAIKO_Sun(cmg.sundusuid, cmg.sunduspass, sumirateYM, "SD");
-                AddLog("サンミック(ダスコン)のシュミレーション実行");
-                famg.AddLog($"{HIZTIM} シュミレーション 0 {cmg.UserName} サンミック(ダスコン)");
-                famg.AddLog2($"{HIZTIM} シュミレーション 0 【ユーザー:{cmg.UserName}】 シュミレーション使用中です");
-            }
-            // --- サンミック(カーペット) ---
-            if (chkBxSuncar.Checked)
-            {
-                famg.SimulateIZAIKO_Sun(cmg.suncaruid, cmg.suncarpass, sumirateYM, "SC");
-                AddLog("サンミック(カーペット)のシュミレーション実行");
-                famg.AddLog($"{HIZTIM} シュミレーション 0 {cmg.UserName} サンミック(カーペット)");
-                famg.AddLog2($"{HIZTIM} シュミレーション 0 【ユーザー:{cmg.UserName}】 シュミレーション使用中です");
-            }
-        }
-
+        /// <summary>
+        /// 戻るボタンクリック
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void btnForm1Back_Click(object sender, EventArgs e)
         {
             // Form1 のインスタンスを取得して表示
@@ -210,6 +156,11 @@ namespace あすよん月次帳票
             this.Close();
         }
 
+        /// <summary>
+        /// 会社選択
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void Company_CheckedChanged(object sender, EventArgs e)
         {
             cmbxBumon.Items.Clear();
@@ -230,12 +181,153 @@ namespace あすよん月次帳票
         }
 
         /// <summary>
+        /// マウスダウンでForm3を掴む
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void Form3_MouseDown(object sender, MouseEventArgs e)
+        {
+            if (e.Button == MouseButtons.Left)
+            {
+                isMouseDown = true;
+                mouseOffset = new Point(-e.X, -e.Y);
+            }
+        }
+
+        /// <summary>
+        /// マウスドラッグでForm3を動かす
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        // MouseMove
+        private void Form3_MouseMove(object sender, MouseEventArgs e)
+        {
+            if (isMouseDown)
+            {
+                Point mousePos = Control.MousePosition;
+                mousePos.Offset(mouseOffset.X, mouseOffset.Y);
+                this.Location = mousePos;
+            }
+        }
+
+        /// <summary>
+        /// マウスアップでForm3を離す
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        // MouseUp
+        private void Form3_MouseUp(object sender, MouseEventArgs e)
+        {
+            if (e.Button == MouseButtons.Left)
+                isMouseDown = false;
+        }
+
+        /// <summary>
+        /// 最小化ボタンクリック
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void btnMin_Click(object sender, EventArgs e)
+        {
+            this.WindowState = FormWindowState.Minimized;
+        }
+
+        //=================================================================
+        // 処理メソッド
+        //=================================================================
+        /// <summary>
+        /// Form3のListBoxとメモリ上にログ追加
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        internal void AddLog(string message)
+        {
+            string logMessage = $"{DateTime.Now:yyyy/MM/dd HH:mm:ss} {message}";
+            runtimelog.Add(logMessage);
+            listBxSituation.Items.Add(logMessage);
+        }
+
+        /// <summary>
+        /// Form3を表示するたびに既存ログもListBoxに表示
+        /// </summary>
+        internal void LoadRuntimeLog()
+        {
+            listBxSituation.Items.Clear();
+            foreach (var log in runtimelog)
+            {
+                listBxSituation.Items.Add(log);
+            }
+        }
+
+        /// <summary>
         /// Form3のログ削除
         /// </summary>
         internal static void ClearRuntimeLog()
         {
             runtimelog.Clear();
         }
+
+        /// <summary>
+        /// シュミレーション処理
+        /// </summary>
+        private void RunSimulation()
+        {
+            HIZTIM = $"{DateTime.Now:yyyy/MM/dd HH:mm:ss}";
+
+            string monthlyFile = Path.Combine(CMD.mfPath, "Monthly.txt");
+            string firstLine = File.ReadLines(monthlyFile).FirstOrDefault();
+            string sumirateYM = firstLine.Substring(0, 6); // 先頭6文字を取得(当月)
+
+            // 選択部門コード取得
+            string selectedBumon = cmbxBumon.Invoke(new Func<string>(() =>
+                cmbxBumon.SelectedItem != null ? cmbxBumon.SelectedItem.ToString().Split(':')[0] : null
+            )) as string;
+
+            // --- オーノ ---
+            if (chkBxOhno.Checked)
+            {
+                if (string.IsNullOrEmpty(selectedBumon))
+                {
+                    // 部門未選択 → 全部門でシミュレーション
+                    famg.SimulateIZAIKO_Ohno(CMD.ohuid, CMD.ohpass, sumirateYM);
+                    AddLog("オーノ_シュミレーション実行");
+                    famg.AddLog($"{HIZTIM} シュミレーション 0 {CMD.UserName} オーノ全部門");
+                    famg.AddLog2($"{HIZTIM} シュミレーション 0 【ユーザー:{CMD.UserName}】 シュミレーション使用中です");
+                }
+                else
+                {
+                    // 部門1つ選択 → 部門指定シミュレーション
+                    famg.SimulateIZAIKO_Ohno(CMD.ohuid, CMD.ohpass, sumirateYM, selectedBumon);
+                    AddLog("オーノ({selectedBumon}) のシュミレーション実行");
+                    famg.AddLog($"{HIZTIM} シュミレーション 0 {CMD.UserName} 部門:{selectedBumon}");
+                    famg.AddLog2($"{HIZTIM} シュミレーション 0 【ユーザー:{CMD.UserName}】 シュミレーション使用中です");
+                }
+            }
+
+            // --- サンミック(ダスコン) ---
+            if (chkBxSundus.Checked)
+            {
+                famg.SimulateIZAIKO_Sun(CMD.sundusuid, CMD.sunduspass, sumirateYM, "SD");
+                AddLog("サンミック(ダスコン)のシュミレーション実行");
+                famg.AddLog($"{HIZTIM} シュミレーション 0 {CMD.UserName} サンミック(ダスコン)");
+                famg.AddLog2($"{HIZTIM} シュミレーション 0 【ユーザー:{CMD.UserName}】 シュミレーション使用中です");
+            }
+            // --- サンミック(カーペット) ---
+            if (chkBxSuncar.Checked)
+            {
+                famg.SimulateIZAIKO_Sun(CMD.suncaruid, CMD.suncarpass, sumirateYM, "SC");
+                AddLog("サンミック(カーペット)のシュミレーション実行");
+                famg.AddLog($"{HIZTIM} シュミレーション 0 {CMD.UserName} サンミック(カーペット)");
+                famg.AddLog2($"{HIZTIM} シュミレーション 0 【ユーザー:{CMD.UserName}】 シュミレーション使用中です");
+            }
+        }
+
+        //==============================================================
+        // デザイン関連メソッド
+        //==============================================================
+        /// <summary>
+        /// Form3にスノーマンカラーを適用
+        /// </summary>
         private void ApplySnowManColors()
         {
             // フォーム全体の背景
@@ -283,43 +375,12 @@ namespace あすよん月次帳票
             StyleButton(btnForm1Back, "saku", clrmg.SakuLight1, borderColor: clrmg.SakuDark2, Color.White);
         }
 
-        // フィールドに追加
-        private Point mouseOffset;
-        private bool isMouseDown = false;
-        private FormAnimation1 animForm;
+        
 
-        // MouseDown
-        private void Form3_MouseDown(object sender, MouseEventArgs e)
-        {
-            if (e.Button == MouseButtons.Left)
-            {
-                isMouseDown = true;
-                mouseOffset = new Point(-e.X, -e.Y);
-            }
-        }
+        
+        
 
-        // MouseMove
-        private void Form3_MouseMove(object sender, MouseEventArgs e)
-        {
-            if (isMouseDown)
-            {
-                Point mousePos = Control.MousePosition;
-                mousePos.Offset(mouseOffset.X, mouseOffset.Y);
-                this.Location = mousePos;
-            }
-        }
-
-        // MouseUp
-        private void Form3_MouseUp(object sender, MouseEventArgs e)
-        {
-            if (e.Button == MouseButtons.Left)
-                isMouseDown = false;
-        }
-
-        private void btnMin_Click(object sender, EventArgs e)
-        {
-            this.WindowState = FormWindowState.Minimized;
-        }
+        
 
     }
 }

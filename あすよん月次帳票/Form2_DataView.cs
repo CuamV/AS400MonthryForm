@@ -63,17 +63,34 @@ namespace あすよん月次帳票
             foreach (var kv in conditions)
             {
                 string key = kv.Key;
-                // ListがnullまたはCount == 0の場合
-                string values = (kv.Value != null && kv.Value.Count > 0)
-                    ? string.Join(", ", kv.Value)
-                    : "なし";
+                var list = kv.Value;
+                string values;
+
+                // 「年月」だけ特別フォーマット
+                if(key == "年月")
+                {
+                    // ListがnullまたはCount == 0の場合
+                    if (list != null && list.Count > 0)
+                    {
+                        string start = list.FirstOrDefault() ?? "";
+                        string end = list.LastOrDefault() ?? "";
+                        values = $"{start} ～ {end}";
+                    }
+                    else
+                    {
+                        values = "なし";
+                    }
+                }
+                else
+                {
+                    // 通常処理
+                    values = (kv.Value != null && kv.Value.Count > 0)
+                       ? string.Join(", ", kv.Value)
+                       : "なし";
+                }
                 sb.AppendLine($"{key}: {values}");
             }
-
             return sb.ToString();
         }
-
-        
     }
-
 }

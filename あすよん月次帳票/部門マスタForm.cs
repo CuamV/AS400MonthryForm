@@ -10,9 +10,9 @@ using System.Windows.Forms;
 
 namespace あすよん月次帳票
 {
-    public partial class Form4 : Form
+    public partial class 部門マスタForm : Form
     {
-        public Form4()
+        public 部門マスタForm()
         {
             InitializeComponent();
         }

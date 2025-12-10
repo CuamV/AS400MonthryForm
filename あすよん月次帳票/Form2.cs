@@ -10,6 +10,7 @@ using System.Threading.Tasks;
 using System.Windows.Forms;
 using static System.Windows.Forms.VisualStyles.VisualStyleElement.TaskbarClock;
 using Excel = Microsoft.Office.Interop.Excel;
+using CMD = あすよん月次帳票.CommonData;
 
 namespace あすよん月次帳票
 {
@@ -18,20 +19,22 @@ namespace あすよん月次帳票
     //==========================================================
     internal partial class Form2 : Form
     {
-        internal CommonData cmg;
-        internal FormActionMethod famg;
+        //=========================================================
+        // インスタンス
+        //=========================================================
         ColorManager clrmg = new ColorManager();
-        //=========================================================
-        // 【フィールド変数】
-        //=========================================================
+        DataProcessor processor = new DataProcessor();
+        DataSummarizeMethod dsumm = new DataSummarizeMethod();
+        FormActionMethod famg = new FormActionMethod();
+
+        // フィールド変数
         private string HIZTIM;
         private string startDate;
         private string endDate;
         private string Hiz;
         private string Tim;
-
-        DataProcessor processor = new DataProcessor();
-        DataSummarizeMethod dsumm = new DataSummarizeMethod();
+        private FormAnimation3 animForm;
+        private Thread animThread;
 
         // 選択された会社と部門
         private List<string> selCompanies = new List<string>();
@@ -54,14 +57,11 @@ namespace あすよん月次帳票
         private Excel.Range end2 = null;
 
         //=========================================================
-        // 【コンストラクタ】
+        // コンストラクタ
         //=========================================================
-        internal Form2(CommonData common)
+        internal Form2()
         {
             InitializeComponent();
-
-            cmg = common;
-            famg = new FormActionMethod(cmg);
 
             cBoxList = new List<GroupBox>
             {
@@ -82,7 +82,7 @@ namespace あすよん月次帳票
 
             // Form2読込ログ
             HIZTIM = $"{DateTime.Now:yyyy/MM/dd HH:mm:ss}";
-            famg.AddLog($"{HIZTIM} FormOpen 1 {cmg.UserName} Form2");
+            famg.AddLog($"{HIZTIM} FormOpen 1 {CMD.UserName} Form2");
 
             this.Load += Form2_Load;
 
@@ -134,7 +134,7 @@ namespace あすよん月次帳票
         private void chkBxControl(object sender, EventArgs e)
         {
             HIZTIM = $"{DateTime.Now:yyyy/MM/dd HH:mm:ss}";
-            famg.AddLog($"{HIZTIM} コントロール 1 {cmg.UserName} chkBxControl");
+            famg.AddLog($"{HIZTIM} コントロール 1 {CMD.UserName} chkBxControl");
 
             bool showSd = chkBxSundus.Checked;
             bool showSl = chkBxSl.Checked;
@@ -218,7 +218,7 @@ namespace あすよん月次帳票
         private void linkLb部門_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
         {
             HIZTIM = $"{DateTime.Now:yyyy/MM/dd HH:mm:ss}";
-            famg.AddLog($"{HIZTIM} コントロール 1 {cmg.UserName} linkLb部門_LinkClicked");
+            famg.AddLog($"{HIZTIM} コントロール 1 {CMD.UserName} linkLb部門_LinkClicked");
 
             // 部門Formを作成
             using (var BuForm = new 部門Form(selBumons))
@@ -251,7 +251,7 @@ namespace あすよん月次帳票
         private void linkLb販売先_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
         {
             HIZTIM = $"{DateTime.Now:yyyy/MM/dd HH:mm:ss}";
-            famg.AddLog($"{HIZTIM} コントロール 1 {cmg.UserName} linkLb販売先_LinkClicked");
+            famg.AddLog($"{HIZTIM} コントロール 1 {CMD.UserName} linkLb販売先_LinkClicked");
 
             using (var frm = new 販売仕入先Form("HANBAI", selSelleres, salesDeptMap))
             {
@@ -294,7 +294,7 @@ namespace あすよん月次帳票
         private void linkLb仕入先_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
         {
             HIZTIM = $"{DateTime.Now:yyyy/MM/dd HH:mm:ss}";
-            famg.AddLog($"{HIZTIM} コントロール 1 {cmg.UserName} linkLb仕入先_LinkClicked");
+            famg.AddLog($"{HIZTIM} コントロール 1 {CMD.UserName} linkLb仕入先_LinkClicked");
 
             using (var frm = new 販売仕入先Form("SHIIRE", selSupplieres, supplierDeptMap))
             {
@@ -323,7 +323,7 @@ namespace あすよん月次帳票
         private async void btnReadData_Click(object sender, EventArgs e)
         {
             HIZTIM = $"{DateTime.Now:yyyy/MM/dd HH:mm:ss}";
-            famg.AddLog($"{HIZTIM} コントロール 1 {cmg.UserName} btnReadData_Click");
+            famg.AddLog($"{HIZTIM} コントロール 1 {CMD.UserName} btnReadData_Click");
 
             //---------------------------------------------------- 
             // ★ エラーチェック
@@ -434,7 +434,7 @@ namespace あすよん月次帳票
         private async void btnExportExcel_Click(object sender, EventArgs e)
         {
             HIZTIM = $"{DateTime.Now:yyyy/MM/dd HH:mm:ss}";
-            famg.AddLog($"{HIZTIM} コントロール 1 {cmg.UserName} btnExportExcel_Click");
+            famg.AddLog($"{HIZTIM} コントロール 1 {CMD.UserName} btnExportExcel_Click");
 
             DataProcessor processor = new DataProcessor();
             Hiz = DateTime.Now.ToString("yyyyMMdd");
@@ -482,50 +482,517 @@ namespace あすよん月次帳票
 
             // ログ追加             
             HIZTIM = $"{DateTime.Now:yyyy/MM/dd HH:mm:ss}";
-            famg.AddLog($"{HIZTIM} Excelエクスポート 1 {cmg.UserName}");
+            famg.AddLog($"{HIZTIM} Excelエクスポート 1 {CMD.UserName}");
             // ↑↑----------- Excelエクスポート -----------↑↑
 
         }
-        private FormAnimation3 animForm;
-        private Thread animThread;
-        private async void StartEndAnimationThread(bool ocFlg)
+        
+        /// <summary>
+        /// 閉じるボタンクリック
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void btnForm1Back_Click(object sender, EventArgs e)
         {
-            FormAnimation3 anim = null;
-            if (ocFlg)
+            HIZTIM = $"{DateTime.Now:yyyy/MM/dd HH:mm:ss}";
+            famg.AddLog($"{HIZTIM} コントロール 1 {CMD.UserName} btnForm1Back_Click");
+            // Form1 のインスタンスを取得して表示
+            if (Application.OpenForms["Form1"] is Form1 form1)
             {
-                // ----------------------------------------------------
-                // ★アニメーションフォーム表示
-                // ----------------------------------------------------
-                animThread = new Thread(() =>
-                {
-                    using (FormAnimation3 a = new FormAnimation3())
-                    {
-                        animForm = a; // 外部参照用
-                        Application.Run(a); // GIF表示
-                    }
-                });
-                animThread.SetApartmentState(ApartmentState.STA);
-                animThread.Start();
+                form1.Show();
+            }
+            // Form2 を閉じる
+            this.Close();
+        }
 
-                await Task.Delay(100); // ちょっと待って anim が作られる
+        // フィールドに追加
+        private Point mouseOffset;
+        private bool isMouseDown = false;
+
+        /// <summary>
+        /// マウスダウンでForm2を掴む
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        // MouseDown
+        private void RplForm2_MouseDown(object sender, MouseEventArgs e)
+        {
+            HIZTIM = $"{DateTime.Now:yyyy/MM/dd HH:mm:ss}";
+            famg.AddLog($"{HIZTIM} コントロール 1 {CMD.UserName} RplForm2_MouseDown");
+
+            if (e.Button == MouseButtons.Left)
+            {
+                isMouseDown = true;
+                mouseOffset = new Point(-e.X, -e.Y);
+            }
+        }
+
+        /// <summary>
+        /// マウスドラッグでForm2を動かす
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        // MouseMove
+        private void RplForm2_MouseMove(object sender, MouseEventArgs e)
+        {
+            HIZTIM = $"{DateTime.Now:yyyy/MM/dd HH:mm:ss}";
+            famg.AddLog($"{HIZTIM} コントロール 1 {CMD.UserName} RplForm2_MouseMove");
+
+            if (isMouseDown)
+            {
+                Point mousePos = Control.MousePosition;
+                mousePos.Offset(mouseOffset.X, mouseOffset.Y);
+                this.Location = mousePos;
+            }
+        }
+
+        /// <summary>
+        /// マウスアップでForm2を離す
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        // MouseUp
+        private void RplForm2_MouseUp(object sender, MouseEventArgs e)
+        {
+            HIZTIM = $"{DateTime.Now:yyyy/MM/dd HH:mm:ss}";
+            famg.AddLog($"{HIZTIM} コントロール 1 {CMD.UserName} RplForm2_MouseUp");
+
+            if (e.Button == MouseButtons.Left)
+                isMouseDown = false;
+        }
+
+        /// <summary>
+        /// 最小化ボタンクリック
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void btnMin_Click(object sender, EventArgs e)
+        {
+            HIZTIM = $"{DateTime.Now:yyyy/MM/dd HH:mm:ss}";
+            famg.AddLog($"{HIZTIM} コントロール 1 {CMD.UserName} btnMin_Click");
+
+            this.WindowState = FormWindowState.Minimized;
+        }
+
+        //=================================================================
+        // 処理メソッド
+        //=================================================================
+        /// <summary>
+        /// 部門選択から取得した会社チェックを更新
+        /// </summary>
+        /// <param name="bumons"></param>
+        private void UpdateCompanyCheckboxesFromBumon(List<Department> bumons)
+        {
+            HIZTIM = $"{DateTime.Now:yyyy/MM/dd HH:mm:ss}";
+            famg.AddLog($"{HIZTIM} 処理メソッド 1 {CMD.UserName} UpdateCompanyCheckboxesFromBumon");
+
+            // 部門に基づいて会社のチェックボックスを更新
+            chkBxOhno.Checked = bumons.Any(d => d.Company == "オーノ");
+            chkBxSuncar.Checked = bumons.Any(d => d.Company == "サンミックカーペット");
+            chkBxSundus.Checked = bumons.Any(d => d.Company == "サンミックダスコン");
+        }
+
+        /// <summary>
+        /// 取引先選択から取得した部門と会社を選択
+        /// </summary>
+        /// <param name="torihikis"></param>
+        private void UpdateBumonAndCompanyFromTorihiki(List<Torihiki> torihikis)
+        {
+            HIZTIM = $"{DateTime.Now:yyyy/MM/dd HH:mm:ss}";
+            famg.AddLog($"{HIZTIM} 処理メソッド 1 {CMD.UserName} UpdateBumonAndCompanyFromTorihiki");
+
+            // 取引先が空なら会社チェック・部門リストもクリア
+            if (torihikis == null || torihikis.Count == 0)
+            {
+                chkBxOhno.Checked = false;
+                chkBxSuncar.Checked = false;
+                chkBxSundus.Checked = false;
+
+                selBumons.Clear();
+                listBx部門.Items.Clear();
+                return;
+            }
+
+            // 取引先に基づいて会社のチェックボックスを更新
+            chkBxOhno.Checked |= torihikis.Any(t => t.Company == "オーノ");
+            chkBxSuncar.Checked |= torihikis.Any(t => t.Company == "サンミックカーペット");
+            chkBxSundus.Checked |= torihikis.Any(t => t.Company == "サンミックダスコン");
+            // 取引先に基づいて部門リストを更新
+            var newBumons = torihikis
+                .Select(t => new Department { Code = t.DeptCode, Name = t.DeptName, Company = t.Company })
+                .ToList();
+
+            foreach (var nb in newBumons)
+            {
+                if (!selBumons.Any(b => b.Code == nb.Code && b.Company == nb.Company))
+                    selBumons.Add(nb);
+            }
+            // listBox 表示更新（コード+名称）
+            RefreshListBx(listBx部門, selBumons.Select(b => new Torihiki
+            {
+                Code = b.Code,
+                Name = b.Name,
+                Company = b.Company,
+                DeptCode = b.Code,
+                DeptName = b.Name
+            }).ToList());
+        }
+
+        /// <summary>
+        /// 取引先選択から取得した部門を追加
+        /// </summary>
+        /// <param name="deptmap"></param>
+        /// <param name="ts"></param>
+        private void AddDeptMap(Dictionary<string, HashSet<string>> deptmap, Torihiki ts)
+        {
+            HIZTIM = $"{DateTime.Now:yyyy/MM/dd HH:mm:ss}";
+            famg.AddLog($"{HIZTIM} 処理メソッド 1 {CMD.UserName} AddDeptMap");
+
+            if (!deptmap.TryGetValue(ts.Code,out var set))
+            {
+                set = new HashSet<string>();
+                deptmap[ts.Code] = set;
+            }
+            set.Add(ts.DeptCode);
+        }
+
+        /// <summary>
+        /// 取引先選択から取得した部門を追加
+        /// </summary>
+        /// <param name="deptmap"></param>
+        /// <param name="ts"></param>
+        private void AddDeptMapRange(Dictionary<string, HashSet<string>> deptmap, IEnumerable<Torihiki> ts)
+        {
+            HIZTIM = $"{DateTime.Now:yyyy/MM/dd HH:mm:ss}";
+            famg.AddLog($"{HIZTIM} 処理メソッド 1 {CMD.UserName} AddDeptMapRange");
+
+            foreach (var t in ts)
+            {
+                AddDeptMap(deptmap, t);
+            }
+        }
+
+        /// <summary>
+        /// 部門・販売・仕入の選択用リストボックス更新
+        /// </summary>
+        /// <param name="listBox"></param>
+        /// <param name="items"></param>
+        private void RefreshListBx(ListBox listBox, List<Torihiki> items)
+        {
+            HIZTIM = $"{DateTime.Now:yyyy/MM/dd HH:mm:ss}";
+            famg.AddLog($"{HIZTIM} 処理メソッド 1 {CMD.UserName} RefreshListBx");
+
+            listBox.Items.Clear();
+
+            // 選択アイテムがなければ終了
+            if (items.Count == 0) return;
+
+            foreach (var item in items)
+            {
+                // 同じ Code + Company の Torihiki がなければ追加
+                bool exists = listBox.Items.Cast<Torihiki>()
+                    .Any(t => t.Code == item.Code && t.Company == item.Company);
+
+                if (!exists)
+                    listBox.Items.Add(item);
+            }
+        }
+
+        /// <summary>
+        /// 表示＆Excelの選択条件エラーチェック
+        /// </summary>
+        /// <returns></returns>
+        private bool ErrCheck()
+        {
+            HIZTIM = $"{DateTime.Now:yyyy/MM/dd HH:mm:ss}";
+            famg.AddLog($"{HIZTIM} 処理メソッド 1 {CMD.UserName} ErrCheck");
+
+            // =====================================================================================
+            // ★ エラーチェック
+            // =====================================================================================
+            //  ＊年月入力チェック
+            if (!famg.TryParseYearMonth(txtBxStrYearMonth, out int strY, out int strM) ||
+                !famg.TryParseYearMonth(txtBxEndYearMonth, out int endY, out int endM))
+            {
+                MessageBox.Show("年月は6桁の数字(yyyyMM)で入力してください。", "警告", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                return true;
+            }
+            //  ＊組織未選択NG
+            if (!chkBxOhno.Checked && !chkBxSuncar.Checked && !chkBxSundus.Checked
+                && listBx販売先.Items.Count == 0 && listBx仕入先.Items.Count == 0
+                && listBx部門.Items.Count == 0)
+            {
+                MessageBox.Show("会社～取引先のいずれかを選択してください。",
+                                "警告", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                return true;
+            }
+            //  ＊データ区分未選択NG
+            if (!chkBxSl.Checked && !chkBxPr.Checked && !chkBxIv.Checked)
+            {
+                MessageBox.Show("データ区分を選択してください。",
+                                "警告", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                return true;
+            }
+            string sym = txtBxStrYearMonth.Text.Trim();
+            string eym = txtBxEndYearMonth.Text.Trim();
+            string nowym = DateTime.Now.ToString("yyyyMM");
+            //  ＊データ区分"在庫"選択の場合未来月NG
+            if (chkBxIv.Checked)
+            {
+                if (string.Compare(sym, nowym) > 0 || string.Compare(eym, nowym) > 0)
+                {
+                    MessageBox.Show("データ区分在庫を選択する場合、未来月は指定できません。",
+                                    "警告", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                    return true;
+                }
+            }
+            // データ区分"在庫"選択と、年月複数月(過去月の複数月はOK,過去月と当月はNG)の選択NG
+            if (chkBxIv.Checked && sym != eym && (sym == nowym || eym == nowym))
+            {
+                MessageBox.Show("データ区分在庫を選択する場合、当月の場合は単月で指定してください。",
+                                "警告", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                return true;
+            }
+            return false;
+        }
+
+        /// <summary>
+        /// 表示＆Excelのデータ抽出(明細)
+        /// </summary>
+        /// <returns></returns>
+        private (
+            DataTable slprResult, DataTable stockDtNow, DataTable stockDtOld, List<string> selDatas,
+            string selAggregte, string selBookName, Dictionary<string, List<string>> conList) MakeMainData()
+        {
+            HIZTIM = $"{DateTime.Now:yyyy/MM/dd HH:mm:ss}";
+            famg.AddLog($"{HIZTIM} 処理メソッド 1 {CMD.UserName} MakeMainData");
+
+            // =====================================================================================
+            // ★メインデータ作成処理
+            // =====================================================================================
+            // 条件選択内容取得
+            famg.TryParseYearMonth(txtBxStrYearMonth, out int strY, out int strM);
+            famg.TryParseYearMonth(txtBxEndYearMonth, out int endY, out int endM);
+
+            string selBookName = famg.GetBookName(txtBx名称);  // 帳票名称
+            (string startDate, string endDate) = famg.GetStartEndDate(strY, strM, endY, endM);　// 開始・終了日付
+            var selCompanies = famg.GetCompany(chkBxOhno, chkBxSundus, chkBxSuncar); // 会社
+            var selBumons = famg.GetSelectedBumons(listBx部門);  // 部門（先頭空白行は無視して取得）
+            var selSelleres = famg.GetSallerOrSupplier(listBx販売先);  // 販売先 （先頭空白行は無視）
+            var selSupplieres = famg.GetSallerOrSupplier(listBx仕入先);  // 仕入先 （先頭空白行は無視）
+            var selDatas = famg.GetSalseProduct(chkBxSl, chkBxPr, chkBxIv);  // データ区分
+            List<string> selSlPrProducts = null;
+            List<string> selIvProducts = null;
+            string selAggregte = null;
+            Dictionary<string, string> selIvTypes = null;
+
+            if (chkBxSl.Checked || chkBxPr.Checked)
+            {
+                selSlPrProducts = famg.GetProduct(chkBx原材料, chkBx半製品, chkBx製品,
+                                                                chkBxOhno, chkBxSundus, chkBxSuncar);  // 売・仕クラス区分
+                selAggregte = famg.GetAggregte(grpBx売仕集計区分);  // 売仕集計区分
+            }
+            if (chkBxIv.Checked)
+            {
+                selIvProducts = famg.GetProduct(chkBx原材料, chkBx半製品, chkBx製品,
+                                                            chkBx加工T, chkBx預りT, chkBx預けT,
+                                                            chkBxOhno, chkBxSundus, chkBxSuncar);  // 在クラス区分
+                selIvTypes = famg.GetIvType(chkBx自社, chkBx預け, chkBx預り, chkBx投入);  // 在庫種別
+                selAggregte = famg.GetAggregte(grpBx在集計区分);  // 在庫集計区分
+            }
+
+
+            // 条件フィルター
+            // データ取得・加工処理
+            var (slprResult, stockDtNow, stockDtOld) = famg.FilterData(startDate, endDate,
+                                                                                   selCompanies, selBumons,
+                                                                                   selSelleres, selSupplieres,
+                                                                                   selDatas, selSlPrProducts, selIvProducts,
+                                                                                   selIvTypes);
+            // 選択条件のリスト
+            // conListには選択されてる条件を格納→Form2_DataViewのListBxに表示
+            Dictionary<string, List<string>> conList = new Dictionary<string, List<string>>();
+            List<string> selectCondition = null;
+
+            // 帳票名
+            if (!string.IsNullOrWhiteSpace(selBookName))
+            {
+                selectCondition = selBookName.Split(',')
+                    .Where(s => !string.IsNullOrWhiteSpace(s)).ToList();
+                conList.Add("帳票名称", selectCondition);
+            }
+
+            // strY+strM(yyyyMM形式)と endY+endM(yyyyMM形式)をList<string> YearMonthsに格納
+            selectCondition = new List<string>
+            {
+                $"{strY}{strM:D2}", $"{endY}{endM:D2}"
+            };
+            conList.Add("年月", selectCondition);
+
+            // 販売先・仕入先－部門－会社
+            if (selSelleres.Count > 0 && selSelleres.Count > 0)
+            {
+                // 会社
+                conList.Add("会社", selCompanies);
+                // 部門
+                conList.Add("部門", selBumons);
+                // 販売先
+                conList.Add("販売先", selSelleres);
+                // 仕入先
+                conList.Add("仕入先", selSupplieres);
+            }
+            else if (selSupplieres.Count == 0 && selSelleres.Count > 0)
+            {
+                // 会社
+                conList.Add("会社", selCompanies);
+                // 部門
+                conList.Add("部門", selBumons);
+                // 販売先
+                conList.Add("販売先", selSelleres);
+            }
+            else if (selSelleres.Count == 0 && selSupplieres.Count > 0)
+            {
+                // 会社
+                conList.Add("会社", selCompanies);
+                // 部門
+                conList.Add("部門", selBumons);
+                // 仕入先
+                conList.Add("仕入先", selSupplieres);
+            }
+            else if (selBumons.Count > 0)
+            {
+                // 会社
+                conList.Add("会社", selCompanies);
+                // 部門
+                conList.Add("部門", selBumons);
             }
             else
             {
-                //----------------------------------------------------
-                // ★アニメーションフォーム閉じる
-                //----------------------------------------------------
-                if (animForm != null && !animForm.IsDisposed)
-                    anim.Invoke(new Action(() => anim.CloseForm()));
-
-                // アニメーションスレッド終了を待つ
-                if(animThread != null && animThread.IsAlive)
-                    animThread.Join();
+                // 会社
+                conList.Add("会社", selCompanies);
             }
+
+            // データ区分
+            conList.Add("データ区分", selDatas);
+
+            // 売仕クラス区分
+            if (selSlPrProducts != null && selSlPrProducts.Count > 0) 
+                conList.Add("売仕クラス区分", selSlPrProducts);
+
+            // 在クラス区分
+            if(selIvProducts != null && selIvProducts.Count > 0)
+                conList.Add("在クラス区分", selIvProducts);
+
+            // 在庫種別
+            if(selIvTypes != null && selIvTypes.Count > 0)
+            {
+                selectCondition = selIvTypes.Values.ToList();
+                conList.Add("在庫種別", selectCondition);
+            }
+
+            // 集計区分
+            selectCondition = selAggregte.Split(',')
+                .Where(s => !string.IsNullOrWhiteSpace(s)).ToList();
+            conList.Add("集計区分", selectCondition);
+
+            return (slprResult, stockDtNow, stockDtOld, selDatas, selAggregte, selBookName, conList);
         }
+
+        /// <summary>
+        /// 表示＆Excelの集計
+        /// </summary>
+        /// <param name="slprResult"></param>
+        /// <param name="stockDtNow"></param>
+        /// <param name="stockDtOld"></param>
+        /// <param name="selDatas"></param>
+        /// <param name="selAggregte"></param>
+        /// <returns></returns>
+        private DataTable DoSummary(DataTable slprResult, DataTable stockDtNow, DataTable stockDtOld, List<string> selDatas, string selAggregte)
+        {
+            HIZTIM = $"{DateTime.Now:yyyy/MM/dd HH:mm:ss}";
+            famg.AddLog($"{HIZTIM} 処理メソッド 1 {CMD.UserName} DoSummary");
+
+            // =====================================================================================
+            // ★集計処理
+            // =====================================================================================
+            DataTable displayData = null;
+            // --- 集計キー列を決定 ---
+            List<string> groupKeys = new List<string>();
+            string[] sortcols = null;
+            string ptn = null;
+            if (selDatas.Contains("在庫"))
+            {
+
+                if (stockDtNow != null)
+                    displayData = stockDtNow;
+                else if (stockDtOld != null)
+                {
+                    if (selAggregte == "NONE")
+                        displayData = stockDtOld;
+                    else
+                    {
+                        switch (selAggregte)
+                        {
+                            case "品目CD":
+                                groupKeys = new List<string> { "年月", "クラス", "在庫種別", "部門CD", "品目CD" };
+                                sortcols = new string[] { "年月", "部門CD", "クラス", "品目CD" };
+                                ptn = "1";
+                                break;
+                                //case "倉庫CD":
+                                //    groupKeys = new List<string> { "年月", "クラス", "在庫種別", "部門CD", "倉庫CD" };
+                                //    sortcols = new string[] { "年月", "部門CD", "クラス", "倉庫CD" };
+                                //    ptn = "2";
+                                //    break;
+                                //case "部門CD":
+                                //    groupKeys = new List<string> { "年月", "クラス", "在庫種別", "部門CD" };
+                                //    sortcols = new string[] { "年月", "部門CD", "クラス" };
+                                //    ptn = "3";
+                                //    break;
+                        }
+                        displayData = dsumm.SumData(stockDtOld, groupKeys, sortcols, "在庫", ptn);
+                    }
+                }
+            }
+            else
+                if (slprResult != null)
+            {
+                if (selAggregte == "NONE")
+                    displayData = slprResult;
+                else
+                {
+                    switch (selAggregte)
+                    {
+                        case "品目CD":
+                            groupKeys = new List<string> { "年月", "SbSys区分", "クラス", "部門CD", "品部門CD", "品名CD", "品種CD", "色CD" };
+                            sortcols = new string[] { "年月", "SbSys区分", "部門CD", "クラス", "品部門CD", "品名CD", "品種CD", "色CD" };
+                            ptn = "1";
+                            break;
+                        case "取引先CD":
+                            groupKeys = new List<string> { "年月", "SbSys区分", "クラス", "部門CD", "取引先CD" };
+                            sortcols = new string[] { "年月", "SbSys区分", "部門CD", "クラス", "取引先CD" };
+                            ptn = "2";
+                            break;
+                        case "部門CD":
+                            groupKeys = new List<string> { "年月", "SbSys区分", "クラス", "部門CD" };
+                            sortcols = new string[] { "年月", "SbSys区分", "部門CD", "クラス" };
+                            ptn = "3";
+                            break;
+                    }
+                    displayData = dsumm.SumData(slprResult, groupKeys, sortcols, "売仕", ptn);
+                }
+            }
+            return displayData;
+        }
+
+        /// <summary>
+        /// Excelへエクスポート
+        /// </summary>
+        /// <param name="ExcelData"></param>
+        /// <param name="selBookName"></param>
         private void OutputExcel(DataTable ExcelData, string selBookName)
         {
             HIZTIM = $"{DateTime.Now:yyyy/MM/dd HH:mm:ss}";
-            famg.AddLog($"{HIZTIM} 処理メソッド 1 {cmg.UserName} OutputExcel");
+            famg.AddLog($"{HIZTIM} 処理メソッド 1 {CMD.UserName} OutputExcel");
 
             //----------------------------------------------------
             // ★エクセルへのエクスポート処理
@@ -788,511 +1255,15 @@ namespace あすよん月次帳票
                 GC.WaitForPendingFinalizers();
             }
         }
-        /// <summary>
-        /// 閉じるボタンクリック
-        /// </summary>
-        /// <param name="sender"></param>
-        /// <param name="e"></param>
-        private void btnForm1Back_Click(object sender, EventArgs e)
-        {
-            HIZTIM = $"{DateTime.Now:yyyy/MM/dd HH:mm:ss}";
-            famg.AddLog($"{HIZTIM} コントロール 1 {cmg.UserName} btnForm1Back_Click");
-            // Form1 のインスタンスを取得して表示
-            if (Application.OpenForms["Form1"] is Form1 form1)
-            {
-                form1.Show();
-            }
-            // Form2 を閉じる
-            this.Close();
-        }
-
-        // フィールドに追加
-        private Point mouseOffset;
-        private bool isMouseDown = false;
-
-        /// <summary>
-        /// マウスダウンでForm2を掴む
-        /// </summary>
-        /// <param name="sender"></param>
-        /// <param name="e"></param>
-        // MouseDown
-        private void RplForm2_MouseDown(object sender, MouseEventArgs e)
-        {
-            HIZTIM = $"{DateTime.Now:yyyy/MM/dd HH:mm:ss}";
-            famg.AddLog($"{HIZTIM} コントロール 1 {cmg.UserName} RplForm2_MouseDown");
-
-            if (e.Button == MouseButtons.Left)
-            {
-                isMouseDown = true;
-                mouseOffset = new Point(-e.X, -e.Y);
-            }
-        }
-
-        /// <summary>
-        /// マウスドラッグでForm2を動かす
-        /// </summary>
-        /// <param name="sender"></param>
-        /// <param name="e"></param>
-        // MouseMove
-        private void RplForm2_MouseMove(object sender, MouseEventArgs e)
-        {
-            HIZTIM = $"{DateTime.Now:yyyy/MM/dd HH:mm:ss}";
-            famg.AddLog($"{HIZTIM} コントロール 1 {cmg.UserName} RplForm2_MouseMove");
-
-            if (isMouseDown)
-            {
-                Point mousePos = Control.MousePosition;
-                mousePos.Offset(mouseOffset.X, mouseOffset.Y);
-                this.Location = mousePos;
-            }
-        }
-
-        /// <summary>
-        /// マウスアップでForm2を離す
-        /// </summary>
-        /// <param name="sender"></param>
-        /// <param name="e"></param>
-        // MouseUp
-        private void RplForm2_MouseUp(object sender, MouseEventArgs e)
-        {
-            HIZTIM = $"{DateTime.Now:yyyy/MM/dd HH:mm:ss}";
-            famg.AddLog($"{HIZTIM} コントロール 1 {cmg.UserName} RplForm2_MouseUp");
-
-            if (e.Button == MouseButtons.Left)
-                isMouseDown = false;
-        }
-
-        /// <summary>
-        /// 最小化ボタンクリック
-        /// </summary>
-        /// <param name="sender"></param>
-        /// <param name="e"></param>
-        private void btnMin_Click(object sender, EventArgs e)
-        {
-            HIZTIM = $"{DateTime.Now:yyyy/MM/dd HH:mm:ss}";
-            famg.AddLog($"{HIZTIM} コントロール 1 {cmg.UserName} btnMin_Click");
-
-            this.WindowState = FormWindowState.Minimized;
-        }
-
-        //=================================================================
-        // 処理メソッド
-        //=================================================================
-        /// <summary>
-        /// 部門選択から取得した会社チェックを更新
-        /// </summary>
-        /// <param name="bumons"></param>
-        private void UpdateCompanyCheckboxesFromBumon(List<Department> bumons)
-        {
-            HIZTIM = $"{DateTime.Now:yyyy/MM/dd HH:mm:ss}";
-            famg.AddLog($"{HIZTIM} 処理メソッド 1 {cmg.UserName} UpdateCompanyCheckboxesFromBumon");
-
-            // 部門に基づいて会社のチェックボックスを更新
-            chkBxOhno.Checked = bumons.Any(d => d.Company == "オーノ");
-            chkBxSuncar.Checked = bumons.Any(d => d.Company == "サンミックカーペット");
-            chkBxSundus.Checked = bumons.Any(d => d.Company == "サンミックダスコン");
-        }
-
-        /// <summary>
-        /// 取引先選択から取得した部門と会社を選択
-        /// </summary>
-        /// <param name="torihikis"></param>
-        private void UpdateBumonAndCompanyFromTorihiki(List<Torihiki> torihikis)
-        {
-            HIZTIM = $"{DateTime.Now:yyyy/MM/dd HH:mm:ss}";
-            famg.AddLog($"{HIZTIM} 処理メソッド 1 {cmg.UserName} UpdateBumonAndCompanyFromTorihiki");
-
-            // 取引先が空なら会社チェック・部門リストもクリア
-            if (torihikis == null || torihikis.Count == 0)
-            {
-                chkBxOhno.Checked = false;
-                chkBxSuncar.Checked = false;
-                chkBxSundus.Checked = false;
-
-                selBumons.Clear();
-                listBx部門.Items.Clear();
-                return;
-            }
-
-            // 取引先に基づいて会社のチェックボックスを更新
-            chkBxOhno.Checked |= torihikis.Any(t => t.Company == "オーノ");
-            chkBxSuncar.Checked |= torihikis.Any(t => t.Company == "サンミックカーペット");
-            chkBxSundus.Checked |= torihikis.Any(t => t.Company == "サンミックダスコン");
-            // 取引先に基づいて部門リストを更新
-            var newBumons = torihikis
-                .Select(t => new Department { Code = t.DeptCode, Name = t.DeptName, Company = t.Company })
-                .ToList();
-
-            foreach (var nb in newBumons)
-            {
-                if (!selBumons.Any(b => b.Code == nb.Code && b.Company == nb.Company))
-                    selBumons.Add(nb);
-            }
-            // listBox 表示更新（コード+名称）
-            RefreshListBx(listBx部門, selBumons.Select(b => new Torihiki
-            {
-                Code = b.Code,
-                Name = b.Name,
-                Company = b.Company,
-                DeptCode = b.Code,
-                DeptName = b.Name
-            }).ToList());
-        }
-
-        /// <summary>
-        /// 取引先選択から取得した部門を追加
-        /// </summary>
-        /// <param name="deptmap"></param>
-        /// <param name="ts"></param>
-        private void AddDeptMap(Dictionary<string, HashSet<string>> deptmap, Torihiki ts)
-        {
-            HIZTIM = $"{DateTime.Now:yyyy/MM/dd HH:mm:ss}";
-            famg.AddLog($"{HIZTIM} 処理メソッド 1 {cmg.UserName} AddDeptMap");
-
-            if (!deptmap.TryGetValue(ts.Code,out var set))
-            {
-                set = new HashSet<string>();
-                deptmap[ts.Code] = set;
-            }
-            set.Add(ts.DeptCode);
-        }
-
-        /// <summary>
-        /// 取引先選択から取得した部門を追加
-        /// </summary>
-        /// <param name="deptmap"></param>
-        /// <param name="ts"></param>
-        private void AddDeptMapRange(Dictionary<string, HashSet<string>> deptmap, IEnumerable<Torihiki> ts)
-        {
-            HIZTIM = $"{DateTime.Now:yyyy/MM/dd HH:mm:ss}";
-            famg.AddLog($"{HIZTIM} 処理メソッド 1 {cmg.UserName} AddDeptMapRange");
-
-            foreach (var t in ts)
-            {
-                AddDeptMap(deptmap, t);
-            }
-        }
-
-        /// <summary>
-        /// 部門・販売・仕入の選択用リストボックス更新
-        /// </summary>
-        /// <param name="listBox"></param>
-        /// <param name="items"></param>
-        private void RefreshListBx(ListBox listBox, List<Torihiki> items)
-        {
-            HIZTIM = $"{DateTime.Now:yyyy/MM/dd HH:mm:ss}";
-            famg.AddLog($"{HIZTIM} 処理メソッド 1 {cmg.UserName} RefreshListBx");
-
-            listBox.Items.Clear();
-
-            // 選択アイテムがなければ終了
-            if (items.Count == 0) return;
-
-            foreach (var item in items)
-            {
-                // 同じ Code + Company の Torihiki がなければ追加
-                bool exists = listBox.Items.Cast<Torihiki>()
-                    .Any(t => t.Code == item.Code && t.Company == item.Company);
-
-                if (!exists)
-                    listBox.Items.Add(item);
-            }
-        }
-
-        /// <summary>
-        /// 表示＆Excelの選択条件エラーチェック
-        /// </summary>
-        /// <returns></returns>
-        private bool ErrCheck()
-        {
-            HIZTIM = $"{DateTime.Now:yyyy/MM/dd HH:mm:ss}";
-            famg.AddLog($"{HIZTIM} 処理メソッド 1 {cmg.UserName} ErrCheck");
-
-            // =====================================================================================
-            // ★ エラーチェック
-            // =====================================================================================
-            //  ＊年月入力チェック
-            if (!famg.TryParseYearMonth(txtBxStrYearMonth, out int strY, out int strM) ||
-                !famg.TryParseYearMonth(txtBxEndYearMonth, out int endY, out int endM))
-            {
-                MessageBox.Show("年月は6桁の数字(yyyyMM)で入力してください。", "警告", MessageBoxButtons.OK, MessageBoxIcon.Warning);
-                return true;
-            }
-            //  ＊組織未選択NG
-            if (!chkBxOhno.Checked && !chkBxSuncar.Checked && !chkBxSundus.Checked
-                && listBx販売先.Items.Count == 0 && listBx仕入先.Items.Count == 0
-                && listBx部門.Items.Count == 0)
-            {
-                MessageBox.Show("会社～取引先のいずれかを選択してください。",
-                                "警告", MessageBoxButtons.OK, MessageBoxIcon.Warning);
-                return true;
-            }
-            //  ＊データ区分未選択NG
-            if (!chkBxSl.Checked && !chkBxPr.Checked && !chkBxIv.Checked)
-            {
-                MessageBox.Show("データ区分を選択してください。",
-                                "警告", MessageBoxButtons.OK, MessageBoxIcon.Warning);
-                return true;
-            }
-            string sym = txtBxStrYearMonth.Text.Trim();
-            string eym = txtBxEndYearMonth.Text.Trim();
-            string nowym = DateTime.Now.ToString("yyyyMM");
-            //  ＊データ区分"在庫"選択の場合未来月NG
-            if (chkBxIv.Checked)
-            {
-                if (string.Compare(sym, nowym) > 0 || string.Compare(eym, nowym) > 0)
-                {
-                    MessageBox.Show("データ区分在庫を選択する場合、未来月は指定できません。",
-                                    "警告", MessageBoxButtons.OK, MessageBoxIcon.Warning);
-                    return true;
-                }
-            }
-            // データ区分"在庫"選択と、年月複数月(過去月の複数月はOK,過去月と当月はNG)の選択NG
-            if (chkBxIv.Checked && sym != eym && (sym == nowym || eym == nowym))
-            {
-                MessageBox.Show("データ区分在庫を選択する場合、当月の場合は単月で指定してください。",
-                                "警告", MessageBoxButtons.OK, MessageBoxIcon.Warning);
-                return true;
-            }
-            return false;
-        }
-
-        /// <summary>
-        /// 表示＆Excelのデータ抽出(明細)
-        /// </summary>
-        /// <returns></returns>
-        private (
-            DataTable slprResult, DataTable stockDtNow, DataTable stockDtOld, List<string> selDatas,
-            string selAggregte, string selBookName, Dictionary<string, List<string>> conList) MakeMainData()
-        {
-            HIZTIM = $"{DateTime.Now:yyyy/MM/dd HH:mm:ss}";
-            famg.AddLog($"{HIZTIM} 処理メソッド 1 {cmg.UserName} MakeMainData");
-
-            // =====================================================================================
-            // ★メインデータ作成処理
-            // =====================================================================================
-            // 条件選択内容取得
-            famg.TryParseYearMonth(txtBxStrYearMonth, out int strY, out int strM);
-            famg.TryParseYearMonth(txtBxEndYearMonth, out int endY, out int endM);
-
-            string selBookName = famg.GetBookName(txtBx名称);  // 帳票名称
-            (string startDate, string endDate) = famg.GetStartEndDate(strY, strM, endY, endM);　// 開始・終了日付
-            var selCompanies = famg.GetCompany(chkBxOhno, chkBxSundus, chkBxSuncar); // 会社
-            var selBumons = famg.GetSelectedBumons(listBx部門);  // 部門（先頭空白行は無視して取得）
-            var selSelleres = famg.GetSallerOrSupplier(listBx販売先);  // 販売先 （先頭空白行は無視）
-            var selSupplieres = famg.GetSallerOrSupplier(listBx仕入先);  // 仕入先 （先頭空白行は無視）
-            var selDatas = famg.GetSalseProduct(chkBxSl, chkBxPr, chkBxIv);  // データ区分
-            List<string> selSlPrProducts = null;
-            List<string> selIvProducts = null;
-            string selAggregte = null;
-            Dictionary<string, string> selIvTypes = null;
-
-            if (chkBxSl.Checked || chkBxPr.Checked)
-            {
-                selSlPrProducts = famg.GetProduct(chkBx原材料, chkBx半製品, chkBx製品,
-                                                                chkBxOhno, chkBxSundus, chkBxSuncar);  // 売・仕クラス区分
-                selAggregte = famg.GetAggregte(grpBx売仕集計区分);  // 売仕集計区分
-            }
-            if (chkBxIv.Checked)
-            {
-                selIvProducts = famg.GetProduct(chkBx原材料, chkBx半製品, chkBx製品,
-                                                            chkBx加工T, chkBx預りT, chkBx預けT,
-                                                            chkBxOhno, chkBxSundus, chkBxSuncar);  // 在クラス区分
-                selIvTypes = famg.GetIvType(chkBx自社, chkBx預け, chkBx預り, chkBx投入);  // 在庫種別
-                selAggregte = famg.GetAggregte(grpBx在集計区分);  // 在庫集計区分
-            }
-
-
-            // 条件フィルター
-            // データ取得・加工処理
-            var (slprResult, stockDtNow, stockDtOld) = famg.FilterData(startDate, endDate,
-                                                                                   selCompanies, selBumons,
-                                                                                   selSelleres, selSupplieres,
-                                                                                   selDatas, selSlPrProducts, selIvProducts,
-                                                                                   selIvTypes);
-            // 選択条件のリスト
-            // conListには選択されてる条件を格納→Form2_DataViewのListBxに表示
-            Dictionary<string, List<string>> conList = new Dictionary<string, List<string>>();
-            List<string> selectCondition = null;
-
-            // 帳票名
-            if (!string.IsNullOrWhiteSpace(selBookName))
-            {
-                selectCondition = selBookName.Split(',')
-                    .Where(s => !string.IsNullOrWhiteSpace(s)).ToList();
-                conList.Add("帳票名称", selectCondition);
-            }
-
-            // strY+strM(yyyyMM形式)と endY+endM(yyyyMM形式)をList<string> YearMonthsに格納
-            selectCondition = new List<string>
-            {
-                $"{strY}{strM:D2}", $"{endY}{endM:D2}"
-            };
-            conList.Add("年月", selectCondition);
-
-            // 販売先・仕入先－部門－会社
-            if (selSelleres.Count > 0 && selSelleres.Count > 0)
-            {
-                // 会社
-                conList.Add("会社", selCompanies);
-                // 部門
-                conList.Add("部門", selBumons);
-                // 販売先
-                conList.Add("販売先", selSelleres);
-                // 仕入先
-                conList.Add("仕入先", selSupplieres);
-            }
-            else if (selSupplieres.Count == 0 && selSelleres.Count > 0)
-            {
-                // 会社
-                conList.Add("会社", selCompanies);
-                // 部門
-                conList.Add("部門", selBumons);
-                // 販売先
-                conList.Add("販売先", selSelleres);
-            }
-            else if (selSelleres.Count == 0 && selSupplieres.Count > 0)
-            {
-                // 会社
-                conList.Add("会社", selCompanies);
-                // 部門
-                conList.Add("部門", selBumons);
-                // 仕入先
-                conList.Add("仕入先", selSupplieres);
-            }
-            else if (selBumons.Count > 0)
-            {
-                // 会社
-                conList.Add("会社", selCompanies);
-                // 部門
-                conList.Add("部門", selBumons);
-            }
-            else
-            {
-                // 会社
-                conList.Add("会社", selCompanies);
-            }
-
-            // データ区分
-            conList.Add("データ区分", selDatas);
-
-            // 売仕クラス区分
-            if (selSlPrProducts != null && selSlPrProducts.Count > 0) 
-                conList.Add("売仕クラス区分", selSlPrProducts);
-
-            // 在クラス区分
-            if(selIvProducts != null && selIvProducts.Count > 0)
-                conList.Add("在クラス区分", selIvProducts);
-
-            // 在庫種別
-            if(selIvTypes != null && selIvTypes.Count > 0)
-            {
-                selectCondition = selIvTypes.Values.ToList();
-                conList.Add("在庫種別", selectCondition);
-            }
-
-            // 集計区分
-            selectCondition = selAggregte.Split(',')
-                .Where(s => !string.IsNullOrWhiteSpace(s)).ToList();
-            conList.Add("集計区分", selectCondition);
-
-            return (slprResult, stockDtNow, stockDtOld, selDatas, selAggregte, selBookName, conList);
-        }
-
-        /// <summary>
-        /// 表示＆Excelの集計
-        /// </summary>
-        /// <param name="slprResult"></param>
-        /// <param name="stockDtNow"></param>
-        /// <param name="stockDtOld"></param>
-        /// <param name="selDatas"></param>
-        /// <param name="selAggregte"></param>
-        /// <returns></returns>
-        private DataTable DoSummary(DataTable slprResult, DataTable stockDtNow, DataTable stockDtOld, List<string> selDatas, string selAggregte)
-        {
-            HIZTIM = $"{DateTime.Now:yyyy/MM/dd HH:mm:ss}";
-            famg.AddLog($"{HIZTIM} 処理メソッド 1 {cmg.UserName} DoSummary");
-
-            // =====================================================================================
-            // ★集計処理
-            // =====================================================================================
-            DataTable displayData = null;
-            // --- 集計キー列を決定 ---
-            List<string> groupKeys = new List<string>();
-            string[] sortcols = null;
-            string ptn = null;
-            if (selDatas.Contains("在庫"))
-            {
-
-                if (stockDtNow != null)
-                    displayData = stockDtNow;
-                else if (stockDtOld != null)
-                {
-                    if (selAggregte == "NONE")
-                        displayData = stockDtOld;
-                    else
-                    {
-                        switch (selAggregte)
-                        {
-                            case "品目CD":
-                                groupKeys = new List<string> { "年月", "クラス", "在庫種別", "部門CD", "品目CD" };
-                                sortcols = new string[] { "年月", "部門CD", "クラス", "品目CD" };
-                                ptn = "1";
-                                break;
-                                //case "倉庫CD":
-                                //    groupKeys = new List<string> { "年月", "クラス", "在庫種別", "部門CD", "倉庫CD" };
-                                //    sortcols = new string[] { "年月", "部門CD", "クラス", "倉庫CD" };
-                                //    ptn = "2";
-                                //    break;
-                                //case "部門CD":
-                                //    groupKeys = new List<string> { "年月", "クラス", "在庫種別", "部門CD" };
-                                //    sortcols = new string[] { "年月", "部門CD", "クラス" };
-                                //    ptn = "3";
-                                //    break;
-                        }
-                        displayData = dsumm.SumData(stockDtOld, groupKeys, sortcols, "在庫", ptn);
-                    }
-                }
-            }
-            else
-                if (slprResult != null)
-            {
-                if (selAggregte == "NONE")
-                    displayData = slprResult;
-                else
-                {
-                    switch (selAggregte)
-                    {
-                        case "品目CD":
-                            groupKeys = new List<string> { "年月", "SbSys区分", "クラス", "部門CD", "品部門CD", "品名CD", "品種CD", "色CD" };
-                            sortcols = new string[] { "年月", "SbSys区分", "部門CD", "クラス", "品部門CD", "品名CD", "品種CD", "色CD" };
-                            ptn = "1";
-                            break;
-                        case "取引先CD":
-                            groupKeys = new List<string> { "年月", "SbSys区分", "クラス", "部門CD", "取引先CD" };
-                            sortcols = new string[] { "年月", "SbSys区分", "部門CD", "クラス", "取引先CD" };
-                            ptn = "2";
-                            break;
-                        case "部門CD":
-                            groupKeys = new List<string> { "年月", "SbSys区分", "クラス", "部門CD" };
-                            sortcols = new string[] { "年月", "SbSys区分", "部門CD", "クラス" };
-                            ptn = "3";
-                            break;
-                    }
-                    displayData = dsumm.SumData(slprResult, groupKeys, sortcols, "売仕", ptn);
-                }
-            }
-            return displayData;
-        }
 
         ///<summary>
-        /// アニメーションを閉じる
+        /// アニメーションを閉じる(FormAnimation2)
         ///</summary>
         ///
         private void CloseAnimation(FormAnimation2 anim, Thread animThread)
         {
             HIZTIM = $"{DateTime.Now:yyyy/MM/dd HH:mm:ss}";
-            famg.AddLog($"{HIZTIM} 処理メソッド 1 {cmg.UserName} CloseAnimation");
+            famg.AddLog($"{HIZTIM} 処理メソッド 1 {CMD.UserName} CloseAnimation");
 
             try
             {
@@ -1309,6 +1280,45 @@ namespace あすよん月次帳票
             catch { }
         }
 
+        /// <summary>
+        /// アニメーション表示・非表示(FormAnimation3)
+        /// </summary>
+        /// <param name="ocFlg"></param>
+        private async void StartEndAnimationThread(bool ocFlg)
+        {
+            FormAnimation3 anim = null;
+            if (ocFlg)
+            {
+                // ----------------------------------------------------
+                // ★アニメーションフォーム表示
+                // ----------------------------------------------------
+                animThread = new Thread(() =>
+                {
+                    using (FormAnimation3 a = new FormAnimation3())
+                    {
+                        animForm = a; // 外部参照用
+                        Application.Run(a); // GIF表示
+                    }
+                });
+                animThread.SetApartmentState(ApartmentState.STA);
+                animThread.Start();
+
+                await Task.Delay(100); // ちょっと待って anim が作られる
+            }
+            else
+            {
+                //----------------------------------------------------
+                // ★アニメーションフォーム閉じる
+                //----------------------------------------------------
+                if (animForm != null && !animForm.IsDisposed)
+                    anim.Invoke(new Action(() => anim.CloseForm()));
+
+                // アニメーションスレッド終了を待つ
+                if (animThread != null && animThread.IsAlive)
+                    animThread.Join();
+            }
+        }
+
         //==============================================================
         // デザイン関連メソッド
         //==============================================================
@@ -1318,7 +1328,7 @@ namespace あすよん月次帳票
         private void ApplySnowManColors()
         {
             HIZTIM = $"{DateTime.Now:yyyy/MM/dd HH:mm:ss}";
-            famg.AddLog($"{HIZTIM} デザイン関連メソッド 1 {cmg.UserName} ApplySnowManColors");
+            famg.AddLog($"{HIZTIM} デザイン関連メソッド 1 {CMD.UserName} ApplySnowManColors");
 
             // フォーム全体の背景
             this.BackColor = Color.FromArgb(255, 220, 150);
@@ -1375,7 +1385,7 @@ namespace あすよん月次帳票
         private void GroupBoxCustomBorder(object sender, PaintEventArgs e)
         {
             HIZTIM = $"{DateTime.Now:yyyy/MM/dd HH:mm:ss}";
-            famg.AddLog($"{HIZTIM} デザイン関連メソッド 1 {cmg.UserName} GroupBoxCustomBorder");
+            famg.AddLog($"{HIZTIM} デザイン関連メソッド 1 {CMD.UserName} GroupBoxCustomBorder");
 
             GroupBox box = (GroupBox)sender;
             e.Graphics.Clear(box.BackColor);

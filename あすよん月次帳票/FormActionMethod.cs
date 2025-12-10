@@ -9,29 +9,32 @@ using System.Text;
 using System.Text.Json;
 using System.Text.RegularExpressions;
 using System.Windows.Forms;
+using CMD = あすよん月次帳票.CommonData;
 
 namespace あすよん月次帳票
 {
+    //=======================================================================
+    // --------FormActionMethod(各種Form使用する処理メソッド)クラス--------
+    //=======================================================================
     internal class FormActionMethod
     {
-        internal CommonData cm;
-        internal FormActionMethod(CommonData common)
-        {
-            cm = common;
-        }
+        //========================================================================
+        // 【インスタンス】
+        //========================================================================
         internal GetDataMethod gdm = new GetDataMethod();
 
+        // フィールド変数
         static internal string ctl = "[enter]";  // Ctlr(実行)
         static internal string f3 = "[pf3]";  // F3(終了)
         static internal string tb = "[tab]"; // Tab(カーソル次送り)
         static internal string ent = "[fldext]"; // Enter(カーソル位置以降の入力exit)
-
         private string HIZTIM;
 
         private List<string> runtimelog = new List<string>();
 
         // =======================================================================
         // 【マスターデータ取得メソッド】
+        // =======================================================================
         //  <FormMainTop>
         /// <summary>
         /// ◆ユーザー名取得
@@ -818,7 +821,7 @@ namespace あすよん月次帳票
         //   ◆シュミレーションロックチェック
         internal bool CheckAndLockSimulation(int lockMinutes)
         {
-            string lockFile = Path.Combine(cm.LockPath, "LOCK_sim.txt");
+            string lockFile = Path.Combine(CMD.LockPath, "LOCK_sim.txt");
             try
             {
                 // ロックファイルのディレクトリがなければ作成
@@ -827,8 +830,8 @@ namespace あすよん月次帳票
                 // ファイルが存在しない＝実施者なし→新規作成してロックし、処理実施
                 if (!File.Exists(lockFile))
                 {
-                    WriteLockFile(lockFile, cm.UserID);
-                    AppendLog(cm.sLog, $"[{DateTime.Now:yyyy/MM/dd HH:mm:ss}] LOCKED by {cm.UserID}");
+                    WriteLockFile(lockFile, CMD.UserID);
+                    AppendLog(CMD.sLog, $"[{DateTime.Now:yyyy/MM/dd HH:mm:ss}] LOCKED by {CMD.UserID}");
                     return true;
                 }
                 // ファイルが存在する＝他のユーザーが使用中(ロック中)
@@ -841,10 +844,10 @@ namespace あすよん月次帳票
                     var elapsed = DateTime.Now - lockTime;
 
                     // 同一ユーザーなら上書きしてOK
-                    if (lockUser == cm.UserID)
+                    if (lockUser == CMD.UserID)
                     {
-                        WriteLockFile(lockFile, cm.UserID);
-                        AppendLog(cm.sLog, $"[{DateTime.Now:yyyy/MM/dd HH:mm:ss}] RE-LOCKED by same user {cm.UserID}");
+                        WriteLockFile(lockFile, CMD.UserID);
+                        AppendLog(CMD.sLog, $"[{DateTime.Now:yyyy/MM/dd HH:mm:ss}] RE-LOCKED by same user {CMD.UserID}");
                         return true;
                     }
 
@@ -860,9 +863,9 @@ namespace あすよん月次帳票
                     }
                 }
                 // ここまで来たら新規ロックまたは上書き
-                WriteLockFile(lockFile, cm.UserID);
+                WriteLockFile(lockFile, CMD.UserID);
                 // ログ追記
-                AppendLog(cm.sLog, $"LOCKED by {cm.UserID}");
+                AppendLog(CMD.sLog, $"LOCKED by {CMD.UserID}");
                 return true;
 
             }
@@ -886,11 +889,13 @@ namespace あすよん月次帳票
         //   ◆シュミレーションロック解除
         internal bool ReleaseSimulationLock()
         {
-            string lockFile = Path.Combine(cm.LockPath, "LOCK_sim.txt");
+            string lockFile = Path.Combine(CMD.LockPath, "LOCK_sim.txt");
             HIZTIM = $"{DateTime.Now:yyyy/MM/dd HH:mm:ss}";
+            AddLog($"{HIZTIM} シュミレーションメソッド 1 {CMD.UserName} ReleaseSimulationLock");
+
             try
             {
-                if (!File.Exists(cm.LockPath))
+                if (!File.Exists(CMD.LockPath))
                     // ロックファイルが存在しないときは何もしない
                     return false;
 
@@ -898,19 +903,20 @@ namespace あすよん月次帳票
                 string lockUser = lines.FirstOrDefault(l => l.StartsWith("UserID="))?.Split('=')[1];
                 string timeLine = lines.FirstOrDefault(l => l.StartsWith("Time="))?.Split('=')[1];
 
-                if (lockUser == cm.UserID)
+                if (lockUser == CMD.UserID)
                 {
                     // 実行者本人のときはロック解除+ログ記録
                     lines[3] = "Status=RELEASED";
                     File.WriteAllLines(lockFile, lines);
 
-                    AppendLog(cm.sLog, $"RELEASED by {cm.UserID}");
-                    AddLog2($"{HIZTIM} 実行者ID:{cm.UserID} ロック解除");
+                    AppendLog(CMD.sLog, $"RELEASED by {CMD.UserID}");
+                    AddLog2($"{HIZTIM} 実行者ID:{CMD.UserID} ロック解除");
                     return true;
                 }
                 else
                 {
                     // 実行者本人でないときはロック解除せずに、何もしない
+                    AddLog2($"{HIZTIM} 実行者ID:{lockUser} ロック未解除");
                     return false;
                 }
             }
@@ -924,7 +930,8 @@ namespace あすよん月次帳票
         internal void SimulateIZAIKO_Ohno(string uid, string pass, string ym)
         {
             PCommOperator.StartConnection("AUT000", PCommWindowState.MIN);
-            PCommOperator.Wait(3000);  // 3秒待機
+            PCommOperator.WaitForAppAvailable(20000);  // 最大20秒待機
+            PCommOperator.WaitForInputReady(20000);  // 最大20秒待機
 
             // オーノシュミレーション実行
             Simulate(uid, pass);
@@ -963,7 +970,8 @@ namespace あすよん月次帳票
         internal void SimulateIZAIKO_Ohno(string uid, string pass, string ym, string bumon)
         {
             PCommOperator.StartConnection("AUT000", PCommWindowState.MIN);
-            PCommOperator.Wait(3000);  // 3秒待機
+            PCommOperator.WaitForAppAvailable(20000);  // 最大20秒待機
+            PCommOperator.WaitForInputReady(20000);  // 最大20秒待機
 
             // オーノシュミレーション実行
             Simulate(uid, pass, bumon);
@@ -1002,8 +1010,9 @@ namespace あすよん月次帳票
         internal void SimulateIZAIKO_Sun(string uid, string pass, string ym, string file)
         {
             PCommOperator.StartConnection("AUT000", PCommWindowState.MIN);
-            PCommOperator.WaitForAppAvailable(10000);  // 最大10秒待機
-            PCommOperator.WaitForInputReady(10000);  // 最大10秒待機
+            PCommOperator.WaitForAppAvailable(20000);  // 最大20秒待機
+            PCommOperator.WaitForInputReady(20000);  // 最大20秒待機
+
             // サンミックシュミレーション実行
             Simulate(uid, pass);
 
@@ -1053,8 +1062,7 @@ namespace あすよん月次帳票
         //   ◆シュミレーション実行(全部門)
         internal void Simulate(string uid, string pass)
         {
-            PCommOperator.WaitForAppAvailable(10000);  // 最大10秒待機
-            PCommOperator.WaitForInputReady(10000);  // 最大10秒待機
+            PCommOperator.Wait(5000);  // 5秒待機
             PCommOperator.SignOn(uid, pass);
             PCommOperator.SendKeys("11" + ctl, 20, 7);  // 月次原価シュミレーションメニュー
             PCommOperator.SendKeys("1" + ctl, 20, 7);  // 月次原価シュミレーション
@@ -1066,8 +1074,7 @@ namespace あすよん月次帳票
         //   ◆シュミレーション実行(部門別)
         internal void Simulate(string uid, string pass, string bumon)
         {
-            PCommOperator.WaitForAppAvailable(10000);  // 最大10秒待機
-            PCommOperator.WaitForInputReady(10000);  // 最大10秒待機
+            PCommOperator.Wait(5000);  // 5秒待機
             PCommOperator.SignOn(uid, pass);
             PCommOperator.SendKeys("11" + ctl, 20, 7);  // 月次原価シュミレーションメニュー
             PCommOperator.SendKeys("1" + ctl, 20, 7);  // 月次原価シュミレーション
@@ -1079,6 +1086,7 @@ namespace あすよん月次帳票
         //   ◆在庫表印刷(全部門)
         internal void PrintIZAIKO(string ym, string cls)
         {
+            PCommOperator.Wait(2000);  // 2秒待機
             PCommOperator.SendKeys("13" + ctl, 20, 7);  // 在庫表(月次原価シュミレーションメニュー)
             PCommOperator.SendKeys(tb, 5, 14);  // 部門選択は変更なしで年月へ移動
             PCommOperator.SendKeys(ym + ent, 8, 14);  // 年月(当月)
@@ -1087,7 +1095,7 @@ namespace あすよん月次帳票
             PCommOperator.SendKeys(tb, 10, 26);  // 品名選択は変更なしで次へ移動
             PCommOperator.SendKeys(tb, 10, 28);  // 品名選択は変更なしでクラスへ移動
             PCommOperator.SendKeys(cls + ctl + ctl, 12, 14);  // 原材料決定＋実行
-            PCommOperator.Wait(3000);  // 3秒待機
+            PCommOperator.Wait(1000);  // 1秒待機
             var txt = PCommOperator.GetText(24, 1, 30).Trim();
             if (txt.Contains("作表データがありません"))
             {
@@ -1100,6 +1108,7 @@ namespace あすよん月次帳票
         //   ◆// 在庫表印刷(部門別)
         internal void PrintIZAIKO(string ym, string cls, string bumon)
         {
+            PCommOperator.Wait(2000);  // 2秒待機
             PCommOperator.SendKeys("13" + ctl, 20, 7);  // 在庫表(月次原価シュミレーションメニュー)
             PCommOperator.SendKeys(bumon, 5, 14);  // 部門選択は変更なしで年月へ移動
             PCommOperator.SendKeys(ym + ent, 8, 14);  // 年月(当月)
@@ -1109,7 +1118,7 @@ namespace あすよん月次帳票
             PCommOperator.SendKeys(tb, 10, 26);  // 品名選択は変更なしで次へ移動
             PCommOperator.SendKeys(tb, 10, 28);  // 品名選択は変更なしでクラスへ移動
             PCommOperator.SendKeys(cls + ctl + ctl, 12, 14);  // 原材料決定＋実行
-            PCommOperator.Wait(3000);  // 3秒待機
+            PCommOperator.Wait(1000);  // 1秒待機
             var txt = PCommOperator.GetText(24, 1, 30).Trim();
             if(txt.Contains("作表データがありません"))
             {
@@ -1122,17 +1131,18 @@ namespace あすよん月次帳票
         //   ◆ライブラリー作成
         internal void MakeLibrary(string file)
         {
+            PCommOperator.Wait(2000);  // 2秒待機
             PCommOperator.SendKeys("WRKQRY" + ctl,20, 7);  // 選択項目またはコマンド(月次原価シュミレーションメニュー)
             PCommOperator.SendKeys("2",5,26);  // QUERY処理,オプション:変更
             PCommOperator.SendKeys(file + tb, 8, 26);  // QUERY定義入力
-            PCommOperator.Wait(2000);  // 2秒待機
+            PCommOperator.Wait(1000);  // 1秒待機
             PCommOperator.SendKeys("OHNO000" + ctl, 9, 28); // 実行
             PCommOperator.SendKeys(f3, 10, 3);  // QUERY定義の終了
             PCommOperator.SendKeys(tb, 5, 29);  // オプションへ移動
             PCommOperator.SendKeys("1", 7, 29);  // 対話式で実行"1"を選択
-            PCommOperator.Wait(2000);  // 2秒待機
+            PCommOperator.Wait(1000);  // 1秒待機
             PCommOperator.SendKeys(ctl, 5, 29);  // QUERY作成実行
-            PCommOperator.Wait(2000);  // 2秒待機
+            PCommOperator.Wait(1000);  // 1秒待機
             PCommOperator.SendKeys(f3, 5, 26);  // QUERY処理終了、1つ戻る
         }
         // =======================================================================
@@ -1145,13 +1155,13 @@ namespace あすよん月次帳票
         /// <param name="message"></param>
         internal void AddLog(string message)
         {
-            if (!Directory.Exists(Path.Combine(cm.LogPath, cm.HIZ)))
-                Directory.CreateDirectory(Path.Combine(cm.LogPath, cm.HIZ));
+            if (!Directory.Exists(Path.Combine(CMD.LogPath, CMD.HIZ)))
+                Directory.CreateDirectory(Path.Combine(CMD.LogPath, CMD.HIZ));
             // 個人用ログファイルパス
-            if (!File.Exists(cm.uLog))
-                File.Create(cm.uLog).Close();
+            if (!File.Exists(CMD.uLog))
+                File.Create(CMD.uLog).Close();
             //  ログファイルに保存
-            File.AppendAllText(cm.uLog, message + Environment.NewLine);
+            File.AppendAllText(CMD.uLog, message + Environment.NewLine);
         }
         ///<summary>
         /// 全体用ログを追加&ログファイル保存
@@ -1159,13 +1169,13 @@ namespace あすよん月次帳票
         /// <param name="message"></param>
         internal void AddLog2(string message)
         {
-            if (!Directory.Exists(Path.Combine(cm.LogPath, cm.HIZ)))
-                Directory.CreateDirectory(Path.Combine(cm.LogPath, cm.HIZ));
+            if (!Directory.Exists(Path.Combine(CMD.LogPath, CMD.HIZ)))
+                Directory.CreateDirectory(Path.Combine(CMD.LogPath, CMD.HIZ));
             // 全体用ログファイルパス
-            if (!File.Exists(cm.conLog))
-                File.Create(cm.conLog).Close();
+            if (!File.Exists(CMD.conLog))
+                File.Create(CMD.conLog).Close();
             // ログファイルに保存
-            File.AppendAllText(cm.conLog, message + Environment.NewLine);
+            File.AppendAllText(CMD.conLog, message + Environment.NewLine);
         }
         private void AppendLog(string logFilePath, string message)
         {
@@ -1235,6 +1245,8 @@ namespace あすよん月次帳票
             }
             return string.Empty;
         }
+
+
         // =======================================================================
 
 
