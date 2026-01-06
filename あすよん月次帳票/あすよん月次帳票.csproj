@@ -26,7 +26,7 @@
     <MinimumRequiredVersion>1.0.0.1</MinimumRequiredVersion>
     <WebPage>publish.htm</WebPage>
     <OpenBrowserOnPublish>false</OpenBrowserOnPublish>
-    <ApplicationRevision>14</ApplicationRevision>
+    <ApplicationRevision>18</ApplicationRevision>
     <ApplicationVersion>1.0.0.%2a</ApplicationVersion>
     <UseApplicationTrust>false</UseApplicationTrust>
     <PublishWizardCompleted>true</PublishWizardCompleted>
@@ -125,6 +125,9 @@
       <HintPath>..\packages\Microsoft.Office.Interop.Excel.15.0.4795.1001\lib\net20\Microsoft.Office.Interop.Excel.dll</HintPath>
       <EmbedInteropTypes>True</EmbedInteropTypes>
     </Reference>
+    <Reference Include="Newtonsoft.Json, Version=13.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
+      <HintPath>..\packages\Newtonsoft.Json.13.0.4\lib\net45\Newtonsoft.Json.dll</HintPath>
+    </Reference>
     <Reference Include="OhnoDbManagers">
       <HintPath>..\..\_bin\OhnoDbManagers.dll</HintPath>
     </Reference>
@@ -173,124 +176,163 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="ColorManager.cs" />
-    <Compile Include="CommonData.cs" />
-    <Compile Include="DataProcessor.cs" />
-    <Compile Include="DataSummarizeMethod.cs" />
-    <Compile Include="Form1.cs">
+    <Compile Include="Class1.cs" />
+    <Compile Include="CommonSetings\ColorManager.cs" />
+    <Compile Include="CommonSetings\CommonData.cs" />
+    <Compile Include="CommonSetings\Enums.cs" />
+    <Compile Include="Dictionaries.cs" />
+    <Compile Include="Forms\MasterMenuFm\取引先マスタFm.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="Form1.Designer.cs">
-      <DependentUpon>Form1.cs</DependentUpon>
+    <Compile Include="Forms\MasterMenuFm\取引先マスタFm.Designer.cs">
+      <DependentUpon>取引先マスタFm.cs</DependentUpon>
     </Compile>
-    <Compile Include="Form2_DataView.cs">
+    <Compile Include="Methods\Processor.cs" />
+    <Compile Include="Methods\Summarize.cs" />
+    <Compile Include="Forms\LoginFm.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="Form2_DataView.Designer.cs">
-      <DependentUpon>Form2_DataView.cs</DependentUpon>
+    <Compile Include="Forms\LoginFm.Designer.cs">
+      <DependentUpon>LoginFm.cs</DependentUpon>
     </Compile>
-    <Compile Include="Form3.cs">
+    <Compile Include="Forms\TopMenuFm.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="Form3.Designer.cs">
-      <DependentUpon>Form3.cs</DependentUpon>
+    <Compile Include="Forms\TopMenuFm.Designer.cs">
+      <DependentUpon>TopMenuFm.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Forms\SimulationFm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Forms\SimulationFm.Designer.cs">
+      <DependentUpon>SimulationFm.cs</DependentUpon>
     </Compile>
     <Compile Include="Form4_BK.cs" />
     <Compile Include="Form4_BK.Designer.cs">
       <DependentUpon>Form4_BK.cs</DependentUpon>
     </Compile>
-    <Compile Include="Form4.cs">
+    <Compile Include="Forms\DataExtraction\DataEtlViewFm.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="Form4.Designer.cs">
-      <DependentUpon>Form4.cs</DependentUpon>
+    <Compile Include="Forms\DataExtraction\DataEtlViewFm.Designer.cs">
+      <DependentUpon>DataEtlViewFm.cs</DependentUpon>
     </Compile>
-    <Compile Include="Form5.cs">
+    <Compile Include="Forms\MasterMenuFm.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="Form5.Designer.cs">
-      <DependentUpon>Form5.cs</DependentUpon>
+    <Compile Include="Forms\MasterMenuFm.Designer.cs">
+      <DependentUpon>MasterMenuFm.cs</DependentUpon>
     </Compile>
-    <Compile Include="FormActionMethod.cs" />
-    <Compile Include="FormAnimation3.cs">
+    <Compile Include="Methods\FormAction.cs" />
+    <Compile Include="AnimationForms\WaitExcelExport.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="FormAnimation3.Designer.cs">
-      <DependentUpon>FormAnimation3.cs</DependentUpon>
+    <Compile Include="AnimationForms\WaitExcelExport.Designer.cs">
+      <DependentUpon>WaitExcelExport.cs</DependentUpon>
     </Compile>
-    <Compile Include="FormAnimation1.cs">
+    <Compile Include="AnimationForms\WaitSimulationFm.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="FormAnimation1.Designer.cs">
-      <DependentUpon>FormAnimation1.cs</DependentUpon>
+    <Compile Include="AnimationForms\WaitSimulationFm.Designer.cs">
+      <DependentUpon>WaitSimulationFm.cs</DependentUpon>
     </Compile>
-    <Compile Include="FormAnimation2.cs">
+    <Compile Include="AnimationForms\WaitSnowMan.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="FormAnimation2.Designer.cs">
-      <DependentUpon>FormAnimation2.cs</DependentUpon>
+    <Compile Include="AnimationForms\WaitSnowMan.Designer.cs">
+      <DependentUpon>WaitSnowMan.cs</DependentUpon>
     </Compile>
-    <Compile Include="FormMainTop.cs">
-      <SubType>Form</SubType>
-    </Compile>
-    <Compile Include="FormMainTop.Designer.cs">
-      <DependentUpon>FormMainTop.cs</DependentUpon>
-    </Compile>
-    <Compile Include="GetDataMethod.cs" />
-    <Compile Include="mf.cs" />
+    <Compile Include="Methods\GetData_AS400.cs" />
+    <Compile Include="CommonSetings\mf.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="Form2.cs">
+    <Compile Include="Forms\DataExtractionFm.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="Form2.Designer.cs">
-      <DependentUpon>Form2.cs</DependentUpon>
+    <Compile Include="Forms\DataExtractionFm.Designer.cs">
+      <DependentUpon>DataExtractionFm.cs</DependentUpon>
     </Compile>
-    <Compile Include="XXX.cs" />
-    <Compile Include="販売仕入先Form.cs">
+    <Compile Include="Forms\DataExtraction\販売仕入先Form.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="販売仕入先Form.Designer.cs">
+    <Compile Include="Forms\DataExtraction\販売仕入先Form.Designer.cs">
       <DependentUpon>販売仕入先Form.cs</DependentUpon>
     </Compile>
-    <Compile Include="部門Form.cs">
+    <Compile Include="Forms\DataExtraction\部門Form.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="部門Form.Designer.cs">
+    <Compile Include="Forms\DataExtraction\部門Form.Designer.cs">
       <DependentUpon>部門Form.cs</DependentUpon>
     </Compile>
-    <Compile Include="部門マスタForm.cs">
+    <Compile Include="Forms\MasterMenuFm\部門マスタForm.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="部門マスタForm.Designer.cs">
+    <Compile Include="Forms\MasterMenuFm\部門マスタForm.Designer.cs">
       <DependentUpon>部門マスタForm.cs</DependentUpon>
     </Compile>
-    <EmbeddedResource Include="Form1.resx">
-      <DependentUpon>Form1.cs</DependentUpon>
+    <Compile Include="Forms\MasterMenuFm\部門マスタ照会Form.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Forms\MasterMenuFm\部門マスタ照会Form.Designer.cs">
+      <DependentUpon>部門マスタ照会Form.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Forms\MasterMenuFm\取引先マスタインポートFm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Forms\MasterMenuFm\取引先マスタインポートFm.Designer.cs">
+      <DependentUpon>取引先マスタインポートFm.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Forms\MasterMenuFm\取引先マスタ照会Fm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Forms\MasterMenuFm\取引先マスタ照会Fm.Designer.cs">
+      <DependentUpon>取引先マスタ照会Fm.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Forms\MasterMenuFm\郵便番号辞書インポートFm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Forms\MasterMenuFm\郵便番号辞書インポートFm.Designer.cs">
+      <DependentUpon>郵便番号辞書インポートFm.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Forms\MasterMenuFm\取引先マスタFm-2.cs" />
+    <Compile Include="Forms\MasterMenuFm\取引先マスタFm-2.Designer.cs">
+      <DependentUpon>取引先マスタFm-2.cs</DependentUpon>
+    </Compile>
+    <EmbeddedResource Include="Forms\DataExtraction\DataEtlViewFm.resx">
+      <DependentUpon>DataEtlViewFm.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="Form2_DataView.resx">
-      <DependentUpon>Form2_DataView.cs</DependentUpon>
+    <EmbeddedResource Include="Forms\LoginFm.resx">
+      <DependentUpon>LoginFm.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="Form3.resx">
-      <DependentUpon>Form3.cs</DependentUpon>
+    <EmbeddedResource Include="Forms\MasterMenuFm\取引先マスタFm-2.resx">
+      <DependentUpon>取引先マスタFm-2.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Forms\MasterMenuFm\取引先マスタFm.resx">
+      <DependentUpon>取引先マスタFm.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Forms\MasterMenuFm\取引先マスタインポートFm.resx">
+      <DependentUpon>取引先マスタインポートFm.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Forms\TopMenuFm.resx">
+      <DependentUpon>TopMenuFm.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Forms\SimulationFm.resx">
+      <DependentUpon>SimulationFm.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Form4_BK.resx">
       <DependentUpon>Form4_BK.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="Form5.resx">
-      <DependentUpon>Form5.cs</DependentUpon>
+    <EmbeddedResource Include="Forms\MasterMenuFm.resx">
+      <DependentUpon>MasterMenuFm.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="FormAnimation1.resx">
-      <DependentUpon>FormAnimation1.cs</DependentUpon>
+    <EmbeddedResource Include="AnimationForms\WaitSimulationFm.resx">
+      <DependentUpon>WaitSimulationFm.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="FormAnimation2.resx">
-      <DependentUpon>FormAnimation2.cs</DependentUpon>
+    <EmbeddedResource Include="AnimationForms\WaitSnowMan.resx">
+      <DependentUpon>WaitSnowMan.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="FormAnimation3.resx">
-      <DependentUpon>FormAnimation3.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="FormMainTop.resx">
-      <DependentUpon>FormMainTop.cs</DependentUpon>
+    <EmbeddedResource Include="AnimationForms\WaitExcelExport.resx">
+      <DependentUpon>WaitExcelExport.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Properties\Resources.resx">
       <Generator>ResXFileCodeGenerator</Generator>
@@ -302,17 +344,23 @@
       <DependentUpon>Resources.resx</DependentUpon>
       <DesignTime>True</DesignTime>
     </Compile>
-    <EmbeddedResource Include="Form2.resx">
-      <DependentUpon>Form2.cs</DependentUpon>
+    <EmbeddedResource Include="Forms\DataExtractionFm.resx">
+      <DependentUpon>DataExtractionFm.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="販売仕入先Form.resx">
+    <EmbeddedResource Include="Forms\DataExtraction\販売仕入先Form.resx">
       <DependentUpon>販売仕入先Form.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="部門Form.resx">
+    <EmbeddedResource Include="Forms\DataExtraction\部門Form.resx">
       <DependentUpon>部門Form.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="部門マスタForm.resx">
+    <EmbeddedResource Include="Forms\MasterMenuFm\部門マスタForm.resx">
       <DependentUpon>部門マスタForm.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Forms\MasterMenuFm\部門マスタ照会Form.resx">
+      <DependentUpon>部門マスタ照会Form.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Forms\MasterMenuFm\郵便番号辞書インポートFm.resx">
+      <DependentUpon>郵便番号辞書インポートFm.cs</DependentUpon>
     </EmbeddedResource>
     <None Include="packages.config" />
     <None Include="Properties\Settings.settings">
@@ -331,7 +379,8 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include="ic_all_csm02.ico" />
-    <Content Include="memo.txt" />
+    <None Include="Resources\csvインポート.png" />
+    <None Include="Resources\csmax_all_unvline_Big.png" />
     <None Include="Resources\あすよん月次帳票.png" />
     <None Include="Resources\Infiter_Small.gif" />
     <None Include="Resources\free_snowman.gif" />
@@ -351,5 +400,6 @@
       <Install>false</Install>
     </BootstrapperPackage>
   </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

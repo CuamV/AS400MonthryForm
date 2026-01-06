@@ -63,6 +63,26 @@ namespace あすよん月次帳票.Properties {
         /// <summary>
         ///   型 System.Drawing.Bitmap のローカライズされたリソースを検索します。
         /// </summary>
+        internal static System.Drawing.Bitmap csmax_all_unvline_Big {
+            get {
+                object obj = ResourceManager.GetObject("csmax_all_unvline_Big", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   型 System.Drawing.Bitmap のローカライズされたリソースを検索します。
+        /// </summary>
+        internal static System.Drawing.Bitmap csvインポート {
+            get {
+                object obj = ResourceManager.GetObject("csvインポート", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   型 System.Drawing.Bitmap のローカライズされたリソースを検索します。
+        /// </summary>
         internal static System.Drawing.Bitmap free_snowman {
             get {
                 object obj = ResourceManager.GetObject("free_snowman", resourceCulture);

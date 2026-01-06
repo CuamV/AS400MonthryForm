@@ -10,7 +10,7 @@ using System.Windows.Forms;
 
 namespace あすよん月次帳票
 {
-    public partial class Form2_DataView : Form
+    public partial class DataEtlViewFm : Form
     {
         private DataTable _displayData;
 
@@ -32,7 +32,7 @@ namespace あすよん月次帳票
             }
         }
 
-        internal Form2_DataView()
+        internal DataEtlViewFm()
         {
             InitializeComponent();
             // DataGridViewスタイル設定
@@ -57,7 +57,7 @@ namespace あすよん月次帳票
 
         private string BuildConditionText(Dictionary<string, List<string>> conditions)
         {
-            
+
             var sb = new StringBuilder();
 
             foreach (var kv in conditions)
@@ -67,7 +67,7 @@ namespace あすよん月次帳票
                 string values;
 
                 // 「年月」だけ特別フォーマット
-                if(key == "年月")
+                if (key == "年月")
                 {
                     // ListがnullまたはCount == 0の場合
                     if (list != null && list.Count > 0)

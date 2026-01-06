@@ -13,7 +13,7 @@ namespace あすよん月次帳票
         {
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
-            Application.Run(new FormMainTop());
+            Application.Run(new LoginFm());
         }
     }
 }
