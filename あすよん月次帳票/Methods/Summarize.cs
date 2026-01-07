@@ -9,7 +9,8 @@ namespace あすよん月次帳票
     internal class Summarize
     {
         /// <summary>
-        /// 集計処理
+        /// リクエスト型集計処理
+        /// 売上・仕入・在庫(過去)データ
         /// </summary>
         /// <param name="data"></param>
         /// <param name="groupKeys"></param>
@@ -185,7 +186,8 @@ namespace あすよん月次帳票
         }
 
         /// <summary>
-        /// ◆社長用集計
+        /// 定型型集計処理
+        /// 未確定当月の売上・仕入・在庫データ
         /// </summary>
         /// <param name="mergedSummary"></param>
         /// <returns></returns>
@@ -261,7 +263,7 @@ namespace あすよん月次帳票
         }
 
         /// <summary>
-        /// 売上・仕入データの処理
+        /// 定型型売上・仕入データ集計処理
         /// </summary>
         /// <param name="sourceData"></param>
         /// <returns></returns>
@@ -416,7 +418,7 @@ namespace あすよん月次帳票
         }
 
         /// <summary>
-        /// 在庫データの処理
+        /// 定型型在庫データの集計処理
         /// </summary>
         /// <param name="stockData"></param>
         /// <returns></returns>
@@ -543,6 +545,7 @@ namespace あすよん月次帳票
             }
             return resultTable;
         }
+
         /// <summary>
         /// 空の結果テーブルを作成
         /// </summary>
@@ -555,7 +558,9 @@ namespace あすよん月次帳票
             return dt;
         }
 
-        // 全行を1グループとして返すヘルパークラス (NONE 用)
+        /// <summary>
+        /// 全行を1グループとして返すヘルパークラス (NONE 用)
+        /// </summary>
         internal class GroupingAllRows : IGrouping<string, DataRow>
         {
             private IEnumerable<DataRow> _rows;

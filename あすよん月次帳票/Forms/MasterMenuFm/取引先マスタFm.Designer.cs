@@ -135,7 +135,7 @@
             this.btn戻る.TabIndex = 3;
             this.btn戻る.Text = "戻る";
             this.btn戻る.UseVisualStyleBackColor = true;
-            this.btn戻る.Click += new System.EventHandler(this.btn戻る_Click);
+            this.btn戻る.Click += new System.EventHandler(this.btnForm1Back_Click);
             // 
             // lb会社
             // 
@@ -196,7 +196,6 @@
             this.btn次へ.TabIndex = 16;
             this.btn次へ.Text = "次へ";
             this.btn次へ.UseVisualStyleBackColor = true;
-            //this.btn次へ.Click += new System.EventHandler(this.btn登録_Click);
             // 
             // txtBx取引先名
             // 

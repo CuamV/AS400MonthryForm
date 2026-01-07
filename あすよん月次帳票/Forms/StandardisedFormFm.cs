@@ -16,18 +16,28 @@ using ENM = あすよん月次帳票.Enums;
 
 namespace あすよん月次帳票
 {
+    //==========================================================
+    // --------Form4(定型帳票)クラス--------
+    //==========================================================
     public partial class StandardisedFormFm : Form
     {
+        //=========================================================
+        // インスタンス
+        //=========================================================
+        FormAction fam = new FormAction();
+        ColorManager clrmg = new ColorManager();
+        Summarize summ = new Summarize();
+
+        // フィールド変数
         private string HIZTIM;
         private string Hiz;
         private string Tim;
         private string startDate;
         private string endDate;
 
-        FormAction fam = new FormAction();
-        ColorManager clrmg = new ColorManager();
-        Summarize summ = new Summarize();
-
+        //=========================================================
+        // コンストラクタ
+        //=========================================================
         public StandardisedFormFm()
         {
             InitializeComponent();
@@ -231,7 +241,6 @@ namespace あすよん月次帳票
             this.WindowState = FormWindowState.Minimized;
         }
 
-
         //=================================================================
         // 処理メソッド
         //=================================================================
@@ -309,6 +318,7 @@ namespace あすよん月次帳票
 
             return clone;
         }
+
         /// <summary>
         /// Excelへエクスポート
         /// </summary>
@@ -335,9 +345,9 @@ namespace あすよん月次帳票
             {
                 xlSheet.Name = $"{CMD.TYM}月次帳票";
 
-                // ==========================================
+                // -------------------------------------------
                 // 分類ごとにオーノ・サンミックに分類
-                // ==========================================
+                // -------------------------------------------
                 var categoryOrder = new[] { "製品売上高", "原材料売上高", "製品仕入高", "原材料仕入高", "製品在庫", "原材料在庫", "仕掛品在庫" };
 
                 // 分類ごとにグループ化
@@ -363,9 +373,9 @@ namespace あすよん月次帳票
                     groupedData.Add((category, ohnoRows, sanmicRows));
                 }
 
-                // ==========================================
+                // -------------------------------------------
                 // 年月度表示（1行目）
-                // ==========================================
+                // -------------------------------------------
                 string yearMonth = CMD.TYM; // yyyymm形式
                 int year = int.Parse(yearMonth.Substring(0, 4));
                 int month = int.Parse(yearMonth.Substring(4, 2));
@@ -384,9 +394,9 @@ namespace あすよん月次帳票
                 yearMonthRange.HorizontalAlignment = Microsoft.Office.Interop.Excel.XlHAlign.xlHAlignCenter;
                 yearMonthRange.VerticalAlignment = Microsoft.Office.Interop.Excel.XlVAlign.xlVAlignCenter;
 
-                // ==========================================
+                // -------------------------------------------
                 // ヘッダー行（3行目）※2行目は空白
-                // ==========================================
+                // -------------------------------------------
                 xlSheet.Cells[3, 1] = "オーノ";
                 xlSheet.Cells[3, 4] = "サンミック";
 
@@ -402,9 +412,9 @@ namespace あすよん月次帳票
                 headerRange.HorizontalAlignment = Microsoft.Office.Interop.Excel.XlHAlign.xlHAlignCenter;
                 headerRange.VerticalAlignment = Microsoft.Office.Interop.Excel.XlVAlign.xlVAlignCenter;
 
-                // ==========================================
+                // -------------------------------------------
                 // データ書き込み（4行目から）
-                // ==========================================
+                // -------------------------------------------
                 int currentRow = 4;
                 foreach (var (category, ohnoRows, sanmicRows) in groupedData)
                 {
@@ -464,9 +474,9 @@ namespace あすよん月次帳票
                     }
                 }
 
-                // ==========================================
+                // -------------------------------------------
                 // 全体の書式設定
-                // ==========================================
+                // -------------------------------------------
                 var dataRange = xlSheet.Range[xlSheet.Cells[3, 1], xlSheet.Cells[currentRow - 1, 6]];
 
                 // フォント設定
@@ -520,23 +530,6 @@ namespace あすよん月次帳票
             }
         }
 
-        /// <summary>
-        /// 分類の並び順を定義
-        /// </summary>
-        private int GetCategoryOrder(string category)
-        {
-            switch (category)
-            {
-                case "製品売上高": return 1;
-                case "原材料売上高": return 2;
-                case "製品仕入高": return 3;
-                case "原材料仕入高": return 4;
-                case "製品在庫": return 5;
-                case "原材料在庫": return 6;
-                case "仕掛品在庫": return 7;
-                default: return 99;
-            }
-        }
         //=================================================================
         // デザイン関連メソッド
         //=================================================================
@@ -545,63 +538,12 @@ namespace あすよん月次帳票
             // フォーム全体の背景
             this.BackColor = clrmg.AbeLight2;
 
-            //// 条件グループボックス
-            //grpBxCondition.BackColor = clrmg.ShopyLight2;
-            //grpBxCondition.ForeColor = clrmg.ShopyLight2;
+            // ListBox枠線
+            listBx月次帳票未確定.ForeColor = clrmg.MemeBase;
 
-            //// データグループボックス
-            //grpBxData.BackColor = clrmg.ShopyLight2;
-            //grpBxData.ForeColor = clrmg.ShopyLight2;
+            // TextBox枠線
+            txtBx月次帳票未確定.ForeColor = clrmg.MemeBase;
 
-            //// 組織グループボックス
-            //grpBxOrganization.BackColor = clrmg.ShopyLight2;
-            //grpBxOrganization.ForeColor = clrmg.ShopyLight2;
-
-            //// ラベル類
-            //lbSituation.ForeColor = clrmg.MemeBase;
-            //lbProductClass.ForeColor = clrmg.MemeBase;
-            //lbSalesCategory.ForeColor = clrmg.MemeBase;
-            //lbSupplier.ForeColor = clrmg.MemeBase;
-            //lbSaller.ForeColor = clrmg.MemeBase;
-            //lbBumon.ForeColor = clrmg.MemeBase;
-            //lbCompany.ForeColor = clrmg.MemeBase;
-            //lbYearMonth.ForeColor = clrmg.MemeBase;
-            //label2.ForeColor = clrmg.MemeBase;
-
-            //// ListBox 背景
-            //listBxSituation.BackColor = clrmg.HikaruLight2;
-            //listBxSituation.ForeColor = clrmg.MemeBase;
-
-            //// ListBox 背景
-            //listBxSaller.BackColor = clrmg.RauLight2;
-            //listBxSaller.ForeColor = clrmg.MemeBase;
-            //listBxSupplier.BackColor = clrmg.RauLight2;
-            //listBxSupplier.ForeColor = clrmg.MemeBase;
-            //listBxBumon.BackColor = clrmg.RauLight2;
-            //listBxBumon.ForeColor = clrmg.MemeBase;
-
-            //// CheckBox（データ・商品区分）
-            //foreach (Control ctrl in grpBxData.Controls)
-            //{
-            //    if (ctrl is CheckBox cb)
-            //    {
-            //        cb.ForeColor = clrmg.ShopyDark2;
-            //        cb.BackColor = clrmg.ShopyLight2;
-            //    }
-            //}
-
-            //// CheckBox（会社選択）
-            //foreach (Control ctrl in grpBxOrganization.Controls)
-            //{
-            //    if (ctrl is CheckBox cb)
-            //    {
-            //        cb.ForeColor = clrmg.ShopyDark2;
-            //        cb.BackColor = clrmg.ShopyLight2;
-            //    }
-            //}
-            //// ボタン類
-            //StyleButton(btnExportExcel, clrmg.ShopyBase, Color.White, borderColor: Color.White);
-            //StyleButton(btnForm1Back, clrmg.ShopyLight1, Color.White, borderColor: Color.White);
         }
 
         /// <summary>
@@ -609,7 +551,7 @@ namespace あすよん月次帳票
         /// </summary>
         /// <param name="sender"></param>
         /// <param name="e"></param>
-        private void PanelCustomBorder(object sender, PaintEventArgs e)
+        private void GroupCustomBorder(object sender, PaintEventArgs e)
         {
             Panel panel = (Panel)sender;
             e.Graphics.Clear(panel.BackColor);

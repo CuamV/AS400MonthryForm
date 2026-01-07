@@ -206,10 +206,6 @@
     <Compile Include="Forms\SimulationFm.Designer.cs">
       <DependentUpon>SimulationFm.cs</DependentUpon>
     </Compile>
-    <Compile Include="Form4_BK.cs" />
-    <Compile Include="Form4_BK.Designer.cs">
-      <DependentUpon>Form4_BK.cs</DependentUpon>
-    </Compile>
     <Compile Include="Forms\DataExtraction\DataEtlViewFm.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -293,9 +289,9 @@
     <Compile Include="Forms\MasterMenuFm\郵便番号辞書インポートFm.Designer.cs">
       <DependentUpon>郵便番号辞書インポートFm.cs</DependentUpon>
     </Compile>
-    <Compile Include="Forms\MasterMenuFm\取引先マスタFm-2.cs" />
-    <Compile Include="Forms\MasterMenuFm\取引先マスタFm-2.Designer.cs">
-      <DependentUpon>取引先マスタFm-2.cs</DependentUpon>
+    <Compile Include="Forms\MasterMenuFm\取引先マスタFm_2.cs" />
+    <Compile Include="Forms\MasterMenuFm\取引先マスタFm_2.Designer.cs">
+      <DependentUpon>取引先マスタFm_2.cs</DependentUpon>
     </Compile>
     <Compile Include="Forms\StandardisedFormFm.cs">
       <SubType>Form</SubType>
@@ -309,8 +305,8 @@
     <EmbeddedResource Include="Forms\LoginFm.resx">
       <DependentUpon>LoginFm.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="Forms\MasterMenuFm\取引先マスタFm-2.resx">
-      <DependentUpon>取引先マスタFm-2.cs</DependentUpon>
+    <EmbeddedResource Include="Forms\MasterMenuFm\取引先マスタFm_2.resx">
+      <DependentUpon>取引先マスタFm_2.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Forms\MasterMenuFm\取引先マスタFm.resx">
       <DependentUpon>取引先マスタFm.cs</DependentUpon>
@@ -326,9 +322,6 @@
     </EmbeddedResource>
     <EmbeddedResource Include="Forms\SimulationFm.resx">
       <DependentUpon>SimulationFm.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="Form4_BK.resx">
-      <DependentUpon>Form4_BK.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Forms\MasterMenuFm.resx">
       <DependentUpon>MasterMenuFm.cs</DependentUpon>

@@ -17,6 +17,7 @@ using CMD = あすよん月次帳票.CommonData;
 using ENM = あすよん月次帳票.Enums;
 using DataTable = System.Data.DataTable;
 using Path = System.IO.Path;
+using Application = System.Windows.Forms.Application;
 
 namespace あすよん月次帳票
 {
@@ -344,14 +345,18 @@ namespace あすよん月次帳票
         /// </summary>
         /// <param name="sender"></param>
         /// <param name="e"></param>
-        private void btn戻る_Click(object sender, EventArgs e)
+        private void btnForm1Back_Click(object sender, EventArgs e)
         {
+            HIZTIM = $"{DateTime.Now:yyyy/MM/dd HH:mm:ss}";
+            fam.AddLog($"{HIZTIM} コントロール 1 {CMD.UserName} btnForm1Back_Click");
             // Form5 のインスタンスを取得して表示
-            if (System.Windows.Forms.Application.OpenForms["Form5"] is MasterMenuFm form5)
+            // 名前で探すと見つからない場合があるため、型で検索して取得する
+            var form5 = Application.OpenForms.OfType<MasterMenuFm>().FirstOrDefault();
+            if (form5 != null)
             {
                 form5.Show();
             }
-            // 部門マスタForm を閉じる
+            // 取引先マスタForm を閉じる
             this.Close();
         }
 
