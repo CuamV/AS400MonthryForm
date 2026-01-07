@@ -26,7 +26,7 @@
     <MinimumRequiredVersion>1.0.0.1</MinimumRequiredVersion>
     <WebPage>publish.htm</WebPage>
     <OpenBrowserOnPublish>false</OpenBrowserOnPublish>
-    <ApplicationRevision>18</ApplicationRevision>
+    <ApplicationRevision>19</ApplicationRevision>
     <ApplicationVersion>1.0.0.%2a</ApplicationVersion>
     <UseApplicationTrust>false</UseApplicationTrust>
     <PublishWizardCompleted>true</PublishWizardCompleted>
@@ -176,11 +176,10 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Class1.cs" />
     <Compile Include="CommonSetings\ColorManager.cs" />
     <Compile Include="CommonSetings\CommonData.cs" />
     <Compile Include="CommonSetings\Enums.cs" />
-    <Compile Include="Dictionaries.cs" />
+    <Compile Include="CommonSetings\Dictionaries.cs" />
     <Compile Include="Forms\MasterMenuFm\取引先マスタFm.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -298,6 +297,12 @@
     <Compile Include="Forms\MasterMenuFm\取引先マスタFm-2.Designer.cs">
       <DependentUpon>取引先マスタFm-2.cs</DependentUpon>
     </Compile>
+    <Compile Include="Forms\StandardisedFormFm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Forms\StandardisedFormFm.Designer.cs">
+      <DependentUpon>StandardisedFormFm.cs</DependentUpon>
+    </Compile>
     <EmbeddedResource Include="Forms\DataExtraction\DataEtlViewFm.resx">
       <DependentUpon>DataEtlViewFm.cs</DependentUpon>
     </EmbeddedResource>
@@ -312,6 +317,9 @@
     </EmbeddedResource>
     <EmbeddedResource Include="Forms\MasterMenuFm\取引先マスタインポートFm.resx">
       <DependentUpon>取引先マスタインポートFm.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Forms\StandardisedFormFm.resx">
+      <DependentUpon>StandardisedFormFm.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Forms\TopMenuFm.resx">
       <DependentUpon>TopMenuFm.cs</DependentUpon>
@@ -379,6 +387,7 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include="ic_all_csm02.ico" />
+    <Content Include="memo.txt" />
     <None Include="Resources\csvインポート.png" />
     <None Include="Resources\csmax_all_unvline_Big.png" />
     <None Include="Resources\あすよん月次帳票.png" />

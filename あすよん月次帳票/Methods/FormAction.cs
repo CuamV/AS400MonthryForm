@@ -40,17 +40,14 @@ namespace あすよん月次帳票
         //  <FormMainTop>
         internal void GetMasterFromAS400(bool flg)
         {
+            // firstLine.Substring(0, 6); // 先頭6文字を取得(当月)
             if (flg)
             {
-                var lines = CheckAndLoadMater(Path.Combine(CMD.mfPath, "ReMasterCal.txt"), "マスタ一括更新", CMD.utf8);
+                string firstLine = File.ReadLines(Path.Combine(CMD.mfPath, "ReMasterCal.txt")).FirstOrDefault();
+                string lastUpDate = firstLine?.Trim();
                 // 1:更新日付(yyyymmdd)
                 // CMD.HIZ と ReMasterCalの1行目の日付を比較→日付が違う場合はマスタ更新実行
-                DateTime lastUpdate;
-                if (lines.Count > 0)
-                {
-                    if (DateTime.TryParse(lines[0], out lastUpdate))
-                        if (CMD.HIZ == lastUpdate.ToString("yyyyMMdd")) return;
-                }
+                if (CMD.HIZ == lastUpDate) return;
             }
             // マスタ更新実行
             TakeInMaster();
@@ -419,15 +416,11 @@ namespace あすよん月次帳票
         //   ◆在庫データ取得
         internal (DataTable, DataTable) MakeReadData_IV(string startDate, string endDate, string company, List<string> selIvProducts)
         {
-            string monthlyFile = @"\\ohnosv01\OhnoSys\099_sys\mf\Monthly.txt";
-            string firstLine = File.ReadLines(monthlyFile).FirstOrDefault();
-            string currentYm = firstLine.Substring(0, 6); // 先頭6文字を取得(当月)
-
             string startYM = startDate.Substring(0, 6);
 
             DataTable dtNow = null;
             DataTable dtOld = null;
-            if (startYM == currentYm)
+            if (startYM == CMD.TYM)
             {
                 // 今月分の在庫データ取得(ライブラリより取得)
                 // 会社ごと＋品目ごとのファイルマッピング
@@ -462,7 +455,6 @@ namespace あすよん月次帳票
                 // 5:ZHHMCD(品名CD) 6:ZHHSCD(品種CD)   7:ZHTZQT(当月残数量) 8:ZHTGZA(当月残金額)
                 //==============================================================
                 dtNow = AddYearMonthColum(dtNow, startYM);
-
             }
             else
             {

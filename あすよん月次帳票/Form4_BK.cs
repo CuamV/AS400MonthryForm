@@ -10,7 +10,7 @@
 //using Excel = Microsoft.Office.Interop.Excel;
 //using CMD = あすよん月次帳票.CommonData;
 //using ENM = あすよん月次帳票.Enums;
-
+//using DCN = あすよん月次帳票.Dictionaries;
 
 
 //namespace あすよん月次帳票
@@ -25,191 +25,62 @@
 
 //        FormAction fam = new FormAction();
 //        ColorManager clrmg = new ColorManager();
+//        Summarize summ = new Summarize();
+//        Processor process = new Processor();
 
 //        public Form4()
 //        {
-//            InitializeComponent();
+//            //InitializeComponent();
 
-//            grpBxData.Paint += GroupBoxCustomBorder;
-//            grpBxOrganization.Paint += GroupBoxCustomBorder;
-//            grpBxCondition.Paint += GroupBoxCustomBorder;
+//            //grpBxData.Paint += GroupBoxCustomBorder;
+//            //grpBxOrganization.Paint += GroupBoxCustomBorder;
+//            //grpBxCondition.Paint += GroupBoxCustomBorder;
 
-//            this.Load += Form4_Load;
-
-//            this.Region = System.Drawing.Region.FromHrgn(
-//                CreateRoundRectRgn(0, 0, this.Width, this.Height, 40, 40));
+//            //this.Region = System.Drawing.Region.FromHrgn(
+//            //    CreateRoundRectRgn(0, 0, this.Width, this.Height, 40, 40));
 //        }
-
-//        [DllImport("Gdi32.dll", EntryPoint = "CreateRoundRectRgn")]
-//        private static extern IntPtr CreateRoundRectRgn(
-//            int nLeftRect, int nTopRect, int nRightRect, int nBottomRect,
-//            int nWidthEllipse, int nHeightEllipse);
-
-//        private void Form4_Load(object sender, EventArgs e)
-//        {
-//            // ログ読み込み
-//            formActionMethod.LoadRuntimeLog(listBxSituation);
-
-//            this.MouseDown += Form4_MouseDown;
-//            this.MouseMove += Form4_MouseMove;
-//            this.MouseUp += Form4_MouseUp;
-
-//            ApplySnowManColors();
-//        }
-
-
-//        private void Company_CheckedChanged(object sender, EventArgs e)
-//        {
-//            FormActionMethod.SelectCompany_Bumon(chkBxOhno, chkBxSundus, chkBxSuncar, listBxBumon);
-//        }
-
-//        private void listBoxBumon_SelectedIndexChanged(object sender, EventArgs e)
-//        {
-//            FormActionMethod.ShowBumon(this, listBxBumon, listBxSaller, listBxSupplier, chkBxOhno, chkBxSundus, chkBxSuncar);
-//        }
-//        private void chkDataType(object sender, EventArgs e)
-//        {
-//            // チェックボックス制御
-//            bool showAll = chkBxSalesAll.Checked;
-//            bool showSl = chkBxSl.Checked || showAll;
-//            bool showPr = chkBxPr.Checked || showAll;
-//            bool showIv = chkBxIv.Checked || showAll;
-
-//            // ALL選択時は他チェック無効化
-//            chkBxSl.Enabled = !showAll;
-//            chkBxPr.Enabled = !showAll;
-//            chkBxIv.Enabled = !showAll;
-//        }
-//        private void chkProductType(object sender, EventArgs e)
-//        {
-//            // チェックボックス制御
-//            bool showAll = chkBxProAll.Checked;
-//            bool showRaw = chkBxRawMaterials.Checked || showAll;
-//            bool showSemi = chkBxSemiFinProducts.Checked || showAll;
-//            bool showProd = chkBxProduct.Checked || showAll;
-//            bool showProc = chkBxProcess.Checked || showAll;
-//            bool showCustody = chkBxCustody.Checked || showAll;
-//            // ALL選択時は他チェック無効化
-//            chkBxRawMaterials.Enabled = !showAll;
-//            chkBxSemiFinProducts.Enabled = !showAll;
-//            chkBxProduct.Enabled = !showAll;
-//            chkBxProcess.Enabled = !showAll;
-//            chkBxCustody.Enabled = !showAll;
-//        }
-
 
 //        // Excelエクスポートボタンクリック
 //        private async void btnExportExcel_Click(object sender, EventArgs e)
 //        {
-//            DataProcessor processor = new DataProcessor();
-//            HIZTIM = $"{DateTime.Now:yyyy/MM/dd HH:mm:ss}";
-//            Hiz = DateTime.Now.ToString("yyyyMMdd");
-//            Tim = DateTime.Now.ToString("HHmmss");
-
-//            // ↓↓--------------エラーチェック--------------↓↓
-//            // 年月入力チェック
-//            if (!FormActionMethod.TryParseYearMonth(txtBxStrYearMonth, out int strY, out int strM) ||
-//                !FormActionMethod.TryParseYearMonth(txtBxEndYearMonth, out int endY, out int endM))
-//            {
-//                MessageBox.Show("年月は6桁の数字(yyyyMM)で入力してください。", "警告", MessageBoxButtons.OK, MessageBoxIcon.Warning);
-//                return;
-//            }
-//            // 会社未選択NG
-//            if (!chkBxOhno.Checked && !chkBxSuncar.Checked && !chkBxSundus.Checked)
-//            {
-//                MessageBox.Show("会社を選択してください。",
-//                                "警告", MessageBoxButtons.OK, MessageBoxIcon.Warning);
-//                return;
-//            }
-//            // 販売区分未選択NG
-//            if (!chkBxSalesAll.Checked && !chkBxSl.Checked && !chkBxPr.Checked && !chkBxIv.Checked)
-//            {
-//                MessageBox.Show("販売区分を選択してください。",
-//                                "警告", MessageBoxButtons.OK, MessageBoxIcon.Warning);
-//                return;
-//            }
-
-//            string sym = txtBxStrYearMonth.Text.Trim();
-//            string eym = txtBxEndYearMonth.Text.Trim();
-//            string nowym = DateTime.Now.ToString("yyyyMM");
-//            // 商品区分(在庫)選択の場合未来月NG
-//            if (chkBxSalesAll.Checked || chkBxIv.Checked)
-//            {
-//                if (string.Compare(sym, nowym) > 0 || string.Compare(eym, nowym) > 0)
-//                {
-//                    MessageBox.Show("商品区分在庫を選択する場合、未来月は指定できません。",
-//                                    "警告", MessageBoxButtons.OK, MessageBoxIcon.Warning);
-//                    return;
-//                }
-//            }
-//            // 商品区分(在庫)選択と、年月複数月(過去月の複数月はOK,過去月と当月はNG)の選択NG
-//            if ((chkBxSalesAll.Checked || chkBxIv.Checked) && sym != eym && (sym == nowym || eym == nowym))
-//            {
-//                MessageBox.Show("商品区分在庫を選択する場合、年月は当月の場合は単月で指定してください。",
-//                                "警告", MessageBoxButtons.OK, MessageBoxIcon.Warning);
-//                return;
-//            }
-//            // ↑↑--------------エラーチェック--------------↑↑
-
-//            // ↓↓------- アニメーションフォーム表示 -------↓↓
-//            FormAnimation3 anim = null;
-
-//            Thread animThread = new Thread(() =>
-//            {
-//                using (FormAnimation3 a = new FormAnimation3())
-//                {
-//                    anim = a; // 外部参照用
-//                    Application.Run(a); // GIF表示
-//                }
-//            });
-//            animThread.SetApartmentState(ApartmentState.STA);
-//            animThread.Start();
-//            // ↑↑------- アニメーションフォーム表示 -------↑↑
-
-//            // ↓↓------- メインスレッドでデータ抽出 -------↓↓
-//            await Task.Delay(100); // ちょっと待って anim が作られる
-
 //            // チェック状態取得
-//            var selCompanies = FormActionMethod.GetCompany(chkBxOhno, chkBxSundus, chkBxSuncar); // 会社
-//            var selBumons = FormActionMethod.GetSelectedBumons(listBxBumon);  // 部門（先頭空白行は無視して取得）
-//            var selSelleres = FormActionMethod.GetSallerOrSupplier(listBxSaller);  // 販売先
-//            var selSupplieres = FormActionMethod.GetSallerOrSupplier(listBxSupplier);  // 仕入先
-//            var selSlCategories = FormActionMethod.GetSalseProduct(chkBxSl, chkBxPr, chkBxIv);  // 販売区分
-//            var (selSlPrProducts, selIvProducts) = FormActionMethod.GetProduct(chkBxRawMaterials, chkBxSemiFinProducts,
-//                                                          chkBxProduct, chkBxProcess, chkBxCustody,
-//                                                          chkBxOhno, chkBxSundus, chkBxSuncar, selSlCategories);  // 商品区分(在庫)
 
-//            // 開始・終了日付取得
-//            (string startDate, string endDate) = FormActionMethod.GetStartEndDate(strY, strM, endY, endM);
+//            // 月初日取得
+//            string startDate = CMD.TYM + "01";
+//            // 月末日取得
+//            int year = int.Parse(CMD.TYM.Substring(0, 4));
+//            int month = int.Parse(CMD.TYM.Substring(4, 2));
+//            int lastDay = DateTime.DaysInMonth(year, month);
+//            string endDate = CMD.TYM + lastDay.ToString("D2");
 
-//            // 各データ取得(売上,仕入)
-//            DataTable ohnoSales = null, ohnoPurchase = null, ohnoStock = null, ;
-//            DataTable suncarSales = null, suncarPurchase = null, suncarStock = null;
-//            DataTable sundusSales = null, sundusPurchase = null, sundusStock = null;
-
-//            var classProduct = new Dictionary<string, string>
-//                            {
-//                                { "1", "原材料" },
-//                                { "2", "半製品" },
-//                                { "3", "半製品" },
-//                                { "4", "製品" },
-//                                { "5", "加工" }
-//                            };
-
-//            DataTable ohnoDt = null;
-//            DataTable suncarDt = null;
-//            DataTable sundusDt = null;
-//            DataTable stockDt = null;
-//            DataTable filtered = null;
-
+//            DataTable slprResult = new DataTable();
+//            DataTable stockDtNow = new DataTable();
+//            DataTable stockDtOld = new DataTable();
+//            DataTable ohnoSales = new DataTable();
+//            DataTable suncarSales = new DataTable();
+//            DataTable sundusSales = new DataTable();
+//            DataTable filtered = new DataTable();
+//            DataTable ohnoPurchase = new DataTable();
+//            DataTable suncarPurchase = new DataTable();
+//            DataTable sundusPurchase = new DataTable();
+//            DataTable ohnoDt = new DataTable();
+//            DataTable suncarDt = new DataTable();
+//            DataTable sundusDt = new DataTable();
+//            DataTable ohnoStockNow = new DataTable();
+//            DataTable ohnoStockOld = new DataTable();
+//            DataTable suncarStockNow = new DataTable();
+//            DataTable suncarStockOld = new DataTable();
+//            DataTable sundusStockNow = new DataTable();
+//            DataTable sundusStockOld = new DataTable();
+//            Dictionary<string,string> classProduct = new Dictionary<string, string>();
 //            // ★売上データ
-//            if (selSlCategories.Contains("売上"))
+//            if (DCN.selCategories.Contains("売上"))
 //            {
-//                foreach (var company in selCompanies)
+//                foreach (var company in DCN.selCompanies)
 //                {
-//                    if (company == "オーノ") ohnoSales = FormActionMethod.MakeReadData_SLPR(startDate, endDate, company, "SL");
-//                    else if (company == "サンミックカーペット") suncarSales = FormActionMethod.MakeReadData_SLPR(startDate, endDate, company, "SL");
-//                    else if (company == "サンミックダスコン") sundusSales = FormActionMethod.MakeReadData_SLPR(startDate, endDate, company, "SL");
+//                    if (company == "オーノ") ohnoSales = fam.MakeReadData_SLPR(startDate, endDate, company, "SL");
+//                    else if (company == "サンミックカーペット") suncarSales = fam.MakeReadData_SLPR(startDate, endDate, company, "SL");
+//                    else if (company == "サンミックダスコン") sundusSales = fam.MakeReadData_SLPR(startDate, endDate, company, "SL");
 //                }
 
 //                var datasetsS = new[]
@@ -227,21 +98,21 @@
 
 //                    filtered = d.Table;
 //                    // 販売先
-//                    if (selSelleres.Count > 0)
+//                    if (DCN.selSelleres.Count > 0)
 //                    {
-//                        filtered = processor.CustFilter(filtered, d.Table, selSelleres, "URHBSC");
+//                        filtered = process.CustFilter(filtered, d.Table, DCN.selSelleres, "URHBSC");
 //                    }
 
 //                    // 商品区分選択
-//                    if (selSlPrProducts.Count < 5)
+//                    if (DCN.selSlPrProducts.Count < 5)
 //                    {
-//                        filtered = processor.ProductFileter(filtered, classProduct, selSlPrProducts);
+//                        filtered = process.ProductFileter(filtered, classProduct, DCN.selSlPrProducts);
 //                    }
 
 //                    // 部門選択
-//                    if (d.Name == "オーノ" && selBumons.Count > 0)
+//                    if (d.Name == "オーノ" && DCN.selBumons.Count > 0)
 //                    {
-//                        filtered = processor.BumonFilter(filtered, selBumons, "URBMCD");
+//                        filtered = process.BumonFilter(filtered, DCN.selBumons, "URBMCD");
 //                    }
 
 //                    salesList.Add(d.Table);
@@ -253,13 +124,13 @@
 //            }
 
 //            // ★仕入データ
-//            if (selSlCategories.Contains("仕入"))
+//            if (DCN.selCategories.Contains("仕入"))
 //            {
-//                foreach (var company in selCompanies)
+//                foreach (var company in DCN.selCompanies)
 //                {
-//                    if (company == "オーノ") ohnoPurchase = FormActionMethod.MakeReadData_SLPR(startDate, endDate, company, "PR");
-//                    else if (company == "サンミックカーペット") suncarPurchase = FormActionMethod.MakeReadData_SLPR(startDate, endDate, company, "PR");
-//                    else if (company == "サンミックダスコン") sundusPurchase = FormActionMethod.MakeReadData_SLPR(startDate, endDate, company, "PR");
+//                    if (company == "オーノ") ohnoPurchase = fam.MakeReadData_SLPR(startDate, endDate, company, "PR");
+//                    else if (company == "サンミックカーペット") suncarPurchase = fam.MakeReadData_SLPR(startDate, endDate, company, "PR");
+//                    else if (company == "サンミックダスコン") sundusPurchase = fam.MakeReadData_SLPR(startDate, endDate, company, "PR");
 //                }
 
 //                var datasetsP = new[]
@@ -277,21 +148,21 @@
 
 //                    filtered = d.Table;
 //                    // 仕入先選択
-//                    if (selSupplieres.Count > 0)
+//                    if (DCN.selSupplieres.Count > 0)
 //                    {
-//                        filtered = processor.CustFilter(filtered, d.Table, selSupplieres, "SRSRCD");
+//                        filtered = process.CustFilter(filtered, d.Table, DCN.selSupplieres, "SRSRCD");
 //                    }
 
 //                    // 商品区分選択
-//                    if (selSlPrProducts.Count < 5)
+//                    if (DCN.selSlPrProducts.Count < 5)
 //                    {
-//                        filtered = processor.ProductFileter(filtered, classProduct, selSlPrProducts);
+//                        filtered = process.ProductFileter(filtered, classProduct, DCN.selSlPrProducts);
 //                    }
 
 //                    // 部門選択
-//                    if (d.Name == "オーノ" && selBumons.Count > 0)
+//                    if (d.Name == "オーノ" && DCN.selBumons.Count > 0)
 //                    {
-//                        filtered = processor.BumonFilter(filtered, selBumons, "SRBMCD");
+//                        filtered = process.BumonFilter(filtered, DCN.selBumons, "SRBMCD");
 //                    }
 
 //                    purchaseList.Add(d.Table);
@@ -315,17 +186,17 @@
 
 //                if (d.Sales != null && d.Purchase != null)
 //                {
-//                    result = processor.MergeSalesPurchase(d.Sales, d.Purchase, true);
+//                    result = process.MergeSalesPurchase(d.Sales, d.Purchase, true);
 //                }
 //                else if (d.Sales != null)
 //                {
-//                    var dt = processor.NormalizeColumnNames(d.Sales, "Sales");
-//                    result = processor.SortData(dt);
+//                    var dt = process.NormalizeColumnNames(d.Sales, "Sales");
+//                    result = process.SortData(dt);
 //                }
 //                else if (d.Purchase != null)
 //                {
-//                    var dt = processor.NormalizeColumnNames(d.Purchase, "Purchase");
-//                    result = processor.SortData(dt);
+//                    var dt = process.NormalizeColumnNames(d.Purchase, "Purchase");
+//                    result = process.SortData(dt);
 //                }
 //                if (result != null)
 //                {
@@ -336,13 +207,13 @@
 //            }
 
 //            // ★在庫データ
-//            if (selSlCategories.Contains("在庫"))
+//            if (DCN.selCategories.Contains("在庫"))
 //            {
-//                foreach (var company in selCompanies)
+//                foreach (var company in DCN.selCompanies)
 //                {
-//                    if (company == "オーノ") (ohnoStockNow, ohnoStockOld) = FormActionMethod.MakeReadData_IV(startDate, endDate, company, selIvProducts);
-//                    else if (company == "サンミックカーペット") suncarStock = FormActionMethod.MakeReadData_IV(startDate, endDate, company, selIvProducts);
-//                    else if (company == "サンミックダスコン") sundusStock = FormActionMethod.MakeReadData_IV(startDate, endDate, company, selIvProducts);
+//                    if (company == "オーノ") (ohnoStockNow, ohnoStockOld) = fam.MakeReadData_IV(startDate, endDate, company, DCN.selIvProducts);
+//                    else if (company == "サンミックカーペット") (suncarStockNow, suncarStockOld) = fam.MakeReadData_IV(startDate, endDate, company, DCN.selIvProducts);
+//                    else if (company == "サンミックダスコン") (sundusStockNow, sundusStockOld) = fam.MakeReadData_IV(startDate, endDate, company, DCN.selIvProducts);
 //                }
 
 //                var datasetsI = new[]
@@ -389,9 +260,9 @@
 //            }
 
 //            // 売上・仕入の集計
-//            DataTable ohnoSummary = DataSummarizeMethod.SummarizeSalesPurchase(PrepareForSummary(ohnoDt));
-//            DataTable suncarSummary = DataSummarizeMethod.SummarizeSalesPurchase(PrepareForSummary(suncarDt));
-//            DataTable sundusSummary = DataSummarizeMethod.SummarizeSalesPurchase(PrepareForSummary(sundusDt));
+//            DataTable ohnoSummary = summ.SummarizeSalesPurchase(PrepareForSummary(ohnoDt));
+//            DataTable suncarSummary = summ.SummarizeSalesPurchase(PrepareForSummary(suncarDt));
+//            DataTable sundusSummary = summ.SummarizeSalesPurchase(PrepareForSummary(sundusDt));
 
 //            // 全データ結合
 //            List<DataTable> allTables = new List<DataTable>();
@@ -409,10 +280,10 @@
 //                allTables.Add(sundusSummary);
 
 //            // 全データをマージして取引先/品種でサマリ 
-//            DataTable mergedSummary = DataSummarizeMethod.MergedSummary(allTables);
+//            DataTable mergedSummary = summ.MergedSummary(allTables);
 
 //            // さらにクラス名＋取引区分＋部門でサマリ
-//            DataTable summary2 = DataSummarizeMethod.SummarizeByCategoryTypeDept(mergedSummary);
+//            DataTable summary2 = summ.SummarizeByCategoryTypeDept(mergedSummary);
 
 //            if (mergedSummary == null || mergedSummary.Rows.Count == 0)
 //            {
@@ -708,7 +579,7 @@
 //            }
 
 //            // ログ追加             
-//            formActionMethod.AddLog("Excelエクスポート完了", listBxSituation);
+//            fam.AddLog("Excelエクスポート完了", listBxSituation);
 //            if (Application.OpenForms["Form1"] is Form1 form1) form1.AddLog($"{HIZTIM}　Excelエクスポート完了");
 //            // ↑↑----------- Excelエクスポート -----------↑↑
 
@@ -813,138 +684,7 @@
 //            return clone;
 //        }
 
-//        private void ApplySnowManColors()
-//        {
-//            // フォーム全体の背景
-//            this.BackColor = ColorManager.ShopyLight2;
 
-//            // 条件グループボックス
-//            grpBxCondition.BackColor = ColorManager.ShopyLight2;
-//            grpBxCondition.ForeColor = ColorManager.ShopyLight2;
-
-//            // データグループボックス
-//            grpBxData.BackColor = ColorManager.ShopyLight2;
-//            grpBxData.ForeColor = ColorManager.ShopyLight2;
-
-//            // 組織グループボックス
-//            grpBxOrganization.BackColor = ColorManager.ShopyLight2;
-//            grpBxOrganization.ForeColor = ColorManager.ShopyLight2;
-
-//            // ラベル類
-//            lbSituation.ForeColor = ColorManager.MemeBase;
-//            lbProductClass.ForeColor = ColorManager.MemeBase;
-//            lbSalesCategory.ForeColor = ColorManager.MemeBase;
-//            lbSupplier.ForeColor = ColorManager.MemeBase;
-//            lbSaller.ForeColor = ColorManager.MemeBase;
-//            lbBumon.ForeColor = ColorManager.MemeBase;
-//            lbCompany.ForeColor = ColorManager.MemeBase;
-//            lbYearMonth.ForeColor = ColorManager.MemeBase;
-//            label2.ForeColor = ColorManager.MemeBase;
-
-//            // ListBox 背景
-//            listBxSituation.BackColor = ColorManager.HikaruLight2;
-//            listBxSituation.ForeColor = ColorManager.MemeBase;
-
-//            // ListBox 背景
-//            listBxSaller.BackColor = ColorManager.RauLight2;
-//            listBxSaller.ForeColor = ColorManager.MemeBase;
-//            listBxSupplier.BackColor = ColorManager.RauLight2;
-//            listBxSupplier.ForeColor = ColorManager.MemeBase;
-//            listBxBumon.BackColor = ColorManager.RauLight2;
-//            listBxBumon.ForeColor = ColorManager.MemeBase;
-
-//            // CheckBox（データ・商品区分）
-//            foreach (Control ctrl in grpBxData.Controls)
-//            {
-//                if (ctrl is CheckBox cb)
-//                {
-//                    cb.ForeColor = ColorManager.ShopyDark2;
-//                    cb.BackColor = ColorManager.ShopyLight2;
-//                }
-//            }
-
-//            // CheckBox（会社選択）
-//            foreach (Control ctrl in grpBxOrganization.Controls)
-//            {
-//                if (ctrl is CheckBox cb)
-//                {
-//                    cb.ForeColor = ColorManager.ShopyDark2;
-//                    cb.BackColor = ColorManager.ShopyLight2;
-//                }
-//            }
-//            // ボタン類
-//            StyleButton(btnExportExcel, ColorManager.ShopyBase, Color.White, borderColor: Color.White);
-//            StyleButton(btnForm1Back, ColorManager.ShopyLight1, Color.White, borderColor: Color.White);
-//        }
-
-//        private void GroupBoxCustomBorder(object sender, PaintEventArgs e)
-//        {
-//            GroupBox box = (GroupBox)sender;
-//            e.Graphics.Clear(box.BackColor);
-
-//            // アンチエイリアス無効（線をくっきり）
-//            e.Graphics.SmoothingMode = System.Drawing.Drawing2D.SmoothingMode.None;
-
-//            // テキストを測定
-//            SizeF textSize = e.Graphics.MeasureString(box.Text, box.Font);
-
-//            // 枠線色を紺色で
-//            using (Pen pen = new Pen(Color.FromArgb(32, 55, 100), 1.5f))
-//            {
-//                int textPadding = 8;  // 左の余白
-//                int textWidth = (int)textSize.Width;
-
-//                // 枠線を描画（上の線だけタイトル部分を避ける）
-//                e.Graphics.DrawLine(pen, 1, (int)(textSize.Height / 2), textPadding - 2, (int)(textSize.Height / 2)); // 左上～文字前
-//                e.Graphics.DrawLine(pen, textPadding + textWidth + 2, (int)(textSize.Height / 2), box.Width - 2, (int)(textSize.Height / 2)); // 文字後～右上
-//                e.Graphics.DrawLine(pen, 1, (int)(textSize.Height / 2), 1, box.Height - 2); // 左線
-//                e.Graphics.DrawLine(pen, 1, box.Height - 2, box.Width - 2, box.Height - 2); // 下線
-//                e.Graphics.DrawLine(pen, box.Width - 2, (int)(textSize.Height / 2), box.Width - 2, box.Height - 2); // 右線
-
-//                // テキストを描画
-//                using (SolidBrush brush = new SolidBrush(ColorManager.MemeDark1))
-//                {
-//                    e.Graphics.DrawString(box.Text, box.Font, brush, 8, 0);
-//                }
-//            }
-//        }
-
-//        // フィールドに追加
-//        private Point mouseOffset;
-//        private bool isMouseDown = false;
-
-//        // MouseDown
-//        private void Form4_MouseDown(object sender, MouseEventArgs e)
-//        {
-//            if (e.Button == MouseButtons.Left)
-//            {
-//                isMouseDown = true;
-//                mouseOffset = new Point(-e.X, -e.Y);
-//            }
-//        }
-
-//        // MouseMove
-//        private void Form4_MouseMove(object sender, MouseEventArgs e)
-//        {
-//            if (isMouseDown)
-//            {
-//                Point mousePos = Control.MousePosition;
-//                mousePos.Offset(mouseOffset.X, mouseOffset.Y);
-//                this.Location = mousePos;
-//            }
-//        }
-
-//        // MouseUp
-//        private void Form4_MouseUp(object sender, MouseEventArgs e)
-//        {
-//            if (e.Button == MouseButtons.Left)
-//                isMouseDown = false;
-//        }
-
-//        private void btnMin_Click(object sender, EventArgs e)
-//        {
-//            this.WindowState = FormWindowState.Minimized;
-//        }
 //    }
 //}
 

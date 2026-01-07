@@ -36,24 +36,7 @@ namespace あすよん月次帳票
         {
             InitializeComponent();
             
-            JsonLoader.LoadBumon(CMD.mfPath + @"\BUMON.json");
-            JsonLoader.LoadHanbai("オーノ", Path.Combine(CMD.mfPath, "DLB01HANBAI.json"));
-            JsonLoader.LoadShiire("オーノ", Path.Combine(CMD.mfPath, "DLB01SHIIRE.json"));
-            JsonLoader.LoadHanbai("サンミックダスコン", Path.Combine(CMD.mfPath, "DLB02HANBAI.json"));
-            JsonLoader.LoadShiire("サンミックダスコン", Path.Combine(CMD.mfPath, "DLB02SHIIRE.json"));
-            JsonLoader.LoadHanbai("サンミックカーペット", Path.Combine(CMD.mfPath, "DLB03HANBAI.json"));
-            JsonLoader.LoadShiire("サンミックカーペット", Path.Combine(CMD.mfPath, "DLB03SHIIRE.json"));
-
             grpBxメニュー.Paint += GroupBoxCustomBorder;
-
-            if (!Directory.Exists(CMD.LogPath))
-                Directory.CreateDirectory(CMD.LogPath);
-            // 個人用ログファイルパス
-            if (!File.Exists(CMD.uLog))
-                File.Create(CMD.uLog).Close();
-            // 全体用ログファイルパス
-            if (!File.Exists(CMD.conLog))
-                File.Create(CMD.conLog).Close();
 
             // Form1読込ログ
             HIZTIM = $"{DateTime.Now:yyyy/MM/dd HH:mm:ss}";
@@ -108,6 +91,23 @@ namespace あすよん月次帳票
         }
 
         /// <summary>
+        /// 定型帳票リンククリック
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void lnkLbStandard_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
+        {
+            HIZTIM = $"{DateTime.Now:yyyy/MM/dd HH:mm:ss}";
+            fam.AddLog($"{HIZTIM} コントロール 1 {CMD.UserName} lnkLbStandard_LinkClicked");
+            // Form2を作成
+            var form2 = new DataExtractionFm();
+            // Form2を表示
+            form2.Show();
+            // Form1を非表示
+            this.Hide();
+        }
+
+        /// <summary>
         /// データ抽出リンククリック
         /// </summary>
         /// <param name="sender"></param>
@@ -129,18 +129,18 @@ namespace あすよん月次帳票
         /// </summary>
         /// <param name="sender"></param>
         /// <param name="e"></param>
-        private void lnkLbStandard_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
+        private void lnkLb定型帳票_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
         {
             HIZTIM = $"{DateTime.Now:yyyy/MM/dd HH:mm:ss}";
             fam.AddLog($"{HIZTIM} コントロール 1 {CMD.UserName} lnkLbStandard_LinkClicked");
             // Form4を作成
-            var form4 = new DataEtlViewFm();
+            var form4 = new StandardisedFormFm();
             // Form4を表示
             form4.Show();
             // Form1を非表示
             this.Hide();
         }
-
+       
         /// <summary>
         /// マスタメニューリンククリック
         /// </summary>
@@ -398,5 +398,7 @@ namespace あすよん月次帳票
                 }
             }
         }
+
+       
     }
 }

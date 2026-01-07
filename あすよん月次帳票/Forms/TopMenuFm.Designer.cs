@@ -38,7 +38,7 @@ namespace あすよん月次帳票
             this.lb操作履歴.Font = new System.Drawing.Font("Meiryo UI", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(128)));
             this.lb操作履歴.Location = new System.Drawing.Point(29, 21);
             this.lb操作履歴.Name = "lb操作履歴";
-            this.lb操作履歴.Size = new System.Drawing.Size(112, 25);
+            this.lb操作履歴.Size = new System.Drawing.Size(89, 20);
             this.lb操作履歴.TabIndex = 23;
             this.lb操作履歴.Text = "【操作履歴】";
             // 
@@ -46,10 +46,10 @@ namespace あすよん月次帳票
             // 
             this.listBxログ表示.Font = new System.Drawing.Font("Meiryo UI", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(128)));
             this.listBxログ表示.FormattingEnabled = true;
-            this.listBxログ表示.ItemHeight = 19;
+            this.listBxログ表示.ItemHeight = 15;
             this.listBxログ表示.Location = new System.Drawing.Point(33, 43);
             this.listBxログ表示.Name = "listBxログ表示";
-            this.listBxログ表示.Size = new System.Drawing.Size(563, 175);
+            this.listBxログ表示.Size = new System.Drawing.Size(563, 169);
             this.listBxログ表示.TabIndex = 0;
             // 
             // btn終了
@@ -69,7 +69,7 @@ namespace あすよん月次帳票
             this.lnkLbシュミレーション.Font = new System.Drawing.Font("Meiryo UI", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(128)));
             this.lnkLbシュミレーション.Location = new System.Drawing.Point(266, 26);
             this.lnkLbシュミレーション.Name = "lnkLbシュミレーション";
-            this.lnkLbシュミレーション.Size = new System.Drawing.Size(152, 25);
+            this.lnkLbシュミレーション.Size = new System.Drawing.Size(122, 20);
             this.lnkLbシュミレーション.TabIndex = 1;
             this.lnkLbシュミレーション.TabStop = true;
             this.lnkLbシュミレーション.Text = "● シュミレーション";
@@ -81,11 +81,11 @@ namespace あすよん月次帳票
             this.lnkLb定型帳票.Font = new System.Drawing.Font("Meiryo UI", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(128)));
             this.lnkLb定型帳票.Location = new System.Drawing.Point(81, 76);
             this.lnkLb定型帳票.Name = "lnkLb定型帳票";
-            this.lnkLb定型帳票.Size = new System.Drawing.Size(119, 25);
+            this.lnkLb定型帳票.Size = new System.Drawing.Size(94, 20);
             this.lnkLb定型帳票.TabIndex = 2;
             this.lnkLb定型帳票.TabStop = true;
             this.lnkLb定型帳票.Text = "● 定型帳票";
-            this.lnkLb定型帳票.LinkClicked += new System.Windows.Forms.LinkLabelLinkClickedEventHandler(this.lnkLbStandard_LinkClicked);
+            this.lnkLb定型帳票.LinkClicked += new System.Windows.Forms.LinkLabelLinkClickedEventHandler(this.lnkLb定型帳票_LinkClicked);
             // 
             // lnkLbExport
             // 
@@ -100,7 +100,7 @@ namespace あすよん月次帳票
             this.lnkLbデータ抽出.Font = new System.Drawing.Font("Meiryo UI", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(128)));
             this.lnkLbデータ抽出.Location = new System.Drawing.Point(266, 76);
             this.lnkLbデータ抽出.Name = "lnkLbデータ抽出";
-            this.lnkLbデータ抽出.Size = new System.Drawing.Size(125, 25);
+            this.lnkLbデータ抽出.Size = new System.Drawing.Size(99, 20);
             this.lnkLbデータ抽出.TabIndex = 3;
             this.lnkLbデータ抽出.TabStop = true;
             this.lnkLbデータ抽出.Text = "● データ抽出";
@@ -112,7 +112,7 @@ namespace あすよん月次帳票
             this.lnkLbマスタ更新.Font = new System.Drawing.Font("Meiryo UI", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(128)));
             this.lnkLbマスタ更新.Location = new System.Drawing.Point(81, 26);
             this.lnkLbマスタ更新.Name = "lnkLbマスタ更新";
-            this.lnkLbマスタ更新.Size = new System.Drawing.Size(141, 25);
+            this.lnkLbマスタ更新.Size = new System.Drawing.Size(112, 20);
             this.lnkLbマスタ更新.TabIndex = 0;
             this.lnkLbマスタ更新.TabStop = true;
             this.lnkLbマスタ更新.Text = "● マスタメニュー";
@@ -140,7 +140,7 @@ namespace あすよん月次帳票
             this.lbメニュー.Font = new System.Drawing.Font("Meiryo UI", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(128)));
             this.lbメニュー.Location = new System.Drawing.Point(89, 272);
             this.lbメニュー.Name = "lbメニュー";
-            this.lbメニュー.Size = new System.Drawing.Size(90, 25);
+            this.lbメニュー.Size = new System.Drawing.Size(72, 20);
             this.lbメニュー.TabIndex = 77;
             this.lbメニュー.Text = "【メニュー】";
             // 
@@ -148,7 +148,7 @@ namespace あすよん月次帳票
             // 
             this.timrLogRenewal.Interval = 15000;
             // 
-            // Form1
+            // TopMenuFm
             // 
             this.ClientSize = new System.Drawing.Size(629, 468);
             this.Controls.Add(this.lbメニュー);
@@ -159,7 +159,7 @@ namespace あすよん月次帳票
             this.Controls.Add(this.lb操作履歴);
             this.Font = new System.Drawing.Font("Meiryo UI", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(128)));
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
-            this.Name = "Form1";
+            this.Name = "TopMenuFm";
             this.Opacity = 0.95D;
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
             this.Text = "あすよん月次帳票";

@@ -7,6 +7,7 @@ namespace あすよん月次帳票
 {
     internal static class CommonData
     {
+        internal static string TYM { get; set; }
         internal static string HIZ { get; set; }
         internal static string UserID { get; set; }
         internal static string UserName { get; set; }

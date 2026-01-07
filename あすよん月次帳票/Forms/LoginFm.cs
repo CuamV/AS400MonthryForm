@@ -1,5 +1,6 @@
 ﻿using System;
 using System.IO;
+using System.Linq;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
@@ -19,6 +20,7 @@ namespace あすよん月次帳票
         // フィールド変数
         private string HIZTIM;
 
+
         //=========================================================
         // コンストラクタ
         //=========================================================
@@ -26,16 +28,38 @@ namespace あすよん月次帳票
         {
             InitializeComponent();
             
+            CMD.HIZ = DateTime.Now.ToString("yyyyMMdd");
+            CMD.mfPath = @"\\ohnosv01\OhnoSys\099_sys\mf";  // マスターファイルパス
+            CMD.mfBkPath = @"\\ohnosv01\OhnoSys\099_sys\mf.BK"; // マスターファイルバックアップパス
+            CMD.LockPath = @"\\ohnosv01\OhnoSys\099_sys\Lock"; // ロックファイルパス
+            CMD.LogPath = $@"\\ohnosv01\OhnoSys\099_sys\LOG\{CMD.HIZ}"; // ログファイルパス
+            string firstLine = File.ReadLines(Path.Combine(CMD.mfPath, "Monthly.txt")).FirstOrDefault();
+            CMD.TYM = firstLine.Substring(0, 6); // 先頭6文字を取得(当月)
             CMD.sjis = Encoding.GetEncoding("Shift_JIS");
             CMD.utf8 = Encoding.GetEncoding("UTF-8");
+            if (!Directory.Exists(CMD.LogPath))
+                Directory.CreateDirectory(CMD.LogPath);
 
             this.Load += FormMainTop_Load;
+
+            JsonLoader.LoadBumon(CMD.mfPath + @"\BUMON.json");
+            JsonLoader.LoadHanbai("オーノ", Path.Combine(CMD.mfPath, "DLB01HANBAI.json"));
+            JsonLoader.LoadShiire("オーノ", Path.Combine(CMD.mfPath, "DLB01SHIIRE.json"));
+            JsonLoader.LoadHanbai("サンミックダスコン", Path.Combine(CMD.mfPath, "DLB02HANBAI.json"));
+            JsonLoader.LoadShiire("サンミックダスコン", Path.Combine(CMD.mfPath, "DLB02SHIIRE.json"));
+            JsonLoader.LoadHanbai("サンミックカーペット", Path.Combine(CMD.mfPath, "DLB03HANBAI.json"));
+            JsonLoader.LoadShiire("サンミックカーペット", Path.Combine(CMD.mfPath, "DLB03SHIIRE.json"));
+
+
         }
 
         private void FormMainTop_Load(object sender, EventArgs e)
         {
             txtBxID.Text = Properties.Settings.Default.UserID;
             txtBxPASS.Text = Properties.Settings.Default.Password;
+
+            
+           
         }
 
         //=========================================================
@@ -91,11 +115,7 @@ namespace あすよん月次帳票
             Properties.Settings.Default.Save();
 
             // 共通クラスにセット
-            CMD.HIZ = DateTime.Now.ToString("yyyyMMdd");
-            CMD.mfPath = @"\\ohnosv01\OhnoSys\099_sys\mf";  // マスターファイルパス
-            CMD.mfBkPath = @"\\ohnosv01\OhnoSys\099_sys\mf.BK"; // マスターファイルバックアップパス
-            CMD.LockPath = @"\\ohnosv01\OhnoSys\099_sys\Lock"; // ロックファイルパス
-            CMD.LogPath = $@"\\ohnosv01\OhnoSys\099_sys\LOG\{CMD.HIZ}"; // ログファイルパス
+            
             CMD.UserID = idText;
             CMD.UserID = idText;
             CMD.Pass = passText;
@@ -117,6 +137,13 @@ namespace あすよん月次帳票
             CMD.suncarpass = "A" + CMD.Pass;
             CMD.sundusuid = "S" + CMD.UserID;
             CMD.sunduspass = "S" + CMD.Pass;
+
+            // 個人用ログファイルパス
+            if (!File.Exists(CMD.uLog))
+                File.Create(CMD.uLog).Close();
+            // 全体用ログファイルパス
+            if (!File.Exists(CMD.conLog))
+                File.Create(CMD.conLog).Close();
 
             // ログイン情報をForm1に渡す
             HIZTIM = $"{DateTime.Now:yyyy/MM/dd HH:mm:ss}";

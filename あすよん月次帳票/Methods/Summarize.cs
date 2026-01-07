@@ -2,18 +2,27 @@
 using System.Collections.Generic;
 using System.Data;
 using System.Linq;
+using DCN = あすよん月次帳票.Dictionaries;
 
 namespace あすよん月次帳票
 {
     internal class Summarize
     {
-
+        /// <summary>
+        /// 集計処理
+        /// </summary>
+        /// <param name="data"></param>
+        /// <param name="groupKeys"></param>
+        /// <param name="sortcols"></param>
+        /// <param name="type"></param>
+        /// <param name="ptn"></param>
+        /// <returns></returns>
         internal DataTable SumData(DataTable data, List<string> groupKeys, string[] sortcols, string type, string ptn)
         {
             if (data == null || data.Rows.Count == 0) return new DataTable();
 
             // 伝票日付→年月(売上・仕入)
-            if(data.Columns.Contains("伝票日付") && !data.Columns.Contains("年月"))
+            if (data.Columns.Contains("伝票日付") && !data.Columns.Contains("年月"))
             {
                 data.Columns.Add("年月", typeof(string));
                 foreach (DataRow r in data.Rows)
@@ -168,118 +177,45 @@ namespace あすよん月次帳票
                     }
                     break;
             }
-            
-                Processor processor = new Processor();
+
+            Processor processor = new Processor();
             result = processor.SortData(result, sortcols);
 
             return result;
         }
-        //====================================================================
-        // ◆社長用集計
-        internal DataTable SummarizeSalesPurchase(DataTable dt)
+
+        /// <summary>
+        /// ◆社長用集計
+        /// </summary>
+        /// <param name="mergedSummary"></param>
+        /// <returns></returns>
+        internal DataTable SummarizeByCategoryTypeDept(DataTable sourceData)
         {
-            DataTable summary = new DataTable();
-            summary.Columns.Add("年月", typeof(string));
-            summary.Columns.Add("クラス名", typeof(string));
-            summary.Columns.Add("取引区分", typeof(string));
-            summary.Columns.Add("部門CD", typeof(string));
-            summary.Columns.Add("取引先/品種CD", typeof(string));
-            summary.Columns.Add("取引先/品名", typeof(string));
-            summary.Columns.Add("数量計", typeof(decimal));
-            summary.Columns.Add("金額計", typeof(decimal));
+            if (sourceData == null || sourceData.Rows.Count == 0)
+                return CreateEmptyResultTable();
 
-            // コード→日本語変換用辞書
-            var systemTypeMap = new Dictionary<string, string>
-            {
-                { "SL", "売上高" },
-                { "PR", "仕入高" }
-            };
-
-            if (dt == null || dt.Rows.Count == 0) return summary;
-
-            var grouped = dt.AsEnumerable().GroupBy(r => new
-            {
-                YearMonth = r["伝票日付"]?.ToString()?.Length >= 6
-                            ? r["伝票日付"].ToString().Substring(0, 6)
-                            : "",
-                ClassName = r["クラス名"]?.ToString()?.Trim(),
-                SystemType = r["サブシステム区分"]?.ToString()?.Trim(),
-                DeptCD = r["部門CD"]?.ToString()?.Trim(),
-                CustCD = r["取引先CD"]?.ToString()?.Trim(),
-                CustName = r["取引先名"]?.ToString()?.Trim()
-            });
-
-            foreach (var g in grouped)
-            {
-                DataRow newRow = summary.NewRow();
-                newRow["年月"] = g.Key.YearMonth;
-                newRow["クラス名"] = g.Key.ClassName;
-                string systemTypeCode = g.Key.SystemType;
-                newRow["取引区分"] = systemTypeMap.ContainsKey(systemTypeCode) ? systemTypeMap[systemTypeCode] : systemTypeCode;
-                newRow["部門CD"] = g.Key.DeptCD;
-                newRow["取引先/品種CD"] = g.Key.CustCD;
-                newRow["取引先/品名"] = g.Key.CustName;
-                newRow["数量計"] = g.Sum(r => r.Field<decimal?>("数量計") ?? 0m);
-                newRow["金額計"] = g.Sum(r => r.Field<decimal?>("金額計") ?? 0m);
-                summary.Rows.Add(newRow);
-            }
-            return summary;
-        }
-
-        internal DataTable MergedSummary(List<DataTable> allTables)
-        {
-            DataTable mergedSummary = new DataTable();
-
-            // 列名を統一
-            mergedSummary.Columns.Add("年月", typeof(string));
-            mergedSummary.Columns.Add("クラス名", typeof(string));
-            mergedSummary.Columns.Add("取引区分", typeof(string));
-            mergedSummary.Columns.Add("部門CD", typeof(string));
-            mergedSummary.Columns.Add("取引先/品種CD", typeof(string));
-            mergedSummary.Columns.Add("取引先/品名", typeof(string));
-            mergedSummary.Columns.Add("数量計", typeof(decimal));
-            mergedSummary.Columns.Add("金額計", typeof(decimal));
-
-            // 各テーブルの行をマージ
-            foreach (var dt in allTables)
-            {
-                foreach (DataRow row in dt.Rows)
+            // ==========================================
+            // 1段階目: SbSys区分・部門CD・クラスで集計
+            // ==========================================
+            var firstStageGroups = sourceData.AsEnumerable()
+                .GroupBy(row => new
                 {
-                    DataRow newRow = mergedSummary.NewRow();
+                    SbSys = row.Field<string>("SbSys区分")?.Trim() ?? "",
+                    DeptCd = row.Field<string>("部門CD")?.Trim() ?? "",
+                    ClassCd = row.Field<string>("クラス")?.Trim() ?? ""
+                })
+                .Select(g => new
+                {
+                    g.Key.SbSys,
+                    g.Key.DeptCd,
+                    g.Key.ClassCd,
+                    Amount = g.Sum(r => r.Field<decimal?>("金額") ?? r.Field<decimal?>("金額計") ?? 0)
+                })
+                .ToList();
 
-                    if (dt.Columns.Contains("年月"))
-                        newRow["年月"] = row["年月"]?.ToString()?.Trim();
-                    else
-                        newRow["年月"] = "";
-                    newRow["クラス名"] = row["クラス名"];
-                    newRow["取引区分"] = row["取引区分"];
-                    newRow["部門CD"] = row["部門CD"];
-                    newRow["取引先/品種CD"] = row["取引先/品種CD"];
-                    newRow["取引先/品名"] = row["取引先/品名"];
-                    newRow["数量計"] = row["数量計"];
-                    newRow["金額計"] = row["金額計"];
-
-                    mergedSummary.Rows.Add(newRow);
-                }
-            }
-
-            // ソート
-            DataView dv = mergedSummary.DefaultView;
-            dv.Sort = "年月 ASC, クラス名 ASC, 取引区分 ASC, 部門CD ASC, 取引先/品種CD ASC";
-            return dv.ToTable();
-        }
-
-        internal DataTable SummarizeByCategoryTypeDept(DataTable mergedSummary)
-        {
-            DataTable summary = new DataTable();
-            summary.Columns.Add("年月", typeof(string));
-            summary.Columns.Add("分類名", typeof(string));
-            summary.Columns.Add("部門グループ", typeof(string));
-            summary.Columns.Add("数量合計", typeof(decimal));
-            summary.Columns.Add("金額合計", typeof(decimal));
-
-            if (mergedSummary == null || mergedSummary.Rows.Count == 0) return summary;
-
+            // ==========================================
+            // 分類名マッピング関数
+            // ==========================================
             Func<string, string, string> mapCategory = (className, transType) =>
             {
                 string cls = (className ?? "").Trim();
@@ -309,123 +245,409 @@ namespace あすよん月次帳票
                 return $"{cls}{type}";
             };
 
-            // 部門グループ定義と IncludeZero フラグ
-            var categoryDeptGroups = new Dictionary<string, List<(string Name, Func<string, bool> Predicate, bool IncludeZero)>>()
+            // ==========================================
+            // 1段階目の集計結果を整形
+            // ==========================================
+            var firstStageResults = firstStageGroups.Select(g =>
             {
-                ["原材料仕入高"] = new List<(string, Func<string, bool>, bool)> {
-                    ("#110～800", c => int.TryParse(c, out int v) && v >= 110 && v <= 800, true),
-                    ("#900,950", c => c=="900" || c=="950", true)
-                },
-                ["製品仕入高"] = new List<(string, Func<string, bool>, bool)> {
-                    ("#110～800", c => int.TryParse(c, out int v) && v >= 110 && v <= 800, false),
-                    ("#900,950", c => c=="900" || c=="950", true)
-                },
-                ["原材料売上高"] = new List<(string, Func<string, bool>, bool)> {
-                    ("#110～500", c => int.TryParse(c, out int v) && v >= 110 && v <= 500, false),
-                    ("#800", c => c=="800", true),
-                    ("#900,950", c => c=="900" || c=="950", true)
-                },
-                ["製品売上高"] = new List<(string, Func<string, bool>, bool)> {
-                    ("#110～500", c => int.TryParse(c, out int v) && v >= 110 && v <= 500, true),
-                    ("#800", c => c=="800", true),
-                    ("#900,950", c => c=="900" || c=="950", true)
-                },
-                ["原材料在庫"] = new List<(string, Func<string, bool>, bool)> {
-                    ("#110～800", c => int.TryParse(c, out int v) && v >= 110 && v <= 800, true),
-                    ("#900,950", c => c=="900" || c=="950", true)
-                },
-                ["仕掛品在庫"] = new List<(string, Func<string, bool>, bool)> {
-                    ("#900,950", c => c=="900" || c=="950", true)
-                },
-                ["製品在庫"] = new List<(string, Func<string, bool>, bool)> {
-                    ("#110～800", c => int.TryParse(c, out int v) && v >= 110 && v <= 800, true),
-                    ("#900,950", c => c=="900" || c=="950", true)
-                }
-            };
+                // クラス名への変換
+                string className = DCN.classMap.ContainsKey(g.ClassCd) 
+                    ? DCN.classMap[g.ClassCd] 
+                    : g.ClassCd;
 
-            // 分類名リスト(クラス名＋取引区分)
-            var classTypes = mergedSummary.AsEnumerable()
-                        .Select(r => mapCategory(r["クラス名"]?.ToString(), r["取引区分"]?.ToString()))
-                        .Distinct();
+                // 取引区分名への変換
+                string transTypeName = DCN.sysTypeMap.ContainsKey(g.SbSys) 
+                    ? DCN.sysTypeMap[g.SbSys] 
+                    : g.SbSys;
 
-            // --- ★ 年月単位でのループ ---
-            var months = mergedSummary.AsEnumerable()
-                .Select(r => r["年月"]?.ToString()?.Trim())
-                .Where(y => !string.IsNullOrEmpty(y))
-                .Distinct()
-                .OrderBy(y => y);
+                // 分類名の決定
+                string categoryName = mapCategory(className, transTypeName);
 
-            foreach (var ym in months)
-            {
-                // 3. 分類ごとにグループ集計
-                foreach (var cls in classTypes)
+                return new
                 {
-                    if (!categoryDeptGroups.ContainsKey(cls)) continue;
+                    CategoryName = categoryName,
+                    ClassName = className,
+                    DeptCd = g.DeptCd,
+                    Amount = g.Amount
+                };
+            }).ToList();
 
-                    foreach (var group in categoryDeptGroups[cls])
+            // ==========================================
+            // 2段階目: DpCateGroupsを利用した集計
+            // ==========================================
+            var secondStageResults = new List<dynamic>();
+
+            foreach (var kvp in DCN.DpCateGroups)
+            {
+                string categoryName = kvp.Key;
+                var groups = kvp.Value;
+
+                foreach (var group in groups)
+                {
+                    string groupName = group.Name;
+                    var predicate = group.Predicate;
+                    bool includeZero = group.IncludeZero;
+
+                    // 該当するデータを抽出して集計
+                    var totalAmount = firstStageResults
+                        .Where(r => r.CategoryName == categoryName && predicate(r.DeptCd))
+                        .Sum(x => x.Amount);
+
+                    // IncludeZero フラグに従って追加
+                    if (includeZero || totalAmount != 0)
                     {
-                        var rows = mergedSummary.AsEnumerable()
-                                    .Where(r =>
-                                    (r["年月"]?.ToString()?.Trim() == ym) &&
-                                    mapCategory(r["クラス名"]?.ToString(), r["取引区分"]?.ToString()) == cls
-                                                && group.Predicate(r["部門CD"]?.ToString()));
-
-                        decimal sumQty = rows.Sum(r => r.Field<decimal?>("数量計") ?? 0m);
-                        decimal sumAmt = rows.Sum(r => r.Field<decimal?>("金額計") ?? 0m);
-
-                        // IncludeZeroフラグで表示制御
-                        if (!rows.Any() && !group.IncludeZero) continue;
-
-                        DataRow newRow = summary.NewRow();
-                        newRow["年月"] = ym;
-                        newRow["分類名"] = cls;
-                        newRow["部門グループ"] = group.Name;
-                        newRow["数量合計"] = sumQty;
-                        newRow["金額合計"] = sumAmt;
-                        summary.Rows.Add(newRow);
+                        secondStageResults.Add(new
+                        {
+                            CategoryName = categoryName,
+                            GroupName = groupName,
+                            Amount = totalAmount
+                        });
                     }
                 }
             }
 
-            // ソート用列を追加して分類名の順序を制御
-            summary.Columns.Add("ソート順", typeof(int));
-            Func<string, int> getSortOrder = cls =>
-            {
-                switch (cls)
+            // ==========================================
+            // 3段階目: 分類と部門グループで合計を出す
+            // ==========================================
+            var finalResults = secondStageResults
+                .GroupBy(x => new { x.CategoryName, x.GroupName })
+                .Select(g => new
                 {
-                    case "原材料仕入高": return 10;
-                    case "製品仕入高": return 20;
-                    case "原材料売上高": return 30;
-                    case "製品売上高": return 40;
-                    case "原材料在庫": return 50;
-                    case "仕掛品在庫": return 60;
-                    case "製品在庫": return 70;
-                    default: return 999;
-                }
-            };
-            foreach (DataRow r in summary.Rows)
+                    CategoryName = g.Key.CategoryName,
+                    GroupName = g.Key.GroupName,
+                    Amount = g.Sum(x => (decimal)x.Amount)
+                })
+                .ToList();
+
+            // ==========================================
+            // 結果をDataTableに変換 [分類][部門グループ][金額]
+            // ==========================================
+            DataTable resultTable = CreateEmptyResultTable();
+
+            foreach (var item in finalResults)
             {
-                r["ソート順"] = getSortOrder(r["分類名"].ToString());
+                DataRow row = resultTable.NewRow();
+                row["分類"] = item.CategoryName;
+                row["部門グループ"] = item.GroupName;
+                row["金額"] = item.Amount;
+                resultTable.Rows.Add(row);
             }
 
-            // ソート
-            DataView dv = summary.DefaultView;
-            dv.Sort = "年月 ASC, ソート順 ASC, 部門グループ ASC";
-
-            DataTable result = dv.ToTable();
-            result.Columns.Remove("ソート順");
-
-            return result;
+            return resultTable;
         }
-        //==============================================================================
-    }
-    // 全行を1グループとして返すヘルパークラス (NONE 用)
-    internal class GroupingAllRows : IGrouping<string, DataRow>
-    {
-        private IEnumerable<DataRow> _rows;
-        public GroupingAllRows(DataTable dt) => _rows = dt.AsEnumerable();
-        public string Key => "";
-        public IEnumerator<DataRow> GetEnumerator() => _rows.GetEnumerator();
-        System.Collections.IEnumerator System.Collections.IEnumerable.GetEnumerator() => _rows.GetEnumerator();
+
+        /// <summary>
+        /// 売上・仕入データの処理
+        /// </summary>
+        private List<dynamic> ProcessSlprData(DataTable sourceData)
+        {
+            // --------------------------------------------
+            // 1段階目: SbSys区分・部門CD・クラスで集計
+            // --------------------------------------------
+            var firstStageGroups = sourceData.AsEnumerable()
+                .GroupBy(row => new
+                {
+                    SbSys = row.Field<string>("SbSys区分")?.Trim() ?? "",
+                    DeptCd = row.Field<string>("部門CD")?.Trim() ?? "",
+                    ClassCd = row.Field<string>("クラス")?.Trim() ?? ""
+                })
+                .Select(g => new
+                {
+                    g.Key.SbSys,
+                    g.Key.DeptCd,
+                    g.Key.ClassCd,
+                    Amount = g.Sum(r => r.Field<decimal?>("金額") ?? r.Field<decimal?>("金額計") ?? 0)
+                })
+                .ToList();
+
+            // --------------------------------------------
+            // 分類名マッピング関数
+            // --------------------------------------------
+            Func<string, string, string> mapCategory = (className, transType) =>
+            {
+                string cls = (className ?? "").Trim();
+                string type = (transType ?? "").Trim();
+
+                // 在庫系の半製品
+                if ((cls.Contains("半製品") || cls.Contains("タフト半製品") || cls.Contains("コーティング半製品"))
+                    && type.Contains("在庫"))
+                    return "仕掛品在庫";
+
+                // 売上高の半製品
+                if (cls.Contains("半製品") && type.Contains("売上"))
+                    return "製品売上高";
+
+                // 仕入高の半製品は原材料仕入高
+                if (cls.Contains("半製品") && type.Contains("仕入"))
+                    return "原材料仕入高";
+
+                // 通常パターン
+                if (cls.Contains("原材料") && type.Contains("仕入")) return "原材料仕入高";
+                if (cls.Contains("製品") && type.Contains("仕入")) return "製品仕入高";
+                if (cls.Contains("原材料") && type.Contains("売上")) return "原材料売上高";
+                if (cls.Contains("製品") && type.Contains("売上")) return "製品売上高";
+                if (cls.Contains("原材料") && type.Contains("在庫")) return "原材料在庫";
+                if (cls.Contains("製品") && type.Contains("在庫")) return "製品在庫";
+
+                return $"{cls}{type}";
+            };
+
+            // --------------------------------------------
+            // 1段階目の集計結果を整形
+            // --------------------------------------------
+            var firstStageResults = firstStageGroups.Select(g =>
+            {
+                // クラス名への変換
+                string className = DCN.classMap.ContainsKey(g.ClassCd)
+                    ? DCN.classMap[g.ClassCd]
+                    : g.ClassCd;
+
+                // 取引区分名への変換
+                string transTypeName = DCN.sysTypeMap.ContainsKey(g.SbSys)
+                    ? DCN.sysTypeMap[g.SbSys]
+                    : g.SbSys;
+
+                // 分類名の決定
+                string categoryName = mapCategory(className, transTypeName);
+
+                // dynamic型で返す
+                dynamic result = new System.Dynamic.ExpandoObject();
+                result.CategoryName = categoryName;
+                result.ClassName = className;
+                result.DeptCd = g.DeptCd;
+                result.Amount = g.Amount;
+                return result;
+            }).ToList();
+
+            // --------------------------------------------
+            // 2段階目: DpCateGroupsを利用した集計
+            // --------------------------------------------
+            return ProcessByDpCateGroups(firstStageResults);
+        }
+
+        /// <summary>
+        /// 在庫データの処理
+        /// </summary>
+        private List<dynamic> ProcessStockData(DataTable sourceData)
+        {
+            // --------------------------------------------
+            // 1段階目: 部門CD・クラス名で集計
+            // --------------------------------------------
+            var firstStageGroups = sourceData.AsEnumerable()
+                .GroupBy(row => new
+                {
+                    DeptCd = row.Field<string>("部門CD")?.Trim() ?? 
+                             row.Field<string>("ZHBMCD")?.Trim() ?? "",
+                    ClassName = row.Field<string>("クラス名")?.Trim() ?? 
+                                row.Field<string>("ZHCSNM")?.Trim() ?? ""
+                })
+                .Select(g => new
+                {
+                    g.Key.DeptCd,
+                    g.Key.ClassName,
+                    Amount = g.Sum(r => 
+                        r.Field<decimal?>("金額") ?? 
+                        r.Field<decimal?>("金額計") ?? 
+                        r.Field<decimal?>("当月残金額") ?? 
+                        r.Field<decimal?>("ZHTGZA") ?? 
+                        0)
+                })
+                .ToList();
+
+            // --------------------------------------------
+            // 分類名マッピング（在庫用）
+            // --------------------------------------------
+            Func<string, string> mapStockCategory = (className) =>
+            {
+                string cls = (className ?? "").Trim();
+
+                // 半製品系
+                if (cls.Contains("タフト半製品") || cls.Contains("タフト"))
+                    return "期末仕掛品在庫";
+                if (cls.Contains("コーティング半製品") || cls.Contains("コーティング"))
+                    return "期末仕掛品在庫";
+                if (cls.Contains("半製品"))
+                    return "期末仕掛品在庫";
+
+                // 通常パターン
+                if (cls.Contains("原材料")) return "期末原材料在庫";
+                if (cls.Contains("製品")) return "期末製品在庫";
+                if (cls.Contains("加工")) return "期末製品在庫";
+
+                return $"期末{cls}在庫";
+            };
+
+            // --------------------------------------------
+            // 1段階目の集計結果を整形
+            // --------------------------------------------
+            var firstStageResults = firstStageGroups.Select(g =>
+            {
+                dynamic result = new System.Dynamic.ExpandoObject();
+                result.CategoryName = mapStockCategory(g.ClassName);
+                result.ClassName = g.ClassName;
+                result.DeptCd = g.DeptCd;
+                result.Amount = g.Amount;
+                return result;
+            }).ToList();
+
+            // --------------------------------------------
+            // 2段階目: DpCateGroupsを利用した集計
+            // --------------------------------------------
+            return ProcessByDpCateGroups(firstStageResults);
+        }
+
+        /// <summary>
+        /// DpCateGroupsを利用した集計処理
+        /// </summary>
+        private List<dynamic> ProcessByDpCateGroups(List<dynamic> firstStageResults)
+        {
+            var secondStageResults = new List<dynamic>();
+
+            foreach (var kvp in DCN.DpCateGroups)
+            {
+                string categoryName = kvp.Key;
+                var groups = kvp.Value;
+
+                // 在庫系の分類名には"期末"がついているか確認
+                string targetCategoryName = categoryName;
+                var matchingResults = firstStageResults
+                    .Where(r => r.CategoryName == categoryName || r.CategoryName == $"期末{categoryName}")
+                    .ToList();
+
+                if (matchingResults.Count == 0)
+                    continue;
+
+                foreach (var group in groups)
+                {
+                    string groupName = group.Name;
+                    var predicate = group.Predicate;
+                    bool includeZero = group.IncludeZero;
+
+                    // 該当するデータを抽出して集計
+                    var totalAmount = matchingResults
+                        .Where(r => predicate(r.DeptCd))
+                        .Sum(x => (decimal)x.Amount);
+
+                    // IncludeZero フラグに従って追加
+                    if (includeZero || totalAmount != 0)
+                    {
+                        // 元の分類名を使用（期末がついている場合はそのまま）
+                        string actualCategoryName = matchingResults.First().CategoryName;
+
+                        dynamic result = new System.Dynamic.ExpandoObject();
+                        result.CategoryName = actualCategoryName;
+                        result.GroupName = groupName;
+                        result.Amount = totalAmount;
+                        secondStageResults.Add(result);
+                    }
+                }
+            }
+
+            // --------------------------------------------
+            // 3段階目: 分類と部門グループで合計を出す
+            // --------------------------------------------
+            var finalResults = secondStageResults
+                .GroupBy(x => new { x.CategoryName, x.GroupName })
+                .Select(g =>
+                {
+                    dynamic result = new System.Dynamic.ExpandoObject();
+                    result.CategoryName = g.Key.CategoryName;
+                    result.GroupName = g.Key.GroupName;
+                    result.Amount = g.Sum(x => (decimal)x.Amount);
+                    return result;
+                })
+                .ToList();
+
+            return finalResults;
+        }
+
+        /// <summary>
+        /// 空の結果テーブルを作成
+        /// </summary>
+        private DataTable CreateEmptyResultTable()
+        {
+            DataTable dt = new DataTable("SummarizedData");
+            dt.Columns.Add("分類", typeof(string));
+            dt.Columns.Add("部門グループ", typeof(string));
+            dt.Columns.Add("金額", typeof(decimal));
+            return dt;
+        }
+
+
+        /// <summary>
+        /// 会社別のピボット形式に変換
+        /// </summary>
+        /// <param name="summaryData">集計データ</param>
+        /// <param name="companyMap">部門CD→会社名のマッピング</param>
+        /// <returns>ピボット形式のDataTable</returns>
+        internal DataTable ConvertToPivotFormat(DataTable summaryData, Dictionary<string, string> companyMap)
+        {
+            if (summaryData == null || summaryData.Rows.Count == 0)
+                return null;
+
+            // 会社ごとに金額を集計
+            var pivotData = summaryData.AsEnumerable()
+                .Select(row => new
+                {
+                    Category = row.Field<string>("分類"),
+                    Group = row.Field<string>("部門グループ"),
+                    DeptCd = row.Field<string>("部門CD"),
+                    Amount = row.Field<decimal>("金額")
+                })
+                .GroupBy(x => new { x.Category, x.Group })
+                .Select(g => new
+                {
+                    Category = g.Key.Category,
+                    Group = g.Key.Group,
+                    Companies = g.GroupBy(x => companyMap.ContainsKey(x.DeptCd) ? companyMap[x.DeptCd] : "その他")
+                                 .ToDictionary(cg => cg.Key, cg => cg.Sum(x => x.Amount))
+                })
+                .ToList();
+
+            // DataTable作成
+            DataTable resultTable = new DataTable("PivotData");
+            resultTable.Columns.Add("分類", typeof(string));
+            resultTable.Columns.Add("部門グループ", typeof(string));
+
+            // 会社ごとの列を追加
+            var allCompanies = pivotData
+                .SelectMany(x => x.Companies.Keys)
+                .Distinct()
+                .OrderBy(c => c)
+                .ToList();
+
+            foreach (var company in allCompanies)
+            {
+                resultTable.Columns.Add(company, typeof(decimal));
+            }
+
+            // データ追加
+            foreach (var item in pivotData)
+            {
+                DataRow row = resultTable.NewRow();
+                row["分類"] = item.Category;
+                row["部門グループ"] = item.Group;
+
+                foreach (var company in allCompanies)
+                {
+                    row[company] = item.Companies.ContainsKey(company) ? item.Companies[company] : 0;
+                }
+
+                resultTable.Rows.Add(row);
+            }
+
+            return resultTable;
+        }
+
+
+        // 全行を1グループとして返すヘルパークラス (NONE 用)
+        internal class GroupingAllRows : IGrouping<string, DataRow>
+        {
+            private IEnumerable<DataRow> _rows;
+            public GroupingAllRows(DataTable dt) => _rows = dt.AsEnumerable();
+            public string Key => "";
+            public IEnumerator<DataRow> GetEnumerator() => _rows.GetEnumerator();
+            System.Collections.IEnumerator System.Collections.IEnumerable.GetEnumerator() => _rows.GetEnumerator();
+        }
     }
 }
