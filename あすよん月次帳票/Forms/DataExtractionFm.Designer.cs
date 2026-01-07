@@ -479,7 +479,7 @@ namespace あすよん月次帳票
             // btnMin
             // 
             this.btnMin.Font = new System.Drawing.Font("Meiryo UI", 8.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(128)));
-            this.btnMin.Location = new System.Drawing.Point(778, 6);
+            this.btnMin.Location = new System.Drawing.Point(821, 7);
             this.btnMin.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.btnMin.Name = "btnMin";
             this.btnMin.Size = new System.Drawing.Size(33, 20);
@@ -744,7 +744,7 @@ namespace あすよん月次帳票
             this.label1.Size = new System.Drawing.Size(0, 12);
             this.label1.TabIndex = 92;
             // 
-            // Form2
+            // DataExtractionFm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 12F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
@@ -768,7 +768,7 @@ namespace あすよん月次帳票
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.None;
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
             this.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
-            this.Name = "Form2";
+            this.Name = "DataExtractionFm";
             this.Opacity = 0.95D;
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
             this.Text = "RplForm2";

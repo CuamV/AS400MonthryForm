@@ -28,6 +28,7 @@
         /// </summary>
         private void InitializeComponent()
         {
+            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(LoginFm));
             this.lbPASS = new System.Windows.Forms.Label();
             this.txtBxPASS = new System.Windows.Forms.TextBox();
             this.txtBxID = new System.Windows.Forms.TextBox();
@@ -77,6 +78,7 @@
             // btn開始
             // 
             this.btn開始.BackColor = System.Drawing.SystemColors.Control;
+            this.btn開始.DialogResult = System.Windows.Forms.DialogResult.Cancel;
             this.btn開始.Font = new System.Drawing.Font("Meiryo UI", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(128)));
             this.btn開始.Location = new System.Drawing.Point(229, 170);
             this.btn開始.Name = "btn開始";
@@ -106,7 +108,7 @@
             this.lbログイン.TabIndex = 41;
             this.lbログイン.Text = "【 ログイン 】";
             // 
-            // FormMainTop
+            // LoginFm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 12F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
@@ -118,8 +120,8 @@
             this.Controls.Add(this.txtBxPASS);
             this.Controls.Add(this.txtBxID);
             this.Controls.Add(this.IbID);
-            this.Name = "FormMainTop";
-            this.Text = "FormMainTop";
+            this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
+            this.Name = "LoginFm";
             ((System.ComponentModel.ISupportInitialize)(this.pctBxあすよん)).EndInit();
             this.ResumeLayout(false);
             this.PerformLayout();

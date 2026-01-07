@@ -488,7 +488,7 @@ namespace あすよん月次帳票
         }
         
         /// <summary>
-        /// 閉じるボタンクリック
+        /// 戻るボタンクリック
         /// </summary>
         /// <param name="sender"></param>
         /// <param name="e"></param>
@@ -497,7 +497,9 @@ namespace あすよん月次帳票
             HIZTIM = $"{DateTime.Now:yyyy/MM/dd HH:mm:ss}";
             fam.AddLog($"{HIZTIM} コントロール 1 {CMD.UserName} btnForm1Back_Click");
             // Form1 のインスタンスを取得して表示
-            if (Application.OpenForms["Form1"] is TopMenuFm form1)
+            // 名前で探すと見つからない場合があるため、型で検索して取得する
+            var form1 = Application.OpenForms.OfType<TopMenuFm>().FirstOrDefault();
+            if (form1 != null)
             {
                 form1.Show();
             }

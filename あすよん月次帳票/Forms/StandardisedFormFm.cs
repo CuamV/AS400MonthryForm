@@ -59,10 +59,10 @@ namespace あすよん月次帳票
         /// </summary>
         /// <param name="sender"></param>
         /// <param name="e"></param>
-        private async void linkLb_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
+        private async void 月次帳票未確定_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
         {
             HIZTIM = $"{DateTime.Now:yyyy/MM/dd HH:mm:ss}";
-            fam.AddLog($"{HIZTIM} コントロール 1 {CMD.UserName} linkLb_LinkClicked");
+            fam.AddLog($"{HIZTIM} コントロール 1 {CMD.UserName} 月次帳票未確定_LinkClicked");
 
             //----------------------------------------------------
             // ★開始日付・終了日付の取得
@@ -125,7 +125,7 @@ namespace あすよん月次帳票
             DataTable preparedStockNow = PrepareForSummary(stockDtNow);
             
             // 分類・部門グループ別に集計（売上・仕入・在庫）
-            DataTable summaryData = summ.SummarizeByCategoryTypeDept(preparedSlpr);
+            DataTable summaryData = summ.SummarizeByCategoryTypeDept(preparedSlpr, preparedStockNow);
 
             if (summaryData == null || summaryData.Rows.Count == 0)
             {
@@ -161,11 +161,34 @@ namespace あすよん月次帳票
             }
         }
 
+        /// <summary>
+        /// 戻るボタンクリック
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void btnForm1Back_Click(object sender, EventArgs e)
+        {
+            HIZTIM = $"{DateTime.Now:yyyy/MM/dd HH:mm:ss}";
+            fam.AddLog($"{HIZTIM} コントロール 1 {CMD.UserName} btnForm1Back_Click");
+            // Form1 のインスタンスを取得して表示
+            // 名前で探すと見つからない場合があるため、型で検索して取得する
+            var form1 = Application.OpenForms.OfType<TopMenuFm>().FirstOrDefault();
+            if (form1 != null)
+            {
+                form1.Show();
+            }
+            // Form4 を閉じる
+            this.Close();
+        }
+
         // フィールドに追加
         private Point mouseOffset;
         private bool isMouseDown = false;
-
-        // MouseDown
+        /// <summary>
+        /// MouseDown
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void Form_MouseDown(object sender, MouseEventArgs e)
         {
             if (e.Button == MouseButtons.Left)
@@ -174,8 +197,11 @@ namespace あすよん月次帳票
                 mouseOffset = new Point(-e.X, -e.Y);
             }
         }
-
-        // MouseMove
+        /// <summary>
+        /// MouseMove
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void Form_MouseMove(object sender, MouseEventArgs e)
         {
             if (isMouseDown)
@@ -185,18 +211,26 @@ namespace あすよん月次帳票
                 this.Location = mousePos;
             }
         }
-
-        // MouseUp
+        /// <summary>
+        /// MouseUp
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void Form_MouseUp(object sender, MouseEventArgs e)
         {
             if (e.Button == MouseButtons.Left)
                 isMouseDown = false;
         }
-
+        /// <summary>
+        /// 最小化ボタンクリック
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void btnMin_Click(object sender, EventArgs e)
         {
             this.WindowState = FormWindowState.Minimized;
         }
+
 
         //=================================================================
         // 処理メソッド
@@ -357,7 +391,7 @@ namespace あすよん月次帳票
         private void ApplySnowManColors()
         {
             // フォーム全体の背景
-            this.BackColor = clrmg.ShopyLight2;
+            this.BackColor = clrmg.AbeLight2;
 
             //// 条件グループボックス
             //grpBxCondition.BackColor = clrmg.ShopyLight2;

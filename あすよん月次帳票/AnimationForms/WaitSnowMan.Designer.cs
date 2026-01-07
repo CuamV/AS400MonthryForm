@@ -32,6 +32,7 @@
             this.lblMessage = new System.Windows.Forms.Label();
             this.pictBx2 = new System.Windows.Forms.PictureBox();
             this.btnMin = new System.Windows.Forms.Button();
+            this.button1 = new System.Windows.Forms.Button();
             ((System.ComponentModel.ISupportInitialize)(this.pictBx2)).BeginInit();
             this.SuspendLayout();
             // 
@@ -58,9 +59,9 @@
             // 
             // btnMin
             // 
-            this.btnMin.BackColor = System.Drawing.Color.NavajoWhite;
+            this.btnMin.BackColor = System.Drawing.SystemColors.Control;
             this.btnMin.Font = new System.Drawing.Font("Meiryo UI", 6.75F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(128)));
-            this.btnMin.Location = new System.Drawing.Point(188, 6);
+            this.btnMin.Location = new System.Drawing.Point(146, 2);
             this.btnMin.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.btnMin.Name = "btnMin";
             this.btnMin.Size = new System.Drawing.Size(33, 20);
@@ -69,17 +70,32 @@
             this.btnMin.UseVisualStyleBackColor = false;
             this.btnMin.Click += new System.EventHandler(this.btnMin_Click);
             // 
-            // FormAnimation2
+            // button1
+            // 
+            this.button1.BackColor = System.Drawing.SystemColors.Control;
+            this.button1.Font = new System.Drawing.Font("Meiryo UI", 6.75F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(128)));
+            this.button1.ForeColor = System.Drawing.Color.Red;
+            this.button1.Location = new System.Drawing.Point(185, 2);
+            this.button1.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
+            this.button1.Name = "button1";
+            this.button1.Size = new System.Drawing.Size(33, 20);
+            this.button1.TabIndex = 81;
+            this.button1.Text = "✕";
+            this.button1.UseVisualStyleBackColor = false;
+            // 
+            // WaitSnowMan
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 12F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(228, 138);
             this.ControlBox = false;
+            this.Controls.Add(this.button1);
             this.Controls.Add(this.btnMin);
             this.Controls.Add(this.pictBx2);
             this.Controls.Add(this.lblMessage);
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
-            this.Name = "FormAnimation2";
+            this.Name = "WaitSnowMan";
+            this.Opacity = 0.95D;
             this.Text = "FormAnimatuin2";
             ((System.ComponentModel.ISupportInitialize)(this.pictBx2)).EndInit();
             this.ResumeLayout(false);
@@ -89,5 +105,6 @@
         #endregion
         private System.Windows.Forms.PictureBox pictBx2;
         private System.Windows.Forms.Button btnMin;
+        private System.Windows.Forms.Button button1;
     }
 }

@@ -127,17 +127,22 @@ namespace あすよん月次帳票
         /// </summary>
         /// <param name="sender"></param>
         /// <param name="e"></param>
-        private void btn戻る_Click(object sender, EventArgs e)
+        private void btnForm1Back_Click(object sender, EventArgs e)
         {
+            HIZTIM = $"{DateTime.Now:yyyy/MM/dd HH:mm:ss}";
+            fam.AddLog($"{HIZTIM} コントロール 1 {CMD.UserName} btnForm1Back_Click");
             // Form1 のインスタンスを取得して表示
-            if (Application.OpenForms["Form1"] is TopMenuFm form1)
+            // 名前で探すと見つからない場合があるため、型で検索して取得する
+            var form1 = Application.OpenForms.OfType<TopMenuFm>().FirstOrDefault();
+            if (form1 != null)
             {
-                form1.Show();
+                form1.Show();   
             }
-            // 部門マスタForm を閉じる
+            // マスタメニューForm を閉じる
             this.Close();
         }
-
+        
+        
         private void btn仕入先マスタ_Click(object sender, EventArgs e)
         {
             HIZTIM = $"{DateTime.Now:yyyy/MM/dd HH:mm:ss}";

@@ -65,7 +65,16 @@ namespace あすよん月次帳票
             "在庫"
         };
         internal static List<string> selSlPrProducts = new List<string>();
-        internal static List<string> selIvProducts = new List<string>();
+        internal static List<string> selIvProducts = new List<string> 
+        {
+            "原材料",
+            "製品",
+            "加工在庫",
+            "預り在庫",
+            "預け在庫",
+            "タフト半製品",
+            "コーティング半製品"
+        };
         internal static Dictionary<string, string> selIvTypes = new Dictionary<string, string>();
 
         internal static Dictionary<string,string> sysTypeMap = new Dictionary<string, string> // コード→日本語変換用辞書

@@ -33,16 +33,19 @@ namespace あすよん月次帳票
         /// </summary>
         private void InitializeComponent()
         {
+            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(WaitSimulationFm));
             this.pictBx1 = new System.Windows.Forms.PictureBox();
             this.lblMessage = new System.Windows.Forms.Label();
             this.progressBar1 = new System.Windows.Forms.ProgressBar();
+            this.button1 = new System.Windows.Forms.Button();
+            this.btnMin = new System.Windows.Forms.Button();
             ((System.ComponentModel.ISupportInitialize)(this.pictBx1)).BeginInit();
             this.SuspendLayout();
             // 
             // pictBx1
             // 
             this.pictBx1.ImageLocation = "\\\\ohnosv01\\OhnoSys\\099_sys\\Images\\Infiter_Big.gif";
-            this.pictBx1.Location = new System.Drawing.Point(34, 12);
+            this.pictBx1.Location = new System.Drawing.Point(34, 35);
             this.pictBx1.Name = "pictBx1";
             this.pictBx1.Size = new System.Drawing.Size(328, 79);
             this.pictBx1.SizeMode = System.Windows.Forms.PictureBoxSizeMode.Zoom;
@@ -63,18 +66,47 @@ namespace あすよん月次帳票
             // 
             // progressBar1
             // 
-            this.progressBar1.Location = new System.Drawing.Point(55, 138);
+            this.progressBar1.Location = new System.Drawing.Point(55, 148);
             this.progressBar1.Name = "progressBar1";
             this.progressBar1.Size = new System.Drawing.Size(283, 11);
             this.progressBar1.TabIndex = 2;
             // 
-            // FormAnimation1
+            // button1
+            // 
+            this.button1.BackColor = System.Drawing.Color.Snow;
+            this.button1.Font = new System.Drawing.Font("Meiryo UI", 6.75F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(128)));
+            this.button1.ForeColor = System.Drawing.Color.Red;
+            this.button1.Location = new System.Drawing.Point(357, 1);
+            this.button1.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
+            this.button1.Name = "button1";
+            this.button1.Size = new System.Drawing.Size(33, 20);
+            this.button1.TabIndex = 83;
+            this.button1.Text = "✕";
+            this.button1.UseVisualStyleBackColor = false;
+            // 
+            // btnMin
+            // 
+            this.btnMin.BackColor = System.Drawing.Color.Snow;
+            this.btnMin.Font = new System.Drawing.Font("Meiryo UI", 6.75F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(128)));
+            this.btnMin.Location = new System.Drawing.Point(318, 1);
+            this.btnMin.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
+            this.btnMin.Name = "btnMin";
+            this.btnMin.Size = new System.Drawing.Size(33, 20);
+            this.btnMin.TabIndex = 82;
+            this.btnMin.Text = "―";
+            this.btnMin.UseVisualStyleBackColor = false;
+            // 
+            // WaitSimulationFm
             // 
             this.ClientSize = new System.Drawing.Size(397, 243);
+            this.Controls.Add(this.button1);
+            this.Controls.Add(this.btnMin);
             this.Controls.Add(this.progressBar1);
             this.Controls.Add(this.pictBx1);
             this.Controls.Add(this.lblMessage);
-            this.Name = "FormAnimation1";
+            this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
+            this.Name = "WaitSimulationFm";
+            this.Opacity = 0.95D;
             this.ShowInTaskbar = false;
             ((System.ComponentModel.ISupportInitialize)(this.pictBx1)).EndInit();
             this.ResumeLayout(false);
@@ -85,5 +117,7 @@ namespace あすよん月次帳票
         #endregion
 
         private ProgressBar progressBar1;
+        private Button button1;
+        private Button btnMin;
     }
 }

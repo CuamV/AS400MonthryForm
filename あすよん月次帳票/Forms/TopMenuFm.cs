@@ -91,23 +91,6 @@ namespace あすよん月次帳票
         }
 
         /// <summary>
-        /// 定型帳票リンククリック
-        /// </summary>
-        /// <param name="sender"></param>
-        /// <param name="e"></param>
-        private void lnkLbStandard_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
-        {
-            HIZTIM = $"{DateTime.Now:yyyy/MM/dd HH:mm:ss}";
-            fam.AddLog($"{HIZTIM} コントロール 1 {CMD.UserName} lnkLbStandard_LinkClicked");
-            // Form2を作成
-            var form2 = new DataExtractionFm();
-            // Form2を表示
-            form2.Show();
-            // Form1を非表示
-            this.Hide();
-        }
-
-        /// <summary>
         /// データ抽出リンククリック
         /// </summary>
         /// <param name="sender"></param>
@@ -336,7 +319,7 @@ namespace あすよん月次帳票
             HIZTIM = $"{DateTime.Now:yyyy/MM/dd HH:mm:ss}";
             fam.AddLog($"{HIZTIM} デザイン関連メソッド 1 {CMD.UserName} ApplySnowManColors");
             // フォーム全体の背景色
-            this.BackColor = clrmg.RauLight1;  // 背景黒
+            this.BackColor = Color.Snow;  // 背景黒
             // ラベルの色
             lbメニュー.ForeColor = clrmg.MemeBase;  // 白文字
             lb操作履歴.ForeColor = clrmg.MemeBase;  // 文字白

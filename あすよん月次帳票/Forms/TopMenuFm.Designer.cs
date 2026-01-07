@@ -150,6 +150,7 @@ namespace あすよん月次帳票
             // 
             // TopMenuFm
             // 
+            this.BackColor = System.Drawing.Color.Snow;
             this.ClientSize = new System.Drawing.Size(629, 468);
             this.Controls.Add(this.lbメニュー);
             this.Controls.Add(this.grpBxメニュー);

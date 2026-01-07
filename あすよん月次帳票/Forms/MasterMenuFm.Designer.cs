@@ -143,11 +143,11 @@
             this.btn戻る.TabIndex = 9;
             this.btn戻る.Text = "戻る";
             this.btn戻る.UseVisualStyleBackColor = true;
-            this.btn戻る.Click += new System.EventHandler(this.btn戻る_Click);
+            this.btn戻る.Click += new System.EventHandler(this.btnForm1Back_Click);
             // 
             // MasterMenuFm
             // 
-            this.AutoScaleDimensions = new System.Drawing.SizeF(10F, 22F);
+            this.AutoScaleDimensions = new System.Drawing.SizeF(9F, 19F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(579, 438);
             this.Controls.Add(this.btn戻る);
