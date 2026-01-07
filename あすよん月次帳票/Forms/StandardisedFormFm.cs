@@ -335,28 +335,130 @@ namespace あすよん月次帳票
             {
                 xlSheet.Name = $"{CMD.TYM}月次帳票";
 
-                // ヘッダー行
-                xlSheet.Cells[1, 1] = "分類";
-                xlSheet.Cells[1, 2] = "部門グループ";
-                xlSheet.Cells[1, 3] = "金額";
+                // ==========================================
+                // 分類ごとにオーノ・サンミックに分類
+                // ==========================================
+                var categoryOrder = new[] { "製品売上高", "原材料売上高", "製品仕入高", "原材料仕入高", "製品在庫", "原材料在庫", "仕掛品在庫" };
 
-                // ヘッダー書式設定
-                var headerRange = xlSheet.Range[xlSheet.Cells[1, 1], xlSheet.Cells[1, 3]];
-                headerRange.Font.Bold = true;
-                headerRange.Interior.Color = System.Drawing.ColorTranslator.ToOle(System.Drawing.Color.LightGray);
-                headerRange.Borders.LineStyle = Microsoft.Office.Interop.Excel.XlLineStyle.xlContinuous;
+                // 分類ごとにグループ化
+                var groupedData = new List<(string Category, List<DataRow> OhnoRows, List<DataRow> SanmicRows)>();
 
-                // データ書き込み
-                for (int i = 0; i < data.Rows.Count; i++)
+                foreach (var category in categoryOrder)
                 {
-                    xlSheet.Cells[i + 2, 1] = data.Rows[i]["分類"];
-                    xlSheet.Cells[i + 2, 2] = data.Rows[i]["部門グループ"];
-                    xlSheet.Cells[i + 2, 3] = data.Rows[i]["金額"];
+                    var categoryRows = data.AsEnumerable()
+                        .Where(r => r["分類"].ToString() == category)
+                        .ToList();
+
+                    if (categoryRows.Count == 0) continue;
+
+                    var ohnoRows = categoryRows
+                        .Where(r => r["部門グループ"].ToString().Contains("#110～") ||
+                                   r["部門グループ"].ToString() == "#800")
+                        .ToList();
+
+                    var sanmicRows = categoryRows
+                        .Where(r => r["部門グループ"].ToString() == "#900,950")
+                        .ToList();
+
+                    groupedData.Add((category, ohnoRows, sanmicRows));
                 }
 
-                // 金額列の書式設定
-                var amountRange = xlSheet.Range[xlSheet.Cells[2, 3], xlSheet.Cells[data.Rows.Count + 1, 3]];
-                amountRange.NumberFormat = "#,##0";
+                // ==========================================
+                // ヘッダー行（1行目）
+                // ==========================================
+                xlSheet.Cells[1, 1] = "オーノ";
+                xlSheet.Cells[1, 4] = "サンミック";
+
+                // ヘッダーのセル結合（A1:C1, D1:F1）
+                xlSheet.Range[xlSheet.Cells[1, 1], xlSheet.Cells[1, 3]].Merge();
+                xlSheet.Range[xlSheet.Cells[1, 4], xlSheet.Cells[1, 6]].Merge();
+
+                // ヘッダーの書式設定
+                var headerRange = xlSheet.Range[xlSheet.Cells[1, 1], xlSheet.Cells[1, 6]];
+                headerRange.Font.Name = "Meiryo UI";
+                headerRange.Font.Size = 12;
+                headerRange.Font.Bold = true;
+                headerRange.HorizontalAlignment = Microsoft.Office.Interop.Excel.XlHAlign.xlHAlignCenter;
+                headerRange.VerticalAlignment = Microsoft.Office.Interop.Excel.XlVAlign.xlVAlignCenter;
+
+                // ==========================================
+                // データ書き込み
+                // ==========================================
+                int currentRow = 2;
+                foreach (var (category, ohnoRows, sanmicRows) in groupedData)
+                {
+                    int maxRows = Math.Max(ohnoRows.Count, sanmicRows.Count);
+
+                    for (int i = 0; i < maxRows; i++)
+                    {
+                        // --- オーノ側（列A～C） ---
+                        if (i < ohnoRows.Count)
+                        {
+                            xlSheet.Cells[currentRow, 1] = ohnoRows[i]["分類"];
+                            xlSheet.Cells[currentRow, 2] = ohnoRows[i]["部門グループ"];
+                            xlSheet.Cells[currentRow, 3] = ohnoRows[i]["金額"];
+                        }
+                        else
+                        {
+                            // 空白行（セル結合）
+                            xlSheet.Cells[currentRow, 1] = "";
+                            xlSheet.Cells[currentRow, 2] = "";
+                            xlSheet.Cells[currentRow, 3] = "";
+                            xlSheet.Range[xlSheet.Cells[currentRow, 1], xlSheet.Cells[currentRow, 3]].Merge();
+                            xlSheet.Range[xlSheet.Cells[currentRow, 1], xlSheet.Cells[currentRow, 3]].HorizontalAlignment =
+                                Microsoft.Office.Interop.Excel.XlHAlign.xlHAlignCenter;
+                        }
+
+                        // --- サンミック側（列D～F） ---
+                        if (i < sanmicRows.Count)
+                        {
+                            xlSheet.Cells[currentRow, 4] = sanmicRows[i]["分類"];
+                            xlSheet.Cells[currentRow, 5] = sanmicRows[i]["部門グループ"];
+                            xlSheet.Cells[currentRow, 6] = sanmicRows[i]["金額"];
+                        }
+                        else
+                        {
+                            // 空白行（セル結合）
+                            xlSheet.Cells[currentRow, 4] = "";
+                            xlSheet.Cells[currentRow, 5] = "";
+                            xlSheet.Cells[currentRow, 6] = "";
+                            xlSheet.Range[xlSheet.Cells[currentRow, 4], xlSheet.Cells[currentRow, 6]].Merge();
+                            xlSheet.Range[xlSheet.Cells[currentRow, 4], xlSheet.Cells[currentRow, 6]].HorizontalAlignment =
+                                Microsoft.Office.Interop.Excel.XlHAlign.xlHAlignCenter;
+                        }
+
+                        currentRow++;
+                    }
+                }
+
+                // ==========================================
+                // 全体の書式設定
+                // ==========================================
+                var dataRange = xlSheet.Range[xlSheet.Cells[1, 1], xlSheet.Cells[currentRow - 1, 6]];
+
+                // フォント設定
+                dataRange.Font.Name = "Meiryo UI";
+                dataRange.Font.Size = 12;
+
+                // 罫線設定
+                dataRange.Borders.LineStyle = Microsoft.Office.Interop.Excel.XlLineStyle.xlContinuous;
+                dataRange.Borders.Weight = Microsoft.Office.Interop.Excel.XlBorderWeight.xlThin;
+
+                // 金額列の書式設定（C列とF列）
+                var amountRangeC = xlSheet.Range[xlSheet.Cells[2, 3], xlSheet.Cells[currentRow - 1, 3]];
+                amountRangeC.NumberFormat = "#,##0";
+                amountRangeC.HorizontalAlignment = Microsoft.Office.Interop.Excel.XlHAlign.xlHAlignRight;
+
+                var amountRangeF = xlSheet.Range[xlSheet.Cells[2, 6], xlSheet.Cells[currentRow - 1, 6]];
+                amountRangeF.NumberFormat = "#,##0";
+                amountRangeF.HorizontalAlignment = Microsoft.Office.Interop.Excel.XlHAlign.xlHAlignRight;
+
+                // 分類・部門グループ列の中央揃え（A・B・D・E列）
+                var categoryGroupRangeAB = xlSheet.Range[xlSheet.Cells[2, 1], xlSheet.Cells[currentRow - 1, 2]];
+                categoryGroupRangeAB.HorizontalAlignment = Microsoft.Office.Interop.Excel.XlHAlign.xlHAlignCenter;
+
+                var categoryGroupRangeDE = xlSheet.Range[xlSheet.Cells[2, 4], xlSheet.Cells[currentRow - 1, 5]];
+                categoryGroupRangeDE.HorizontalAlignment = Microsoft.Office.Interop.Excel.XlHAlign.xlHAlignCenter;
 
                 // 列幅自動調整
                 xlSheet.Columns.AutoFit();
@@ -367,7 +469,7 @@ namespace あすよん月次帳票
                 xlApp.Quit();
 
                 // 保存後に開くか確認
-                var result = MessageBox.Show("Excelを保存しました。\n開きますか?", "保存完了",
+                var result = MessageBox.Show("Excelを保存しました。\n開きますか? ", "保存完了",
                     MessageBoxButtons.YesNo, MessageBoxIcon.Question);
                 if (result == DialogResult.Yes)
                 {
@@ -385,6 +487,23 @@ namespace あすよん月次帳票
             }
         }
 
+        /// <summary>
+        /// 分類の並び順を定義
+        /// </summary>
+        private int GetCategoryOrder(string category)
+        {
+            switch (category)
+            {
+                case "製品売上高": return 1;
+                case "原材料売上高": return 2;
+                case "製品仕入高": return 3;
+                case "原材料仕入高": return 4;
+                case "製品在庫": return 5;
+                case "原材料在庫": return 6;
+                case "仕掛品在庫": return 7;
+                default: return 99;
+            }
+        }
         //=================================================================
         // デザイン関連メソッド
         //=================================================================
