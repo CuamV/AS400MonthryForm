@@ -381,6 +381,7 @@
       <DesignTimeSharedInput>True</DesignTimeSharedInput>
     </Compile>
     <None Include="あすよん月次帳票_TemporaryKey.pfx" />
+    <None Include="社長依頼金額合計.xlsm" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />
