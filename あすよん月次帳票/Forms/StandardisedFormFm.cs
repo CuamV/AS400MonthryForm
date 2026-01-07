@@ -364,17 +364,38 @@ namespace あすよん月次帳票
                 }
 
                 // ==========================================
-                // ヘッダー行（1行目）
+                // 年月度表示（1行目）
                 // ==========================================
-                xlSheet.Cells[1, 1] = "オーノ";
-                xlSheet.Cells[1, 4] = "サンミック";
+                string yearMonth = CMD.TYM; // yyyymm形式
+                int year = int.Parse(yearMonth.Substring(0, 4));
+                int month = int.Parse(yearMonth.Substring(4, 2));
+                string displayYearMonth = $"<{year}年{month}月度>";
+
+                xlSheet.Cells[1, 1] = displayYearMonth;
+
+                // 年月度のセル結合（A1:F1）
+                xlSheet.Range[xlSheet.Cells[1, 1], xlSheet.Cells[1, 6]].Merge();
+
+                // 年月度の書式設定
+                var yearMonthRange = xlSheet.Range[xlSheet.Cells[1, 1], xlSheet.Cells[1, 6]];
+                yearMonthRange.Font.Name = "Meiryo UI";
+                yearMonthRange.Font.Size = 12;
+                yearMonthRange.Font.Bold = true;
+                yearMonthRange.HorizontalAlignment = Microsoft.Office.Interop.Excel.XlHAlign.xlHAlignCenter;
+                yearMonthRange.VerticalAlignment = Microsoft.Office.Interop.Excel.XlVAlign.xlVAlignCenter;
+
+                // ==========================================
+                // ヘッダー行（3行目）※2行目は空白
+                // ==========================================
+                xlSheet.Cells[3, 1] = "オーノ";
+                xlSheet.Cells[3, 4] = "サンミック";
 
                 // ヘッダーのセル結合（A1:C1, D1:F1）
-                xlSheet.Range[xlSheet.Cells[1, 1], xlSheet.Cells[1, 3]].Merge();
-                xlSheet.Range[xlSheet.Cells[1, 4], xlSheet.Cells[1, 6]].Merge();
+                xlSheet.Range[xlSheet.Cells[3, 1], xlSheet.Cells[3, 3]].Merge();
+                xlSheet.Range[xlSheet.Cells[3, 4], xlSheet.Cells[3, 6]].Merge();
 
                 // ヘッダーの書式設定
-                var headerRange = xlSheet.Range[xlSheet.Cells[1, 1], xlSheet.Cells[1, 6]];
+                var headerRange = xlSheet.Range[xlSheet.Cells[3, 1], xlSheet.Cells[3, 6]];
                 headerRange.Font.Name = "Meiryo UI";
                 headerRange.Font.Size = 12;
                 headerRange.Font.Bold = true;
@@ -382,9 +403,9 @@ namespace あすよん月次帳票
                 headerRange.VerticalAlignment = Microsoft.Office.Interop.Excel.XlVAlign.xlVAlignCenter;
 
                 // ==========================================
-                // データ書き込み
+                // データ書き込み（4行目から）
                 // ==========================================
-                int currentRow = 2;
+                int currentRow = 4;
                 foreach (var (category, ohnoRows, sanmicRows) in groupedData)
                 {
                     int maxRows = Math.Max(ohnoRows.Count, sanmicRows.Count);
@@ -400,13 +421,19 @@ namespace あすよん月次帳票
                         }
                         else
                         {
-                            // 空白行（セル結合）
+                            // 空白行（セル結合　+ 斜め罫線）
                             xlSheet.Cells[currentRow, 1] = "";
                             xlSheet.Cells[currentRow, 2] = "";
                             xlSheet.Cells[currentRow, 3] = "";
-                            xlSheet.Range[xlSheet.Cells[currentRow, 1], xlSheet.Cells[currentRow, 3]].Merge();
-                            xlSheet.Range[xlSheet.Cells[currentRow, 1], xlSheet.Cells[currentRow, 3]].HorizontalAlignment =
-                                Microsoft.Office.Interop.Excel.XlHAlign.xlHAlignCenter;
+                            var emptyRangeOhno = xlSheet.Range[xlSheet.Cells[currentRow, 1], xlSheet.Cells[currentRow, 3]];
+                            emptyRangeOhno.Merge();
+                            emptyRangeOhno.HorizontalAlignment = Microsoft.Office.Interop.Excel.XlHAlign.xlHAlignCenter;
+
+                            // 斜め罫線を追加（左上から右下）
+                            emptyRangeOhno.Borders[Microsoft.Office.Interop.Excel.XlBordersIndex.xlDiagonalDown].LineStyle =
+                                Microsoft.Office.Interop.Excel.XlLineStyle.xlContinuous;
+                            emptyRangeOhno.Borders[Microsoft.Office.Interop.Excel.XlBordersIndex.xlDiagonalDown].Weight =
+                                Microsoft.Office.Interop.Excel.XlBorderWeight.xlThin;
                         }
 
                         // --- サンミック側（列D～F） ---
@@ -422,9 +449,15 @@ namespace あすよん月次帳票
                             xlSheet.Cells[currentRow, 4] = "";
                             xlSheet.Cells[currentRow, 5] = "";
                             xlSheet.Cells[currentRow, 6] = "";
-                            xlSheet.Range[xlSheet.Cells[currentRow, 4], xlSheet.Cells[currentRow, 6]].Merge();
-                            xlSheet.Range[xlSheet.Cells[currentRow, 4], xlSheet.Cells[currentRow, 6]].HorizontalAlignment =
-                                Microsoft.Office.Interop.Excel.XlHAlign.xlHAlignCenter;
+                            var emptyRangeSanmic = xlSheet.Range[xlSheet.Cells[currentRow, 4], xlSheet.Cells[currentRow, 6]];
+                            emptyRangeSanmic.Merge();
+                            emptyRangeSanmic.HorizontalAlignment = Microsoft.Office.Interop.Excel.XlHAlign.xlHAlignCenter;
+
+                            // 斜め罫線を追加（左上から右下）
+                            emptyRangeSanmic.Borders[Microsoft.Office.Interop.Excel.XlBordersIndex.xlDiagonalDown].LineStyle =
+                                Microsoft.Office.Interop.Excel.XlLineStyle.xlContinuous;
+                            emptyRangeSanmic.Borders[Microsoft.Office.Interop.Excel.XlBordersIndex.xlDiagonalDown].Weight =
+                                Microsoft.Office.Interop.Excel.XlBorderWeight.xlThin;
                         }
 
                         currentRow++;
@@ -434,7 +467,7 @@ namespace あすよん月次帳票
                 // ==========================================
                 // 全体の書式設定
                 // ==========================================
-                var dataRange = xlSheet.Range[xlSheet.Cells[1, 1], xlSheet.Cells[currentRow - 1, 6]];
+                var dataRange = xlSheet.Range[xlSheet.Cells[3, 1], xlSheet.Cells[currentRow - 1, 6]];
 
                 // フォント設定
                 dataRange.Font.Name = "Meiryo UI";
@@ -445,19 +478,19 @@ namespace あすよん月次帳票
                 dataRange.Borders.Weight = Microsoft.Office.Interop.Excel.XlBorderWeight.xlThin;
 
                 // 金額列の書式設定（C列とF列）
-                var amountRangeC = xlSheet.Range[xlSheet.Cells[2, 3], xlSheet.Cells[currentRow - 1, 3]];
+                var amountRangeC = xlSheet.Range[xlSheet.Cells[4, 3], xlSheet.Cells[currentRow - 1, 3]];
                 amountRangeC.NumberFormat = "#,##0";
                 amountRangeC.HorizontalAlignment = Microsoft.Office.Interop.Excel.XlHAlign.xlHAlignRight;
 
-                var amountRangeF = xlSheet.Range[xlSheet.Cells[2, 6], xlSheet.Cells[currentRow - 1, 6]];
+                var amountRangeF = xlSheet.Range[xlSheet.Cells[4, 6], xlSheet.Cells[currentRow - 1, 6]];
                 amountRangeF.NumberFormat = "#,##0";
                 amountRangeF.HorizontalAlignment = Microsoft.Office.Interop.Excel.XlHAlign.xlHAlignRight;
 
                 // 分類・部門グループ列の中央揃え（A・B・D・E列）
-                var categoryGroupRangeAB = xlSheet.Range[xlSheet.Cells[2, 1], xlSheet.Cells[currentRow - 1, 2]];
+                var categoryGroupRangeAB = xlSheet.Range[xlSheet.Cells[4, 1], xlSheet.Cells[currentRow - 1, 2]];
                 categoryGroupRangeAB.HorizontalAlignment = Microsoft.Office.Interop.Excel.XlHAlign.xlHAlignCenter;
 
-                var categoryGroupRangeDE = xlSheet.Range[xlSheet.Cells[2, 4], xlSheet.Cells[currentRow - 1, 5]];
+                var categoryGroupRangeDE = xlSheet.Range[xlSheet.Cells[4, 4], xlSheet.Cells[currentRow - 1, 5]];
                 categoryGroupRangeDE.HorizontalAlignment = Microsoft.Office.Interop.Excel.XlHAlign.xlHAlignCenter;
 
                 // 列幅自動調整
