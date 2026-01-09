@@ -1199,6 +1199,17 @@ namespace あすよん月次帳票
             File.AppendAllText(logFilePath,
                 $"{DateTime.Now:yyyy/MM/dd HH:mm:ss} | {message} ({Environment.MachineName}){Environment.NewLine}");
         }
+
+        internal void ErrLog(Exception err, string mst)
+        {
+            if (!Directory.Exists(CMD.LogPath))
+                Directory.CreateDirectory(CMD.LogPath);
+            // エラーログ
+            string TIM = $"{DateTime.Now:HHmmss}";
+            string fileName = $"ERR_{mst}_{CMD.UserID}.{CMD.HIZ}.{TIM}.txt";
+            File.AppendAllText(Path.Combine(CMD.LogPath, fileName), err.StackTrace);
+        }
+
         /// <summary>
         /// 各FormのlistBxSituationとメモリ上にログ追加
         /// </summary>
@@ -1274,8 +1285,11 @@ namespace あすよん月次帳票
         /// <param name="bumonCD"></param>
         /// <param name="newLine"></param>
         /// <returns></returns>
-        internal (List<string>, bool) AddMasterFile(List<string> lines, string CD1, string newLine)
+        internal (List<string>, bool) AddMasterFile(List<string> lines, List<string> newLineList)
         {
+            // newLineListを半角スペース区切りの文字列に変換
+            string newLine = string.Join(" ", newLineList);
+            string CD1 = newLineList[0]; // 1項目目をキーとする
             bool replaced = false;
             // 既存データチェック(重複)
             for (int i = 0; i < lines.Count; i++)
@@ -1301,11 +1315,15 @@ namespace あすよん月次帳票
         /// (※1,2項目目キー)
         /// </summary>
         /// <param name="lines"></param>
-        /// <param name="bumonCD"></param>
-        /// <param name="newLine"></param>
+        /// <param name="newLineList"></param>
         /// <returns></returns>
-        internal (List<string>, List<string>, bool) AddMasterFile(List<string> lines, List<string> lines_bumon, string CD1, string CD2, string newLine, string newLine_bumon)
+        internal (List<string>, bool) AddMasterFile2(List<string> lines, List<string> newLineList)
         {
+            // newLineListを半角スペース区切りの文字列に変換
+            string newLine = string.Join(" ", newLineList);
+            string CD1 = newLineList[0]; // 1項目目をキーとする
+            string CD2 = newLineList[1]; // 2項目目をキーとする
+
             bool replaced = false;
             // 既存データチェック(重複)
             for (int i = 0; i < lines.Count; i++)
@@ -1313,9 +1331,9 @@ namespace あすよん月次帳票
                 if (string.IsNullOrWhiteSpace(lines[i])) continue;
 
                 var parts = lines[i].Split(' ');
-                // 仕入先・販売先
-                //----------------------------------------------------
-                if (parts.Length > 0 && parts[0] == CD1)
+                
+                // 1項目目と2項目目の両方が一致する場合のみ上書き
+                if (parts.Length > 1 && parts[0] == CD1 && parts[1] == CD2)
                 {
                     // 重複あり→上書き
                     lines[i] = newLine;
@@ -1323,27 +1341,34 @@ namespace あすよん月次帳票
                     break;
                 }
             }
-            for (int i = 0; i < lines_bumon.Count; i++)
-            {
-                if (string.IsNullOrWhiteSpace(lines[i])) continue;
-                var parts = lines_bumon[i].Split(' ');
-                // 1:取引先CD 2:部門CD
-                //----------------------------------------------------
-                if (parts.Length > 1 && parts[0] == CD1 && parts[1] == CD2)
-                {
-                    // 重複あり→上書き
-                    lines_bumon[i] = newLine_bumon;
-                    replaced = true;
-                    break;
-                }
-            }
-            // 新規追加
+            
+            // 新規追加(両方のキーが一致しない場合)
             if (!replaced) lines.Add(newLine);
-            if (!replaced) lines_bumon.Add(newLine_bumon);
 
-            return (lines, lines_bumon, replaced);
+            return (lines, replaced);
         }
 
+        /// <summary>
+        /// 入力内容クリア処理
+        /// </summary>
+        /// <param name="_inputControls"></param>
+        internal void ClearInput(List<Control> _inputControls)
+        {
+            foreach (var input in _inputControls)
+            {
+                if (input is ComboBox cb)
+                    cb.SelectedItem = null;
+                if (input is TextBox tb)
+                    tb.Clear();
+                if (input is CheckedListBox clb)
+                {
+                    for (int i = 0; i < clb.Items.Count; i++)
+                    {
+                        clb.SetItemChecked(i, false);
+                    }
+                }
+            }
+        }
         /// <summary>
         /// ★マスタファイルバックアップ処理
         /// </summary>
@@ -1404,19 +1429,23 @@ namespace あすよん月次帳票
         /// </summary>
         /// <param name="mf"></param>
         /// <param name="mst"></param>
-        internal List<string> CheckAndLoadMater(string mf, string mst, Encoding encod)
+        internal List<string> CheckAndLoadMater(string mf, string mst, Encoding encod, int flg)
         {
             List<string> lines = new List<string>();
             // ファイルチェック
             if (!File.Exists(mf))
             {
-                MessageBox.Show($"{mst}ファイルが存在しません。",
+                if (flg == 1)
+                {
+                    MessageBox.Show($"{mst}ファイルが存在しません。",
                     "エラー", MessageBoxButtons.OK, MessageBoxIcon.Error);
 
-                HIZTIM = $"{DateTime.Now:yyyy/MM/dd HH:mm:ss}";
-                AddLog($"{HIZTIM} エラー 1 {CMD.UserID} BackupMaster {mst}");
-                AddLog2($"{HIZTIM} エラー 1 {CMD.UserID} BackupMaster {mst}ファイルなし");
-                return lines;
+                    HIZTIM = $"{DateTime.Now:yyyy/MM/dd HH:mm:ss}";
+                    AddLog($"{HIZTIM} エラー 1 {CMD.UserID} BackupMaster {mst}");
+                    AddLog2($"{HIZTIM} エラー 1 {CMD.UserID} BackupMaster {mst}ファイルなし");
+                    return lines;
+                }
+                File.Create(mf).Close();
             }
 
             // ファイル読込
@@ -1513,7 +1542,7 @@ namespace あすよん月次帳票
                 // SHIIRE-BUMON: 既存を読み込み、仕入先CD+部門CD をキーに差分置換/追加
                 var existingPairs = new List<string>();
                 if (File.Exists(shiiresBumon))
-                    existingPairs = CheckAndLoadMater(shiiresBumon, "仕入先部門マスタ", CMD.utf8).ToList();
+                    existingPairs = CheckAndLoadMater(shiiresBumon, "仕入先部門マスタ", CMD.utf8, 0).ToList();
 
                 // build map for existing
                 var existMap = new Dictionary<string, string>(); // key: "siireCD|bumonCD" -> line
@@ -1583,12 +1612,73 @@ namespace あすよん月次帳票
             list.Add(sb.ToString());
             return list.ToArray();
         }
-        // 取引先コードで
-        internal void GetMadterTorihiki_Bumon()
-        {
 
+        /// <summary>
+        /// コード桁数チェック
+        /// </summary>
+        /// <param name="codeNmae"></param>
+        /// <param name="code"></param>
+        /// <param name="len"></param>
+        /// <returns></returns>
+        /// <exception cref="Exception"></exception>
+        internal bool CheckedErrLength(string codeNmae, string code, int len)
+        {
+            if (!Regex.IsMatch(code, "^[0-9]{" + len + "}$"))
+            {
+                MessageBox.Show($"{codeNmae}は半角数字{len}桁で入力して下さい。", "入力エラー", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                throw new Exception("");
+            }
+            return true;
         }
 
+        /// <summary>
+        /// 必須項目入力チェック(空白)
+        /// </summary>
+        /// <param name="ToriInTxtDic"></param>
+        /// <returns></returns>
+        internal bool CheckedNullOrWhiteSpace(Dictionary<string, string> ToriInTxtDic)
+        {
+            foreach (var input in ToriInTxtDic)
+            {
+                if (string.IsNullOrWhiteSpace(input.Value))
+                {
+                    MessageBox.Show($"{input.Key}を入力して下さい。", "入力エラー", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    return false;
+                }
+            }
+            return true;
+        }
+
+        /// <summary>
+        /// 登録確認メッセージボックス
+        /// </summary>
+        /// <param name="mst"></param>
+        /// <returns></returns>
+        internal bool CheckedAddYesNo(string mst)
+        {
+            if (MessageBox.Show($"{mst}登録を行います。\n", "【マスタ登録】",
+                MessageBoxButtons.YesNo, MessageBoxIcon.None) == DialogResult.No) return false;
+            return true;
+        }
+
+        /// <summary>
+        /// 入力内容の半角数字チェック
+        /// </summary>
+        /// <param name="allowHyphen"></param>
+        /// <param name="name"></param>
+        /// <param name="pCode"></param>
+        /// <returns></returns>
+        internal bool CheckedHalfNum(string name, string pCode, bool allowHyphen)
+        {
+            string pattern = allowHyphen ? @"^[0-9-]+$" : @"^[0-9]+$";
+            if (!Regex.IsMatch(pCode, pattern))
+            {
+                if (string.IsNullOrWhiteSpace(pCode)) return true; // 空白は許容
+                MessageBox.Show($"{name}は半角数字{(allowHyphen ? "またはハイフンを含む" : "")}で入力して下さい。", "入力エラー", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                return false;
+            }
+            return true;
+        }
 
         // 以下のメソッドは不要なため後ほど削除
         internal List<string> SelectCompany_Bumon(string company, string mst)
@@ -1597,7 +1687,7 @@ namespace あすよん月次帳票
 
             // 1:部門コード 2:部門名 3:部門名カナ 4:会社
             CMD.utf8 = Encoding.GetEncoding("UTF-8");
-            var lines = CheckAndLoadMater(Path.Combine(CMD.mfPath,"BUMON.txt"), mst , CMD.utf8);
+            var lines = CheckAndLoadMater(Path.Combine(CMD.mfPath,"BUMON.txt"), mst , CMD.utf8, 0);
 
             // 既存データチェック(重複)
             for (int i = 0; i < lines.Count; i++)

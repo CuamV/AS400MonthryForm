@@ -28,6 +28,7 @@
         /// </summary>
         private void InitializeComponent()
         {
+            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(MasterMenuFm));
             this.btn旧取引先 = new System.Windows.Forms.Button();
             this.btn販売先マスタ = new System.Windows.Forms.Button();
             this.btn取引先マスタ = new System.Windows.Forms.Button();
@@ -60,6 +61,7 @@
             this.btn販売先マスタ.TabIndex = 1;
             this.btn販売先マスタ.Text = "郵便番号辞書";
             this.btn販売先マスタ.UseVisualStyleBackColor = true;
+            this.btn販売先マスタ.Click += new System.EventHandler(this.btn郵便番号辞書_Click);
             // 
             // btn取引先マスタ
             // 
@@ -70,7 +72,7 @@
             this.btn取引先マスタ.TabIndex = 2;
             this.btn取引先マスタ.Text = "取引先マスタ";
             this.btn取引先マスタ.UseVisualStyleBackColor = true;
-            this.btn取引先マスタ.Click += new System.EventHandler(this.btn仕入先マスタ_Click);
+            this.btn取引先マスタ.Click += new System.EventHandler(this.btn取引先マスタ_Click);
             // 
             // btn得意先
             // 
@@ -161,6 +163,7 @@
             this.Controls.Add(this.btn販売先マスタ);
             this.Controls.Add(this.btn旧取引先);
             this.Font = new System.Drawing.Font("Meiryo UI", 11.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(128)));
+            this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
             this.Name = "MasterMenuFm";
             this.Text = "Form5";
             this.ResumeLayout(false);

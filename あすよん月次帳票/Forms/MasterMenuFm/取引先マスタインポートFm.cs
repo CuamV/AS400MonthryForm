@@ -211,7 +211,7 @@ namespace あすよん月次帳票
                 // 更に、エラー列を追加し、エラー内容を記載してエラー行のみプレビューに表示
                 // ----------------------------------------------------
                 // 部門マスタファイル読込
-                var bumonLines = fam.CheckAndLoadMater(BUMONmf, "部門マスタ", CMD.utf8);
+                var bumonLines = fam.CheckAndLoadMater(BUMONmf, "部門マスタ", CMD.utf8, 1);
                 var bumonSet = new HashSet<string>(bumonLines
                     .Where(l => !string.IsNullOrWhiteSpace(l))
                     .Select(l => l.Split(' ')[0].Trim()));

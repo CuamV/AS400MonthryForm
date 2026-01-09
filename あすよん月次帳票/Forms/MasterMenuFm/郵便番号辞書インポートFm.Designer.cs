@@ -29,7 +29,7 @@
         private void InitializeComponent()
         {
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(郵便番号辞書インポートFm));
-            this.btnファイル選択 = new System.Windows.Forms.Button();
+            this.btn参照 = new System.Windows.Forms.Button();
             this.txtBxファイル選択 = new System.Windows.Forms.TextBox();
             this.btnインポート = new System.Windows.Forms.Button();
             this.btn戻る = new System.Windows.Forms.Button();
@@ -38,16 +38,16 @@
             this.lbステータス = new System.Windows.Forms.Label();
             this.SuspendLayout();
             // 
-            // btnファイル選択
+            // btn参照
             // 
-            this.btnファイル選択.Font = new System.Drawing.Font("Meiryo UI", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(128)));
-            this.btnファイル選択.Location = new System.Drawing.Point(265, 56);
-            this.btnファイル選択.Name = "btnファイル選択";
-            this.btnファイル選択.Size = new System.Drawing.Size(77, 26);
-            this.btnファイル選択.TabIndex = 0;
-            this.btnファイル選択.Text = "ファイル選択";
-            this.btnファイル選択.UseVisualStyleBackColor = false;
-            this.btnファイル選択.Click += new System.EventHandler(this.btnファイル選択_Click);
+            this.btn参照.Font = new System.Drawing.Font("Meiryo UI", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(128)));
+            this.btn参照.Location = new System.Drawing.Point(265, 56);
+            this.btn参照.Name = "btn参照";
+            this.btn参照.Size = new System.Drawing.Size(77, 26);
+            this.btn参照.TabIndex = 0;
+            this.btn参照.Text = "参照";
+            this.btn参照.UseVisualStyleBackColor = false;
+            this.btn参照.Click += new System.EventHandler(this.btn参照_Click);
             // 
             // txtBxファイル選択
             // 
@@ -116,7 +116,7 @@
             this.Controls.Add(this.btn戻る);
             this.Controls.Add(this.btnインポート);
             this.Controls.Add(this.txtBxファイル選択);
-            this.Controls.Add(this.btnファイル選択);
+            this.Controls.Add(this.btn参照);
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
             this.Name = "郵便番号辞書インポートFm";
             this.Text = "郵便番号辞書インポート";
@@ -127,7 +127,7 @@
 
         #endregion
 
-        private System.Windows.Forms.Button btnファイル選択;
+        private System.Windows.Forms.Button btn参照;
         private System.Windows.Forms.TextBox txtBxファイル選択;
         private System.Windows.Forms.Button btnインポート;
         private System.Windows.Forms.Button btn戻る;

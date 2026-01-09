@@ -38,7 +38,7 @@
             this.cmbBx会社 = new System.Windows.Forms.ComboBox();
             this.lb部門 = new System.Windows.Forms.Label();
             this.btn削除 = new System.Windows.Forms.Button();
-            this.btn次へ = new System.Windows.Forms.Button();
+            this.btn登録 = new System.Windows.Forms.Button();
             this.txtBx取引先名 = new System.Windows.Forms.TextBox();
             this.txtBx取引先正式名 = new System.Windows.Forms.TextBox();
             this.txtBx取引先CD = new System.Windows.Forms.TextBox();
@@ -72,6 +72,8 @@
             this.txtBxFAX番号2 = new System.Windows.Forms.TextBox();
             this.txtBx備考 = new System.Windows.Forms.TextBox();
             this.lb備考 = new System.Windows.Forms.Label();
+            this.chkListBx取引先ロール = new System.Windows.Forms.CheckedListBox();
+            this.lb取引先ロール = new System.Windows.Forms.Label();
             this.btnメニュー.SuspendLayout();
             this.SuspendLayout();
             // 
@@ -81,7 +83,7 @@
             this.btnメニュー.Controls.Add(this.btn照会);
             this.btnメニュー.Controls.Add(this.btnダウンロード);
             this.btnメニュー.Controls.Add(this.btn戻る);
-            this.btnメニュー.Location = new System.Drawing.Point(292, 13);
+            this.btnメニュー.Location = new System.Drawing.Point(289, 13);
             this.btnメニュー.Margin = new System.Windows.Forms.Padding(4);
             this.btnメニュー.Name = "btnメニュー";
             this.btnメニュー.Padding = new System.Windows.Forms.Padding(4);
@@ -141,7 +143,7 @@
             // 
             this.lb会社.AutoSize = true;
             this.lb会社.Font = new System.Drawing.Font("Meiryo UI", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(128)));
-            this.lb会社.Location = new System.Drawing.Point(57, 106);
+            this.lb会社.Location = new System.Drawing.Point(48, 94);
             this.lb会社.Margin = new System.Windows.Forms.Padding(5, 0, 5, 0);
             this.lb会社.Name = "lb会社";
             this.lb会社.Size = new System.Drawing.Size(47, 17);
@@ -156,7 +158,7 @@
             "オーノ",
             "サンミックダスコン",
             "サンミックカーペット"});
-            this.cmbBx会社.Location = new System.Drawing.Point(107, 99);
+            this.cmbBx会社.Location = new System.Drawing.Point(97, 88);
             this.cmbBx会社.Margin = new System.Windows.Forms.Padding(5);
             this.cmbBx会社.Name = "cmbBx会社";
             this.cmbBx会社.Size = new System.Drawing.Size(120, 26);
@@ -167,7 +169,7 @@
             // 
             this.lb部門.AutoSize = true;
             this.lb部門.Font = new System.Drawing.Font("Meiryo UI", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(128)));
-            this.lb部門.Location = new System.Drawing.Point(57, 166);
+            this.lb部門.Location = new System.Drawing.Point(48, 138);
             this.lb部門.Margin = new System.Windows.Forms.Padding(5, 0, 5, 0);
             this.lb部門.Name = "lb部門";
             this.lb部門.Size = new System.Drawing.Size(47, 17);
@@ -177,7 +179,7 @@
             // btn削除
             // 
             this.btn削除.Font = new System.Drawing.Font("Meiryo UI", 10.2F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(128)));
-            this.btn削除.Location = new System.Drawing.Point(518, 479);
+            this.btn削除.Location = new System.Drawing.Point(543, 539);
             this.btn削除.Margin = new System.Windows.Forms.Padding(5);
             this.btn削除.Name = "btn削除";
             this.btn削除.Size = new System.Drawing.Size(80, 30);
@@ -186,21 +188,22 @@
             this.btn削除.UseVisualStyleBackColor = true;
             this.btn削除.Click += new System.EventHandler(this.btn削除_Click);
             // 
-            // btn次へ
+            // btn登録
             // 
-            this.btn次へ.Font = new System.Drawing.Font("Meiryo UI", 10.2F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(128)));
-            this.btn次へ.Location = new System.Drawing.Point(390, 479);
-            this.btn次へ.Margin = new System.Windows.Forms.Padding(5);
-            this.btn次へ.Name = "btn次へ";
-            this.btn次へ.Size = new System.Drawing.Size(80, 30);
-            this.btn次へ.TabIndex = 16;
-            this.btn次へ.Text = "次へ";
-            this.btn次へ.UseVisualStyleBackColor = true;
+            this.btn登録.Font = new System.Drawing.Font("Meiryo UI", 10.2F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(128)));
+            this.btn登録.Location = new System.Drawing.Point(415, 539);
+            this.btn登録.Margin = new System.Windows.Forms.Padding(5);
+            this.btn登録.Name = "btn登録";
+            this.btn登録.Size = new System.Drawing.Size(80, 30);
+            this.btn登録.TabIndex = 16;
+            this.btn登録.Text = "登録";
+            this.btn登録.UseVisualStyleBackColor = true;
+            this.btn登録.Click += new System.EventHandler(this.btn登録_Click);
             // 
             // txtBx取引先名
             // 
             this.txtBx取引先名.Font = new System.Drawing.Font("Meiryo UI", 10.2F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(128)));
-            this.txtBx取引先名.Location = new System.Drawing.Point(378, 157);
+            this.txtBx取引先名.Location = new System.Drawing.Point(365, 151);
             this.txtBx取引先名.Margin = new System.Windows.Forms.Padding(5);
             this.txtBx取引先名.MaxLength = 30;
             this.txtBx取引先名.Name = "txtBx取引先名";
@@ -210,7 +213,7 @@
             // txtBx取引先正式名
             // 
             this.txtBx取引先正式名.Font = new System.Drawing.Font("Meiryo UI", 10.2F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(128)));
-            this.txtBx取引先正式名.Location = new System.Drawing.Point(729, 105);
+            this.txtBx取引先正式名.Location = new System.Drawing.Point(719, 101);
             this.txtBx取引先正式名.Margin = new System.Windows.Forms.Padding(5);
             this.txtBx取引先正式名.MaxLength = 50;
             this.txtBx取引先正式名.Name = "txtBx取引先正式名";
@@ -221,7 +224,7 @@
             // 
             this.txtBx取引先CD.Font = new System.Drawing.Font("Meiryo UI", 10.2F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(128)));
             this.txtBx取引先CD.ImeMode = System.Windows.Forms.ImeMode.Disable;
-            this.txtBx取引先CD.Location = new System.Drawing.Point(381, 107);
+            this.txtBx取引先CD.Location = new System.Drawing.Point(365, 101);
             this.txtBx取引先CD.Margin = new System.Windows.Forms.Padding(5);
             this.txtBx取引先CD.MaxLength = 7;
             this.txtBx取引先CD.Name = "txtBx取引先CD";
@@ -232,7 +235,7 @@
             // 
             this.lb取引先名.AutoSize = true;
             this.lb取引先名.Font = new System.Drawing.Font("Meiryo UI", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(128)));
-            this.lb取引先名.Location = new System.Drawing.Point(302, 161);
+            this.lb取引先名.Location = new System.Drawing.Point(292, 155);
             this.lb取引先名.Margin = new System.Windows.Forms.Padding(5, 0, 5, 0);
             this.lb取引先名.Name = "lb取引先名";
             this.lb取引先名.Size = new System.Drawing.Size(73, 17);
@@ -243,7 +246,7 @@
             // 
             this.lb取引先正式名.AutoSize = true;
             this.lb取引先正式名.Font = new System.Drawing.Font("Meiryo UI", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(128)));
-            this.lb取引先正式名.Location = new System.Drawing.Point(626, 111);
+            this.lb取引先正式名.Location = new System.Drawing.Point(621, 107);
             this.lb取引先正式名.Margin = new System.Windows.Forms.Padding(5, 0, 5, 0);
             this.lb取引先正式名.Name = "lb取引先正式名";
             this.lb取引先正式名.Size = new System.Drawing.Size(99, 17);
@@ -254,7 +257,7 @@
             // 
             this.lb取引先CD.AutoSize = true;
             this.lb取引先CD.Font = new System.Drawing.Font("Meiryo UI", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(128)));
-            this.lb取引先CD.Location = new System.Drawing.Point(296, 113);
+            this.lb取引先CD.Location = new System.Drawing.Point(286, 107);
             this.lb取引先CD.Margin = new System.Windows.Forms.Padding(5, 0, 5, 0);
             this.lb取引先CD.Name = "lb取引先CD";
             this.lb取引先CD.Size = new System.Drawing.Size(79, 17);
@@ -265,7 +268,7 @@
             // 
             this.lb取引先略名.AutoSize = true;
             this.lb取引先略名.Font = new System.Drawing.Font("Meiryo UI", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(128)));
-            this.lb取引先略名.Location = new System.Drawing.Point(289, 211);
+            this.lb取引先略名.Location = new System.Drawing.Point(279, 205);
             this.lb取引先略名.Margin = new System.Windows.Forms.Padding(5, 0, 5, 0);
             this.lb取引先略名.Name = "lb取引先略名";
             this.lb取引先略名.Size = new System.Drawing.Size(86, 17);
@@ -275,7 +278,7 @@
             // txtBx取引先略名
             // 
             this.txtBx取引先略名.Font = new System.Drawing.Font("Meiryo UI", 10.2F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(128)));
-            this.txtBx取引先略名.Location = new System.Drawing.Point(378, 206);
+            this.txtBx取引先略名.Location = new System.Drawing.Point(365, 201);
             this.txtBx取引先略名.Margin = new System.Windows.Forms.Padding(5);
             this.txtBx取引先略名.MaxLength = 20;
             this.txtBx取引先略名.Name = "txtBx取引先略名";
@@ -290,7 +293,7 @@
             "オーノ",
             "サンミックダスコン",
             "サンミックカーペット"});
-            this.cmbBx部門.Location = new System.Drawing.Point(107, 162);
+            this.cmbBx部門.Location = new System.Drawing.Point(97, 134);
             this.cmbBx部門.Margin = new System.Windows.Forms.Padding(5);
             this.cmbBx部門.Name = "cmbBx部門";
             this.cmbBx部門.Size = new System.Drawing.Size(120, 26);
@@ -300,7 +303,7 @@
             // 
             this.lb取引先名カナ.AutoSize = true;
             this.lb取引先名カナ.Font = new System.Drawing.Font("Meiryo UI", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(128)));
-            this.lb取引先名カナ.Location = new System.Drawing.Point(633, 160);
+            this.lb取引先名カナ.Location = new System.Drawing.Point(628, 156);
             this.lb取引先名カナ.Margin = new System.Windows.Forms.Padding(5, 0, 5, 0);
             this.lb取引先名カナ.Name = "lb取引先名カナ";
             this.lb取引先名カナ.Size = new System.Drawing.Size(92, 17);
@@ -310,7 +313,7 @@
             // txtBx取引先名カナ
             // 
             this.txtBx取引先名カナ.Font = new System.Drawing.Font("Meiryo UI", 10.2F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(128)));
-            this.txtBx取引先名カナ.Location = new System.Drawing.Point(729, 155);
+            this.txtBx取引先名カナ.Location = new System.Drawing.Point(719, 151);
             this.txtBx取引先名カナ.Margin = new System.Windows.Forms.Padding(5);
             this.txtBx取引先名カナ.MaxLength = 40;
             this.txtBx取引先名カナ.Name = "txtBx取引先名カナ";
@@ -321,7 +324,7 @@
             // 
             this.lb取引先略名カナ.AutoSize = true;
             this.lb取引先略名カナ.Font = new System.Drawing.Font("Meiryo UI", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(128)));
-            this.lb取引先略名カナ.Location = new System.Drawing.Point(620, 211);
+            this.lb取引先略名カナ.Location = new System.Drawing.Point(615, 207);
             this.lb取引先略名カナ.Margin = new System.Windows.Forms.Padding(5, 0, 5, 0);
             this.lb取引先略名カナ.Name = "lb取引先略名カナ";
             this.lb取引先略名カナ.Size = new System.Drawing.Size(105, 17);
@@ -331,7 +334,7 @@
             // txtBx取引先略名カナ
             // 
             this.txtBx取引先略名カナ.Font = new System.Drawing.Font("Meiryo UI", 10.2F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(128)));
-            this.txtBx取引先略名カナ.Location = new System.Drawing.Point(729, 206);
+            this.txtBx取引先略名カナ.Location = new System.Drawing.Point(719, 201);
             this.txtBx取引先略名カナ.Margin = new System.Windows.Forms.Padding(5);
             this.txtBx取引先略名カナ.MaxLength = 30;
             this.txtBx取引先略名カナ.Name = "txtBx取引先略名カナ";
@@ -342,7 +345,7 @@
             // 
             this.lb郵便番号.AutoSize = true;
             this.lb郵便番号.Font = new System.Drawing.Font("Meiryo UI", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(128)));
-            this.lb郵便番号.Location = new System.Drawing.Point(31, 324);
+            this.lb郵便番号.Location = new System.Drawing.Point(52, 395);
             this.lb郵便番号.Margin = new System.Windows.Forms.Padding(5, 0, 5, 0);
             this.lb郵便番号.Name = "lb郵便番号";
             this.lb郵便番号.Size = new System.Drawing.Size(73, 17);
@@ -352,11 +355,11 @@
             // txtBx郵便番号
             // 
             this.txtBx郵便番号.Font = new System.Drawing.Font("Meiryo UI", 10.2F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(128)));
-            this.txtBx郵便番号.Location = new System.Drawing.Point(107, 320);
+            this.txtBx郵便番号.Location = new System.Drawing.Point(127, 391);
             this.txtBx郵便番号.Margin = new System.Windows.Forms.Padding(5);
             this.txtBx郵便番号.MaxLength = 8;
             this.txtBx郵便番号.Name = "txtBx郵便番号";
-            this.txtBx郵便番号.Size = new System.Drawing.Size(106, 25);
+            this.txtBx郵便番号.Size = new System.Drawing.Size(108, 25);
             this.txtBx郵便番号.TabIndex = 9;
             this.txtBx郵便番号.TextChanged += new System.EventHandler(this.txtBx郵便番号_TextChanged);
             // 
@@ -364,7 +367,7 @@
             // 
             this.lb電話番号1.AutoSize = true;
             this.lb電話番号1.Font = new System.Drawing.Font("Meiryo UI", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(128)));
-            this.lb電話番号1.Location = new System.Drawing.Point(85, 269);
+            this.lb電話番号1.Location = new System.Drawing.Point(284, 264);
             this.lb電話番号1.Margin = new System.Windows.Forms.Padding(5, 0, 5, 0);
             this.lb電話番号1.Name = "lb電話番号1";
             this.lb電話番号1.Size = new System.Drawing.Size(81, 17);
@@ -374,18 +377,18 @@
             // txtBx電話番号1
             // 
             this.txtBx電話番号1.Font = new System.Drawing.Font("Meiryo UI", 10.2F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(128)));
-            this.txtBx電話番号1.Location = new System.Drawing.Point(170, 263);
+            this.txtBx電話番号1.Location = new System.Drawing.Point(366, 259);
             this.txtBx電話番号1.Margin = new System.Windows.Forms.Padding(5);
             this.txtBx電話番号1.MaxLength = 15;
             this.txtBx電話番号1.Name = "txtBx電話番号1";
-            this.txtBx電話番号1.Size = new System.Drawing.Size(109, 25);
+            this.txtBx電話番号1.Size = new System.Drawing.Size(119, 25);
             this.txtBx電話番号1.TabIndex = 14;
             // 
             // lb住所1
             // 
             this.lb住所1.AutoSize = true;
             this.lb住所1.Font = new System.Drawing.Font("Meiryo UI", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(128)));
-            this.lb住所1.Location = new System.Drawing.Point(49, 374);
+            this.lb住所1.Location = new System.Drawing.Point(70, 445);
             this.lb住所1.Margin = new System.Windows.Forms.Padding(5, 0, 5, 0);
             this.lb住所1.Name = "lb住所1";
             this.lb住所1.Size = new System.Drawing.Size(55, 17);
@@ -395,9 +398,9 @@
             // txtBx住所1
             // 
             this.txtBx住所1.Font = new System.Drawing.Font("Meiryo UI", 10.2F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(128)));
-            this.txtBx住所1.Location = new System.Drawing.Point(107, 369);
+            this.txtBx住所1.Location = new System.Drawing.Point(127, 440);
             this.txtBx住所1.Margin = new System.Windows.Forms.Padding(5);
-            this.txtBx住所1.MaxLength = 34;
+            this.txtBx住所1.MaxLength = 75;
             this.txtBx住所1.Name = "txtBx住所1";
             this.txtBx住所1.Size = new System.Drawing.Size(287, 25);
             this.txtBx住所1.TabIndex = 10;
@@ -406,7 +409,7 @@
             // 
             this.lbFAX番号1.AutoSize = true;
             this.lbFAX番号1.Font = new System.Drawing.Font("Meiryo UI", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(128)));
-            this.lbFAX番号1.Location = new System.Drawing.Point(541, 267);
+            this.lbFAX番号1.Location = new System.Drawing.Point(641, 264);
             this.lbFAX番号1.Margin = new System.Windows.Forms.Padding(5, 0, 5, 0);
             this.lbFAX番号1.Name = "lbFAX番号1";
             this.lbFAX番号1.Size = new System.Drawing.Size(79, 17);
@@ -416,18 +419,18 @@
             // txtBxFAX番号1
             // 
             this.txtBxFAX番号1.Font = new System.Drawing.Font("Meiryo UI", 10.2F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(128)));
-            this.txtBxFAX番号1.Location = new System.Drawing.Point(620, 263);
+            this.txtBxFAX番号1.Location = new System.Drawing.Point(719, 259);
             this.txtBxFAX番号1.Margin = new System.Windows.Forms.Padding(5);
             this.txtBxFAX番号1.MaxLength = 15;
             this.txtBxFAX番号1.Name = "txtBxFAX番号1";
-            this.txtBxFAX番号1.Size = new System.Drawing.Size(111, 25);
+            this.txtBxFAX番号1.Size = new System.Drawing.Size(120, 25);
             this.txtBxFAX番号1.TabIndex = 15;
             // 
             // lb住所2
             // 
             this.lb住所2.AutoSize = true;
             this.lb住所2.Font = new System.Drawing.Font("Meiryo UI", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(128)));
-            this.lb住所2.Location = new System.Drawing.Point(49, 419);
+            this.lb住所2.Location = new System.Drawing.Point(70, 490);
             this.lb住所2.Margin = new System.Windows.Forms.Padding(5, 0, 5, 0);
             this.lb住所2.Name = "lb住所2";
             this.lb住所2.Size = new System.Drawing.Size(55, 17);
@@ -437,9 +440,9 @@
             // txtBx住所2
             // 
             this.txtBx住所2.Font = new System.Drawing.Font("Meiryo UI", 10.2F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(128)));
-            this.txtBx住所2.Location = new System.Drawing.Point(107, 413);
+            this.txtBx住所2.Location = new System.Drawing.Point(127, 484);
             this.txtBx住所2.Margin = new System.Windows.Forms.Padding(5);
-            this.txtBx住所2.MaxLength = 34;
+            this.txtBx住所2.MaxLength = 40;
             this.txtBx住所2.Name = "txtBx住所2";
             this.txtBx住所2.Size = new System.Drawing.Size(287, 25);
             this.txtBx住所2.TabIndex = 11;
@@ -448,7 +451,7 @@
             // 
             this.lb住所1カナ.AutoSize = true;
             this.lb住所1カナ.Font = new System.Drawing.Font("Meiryo UI", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(128)));
-            this.lb住所1カナ.Location = new System.Drawing.Point(492, 371);
+            this.lb住所1カナ.Location = new System.Drawing.Point(513, 442);
             this.lb住所1カナ.Margin = new System.Windows.Forms.Padding(5, 0, 5, 0);
             this.lb住所1カナ.Name = "lb住所1カナ";
             this.lb住所1カナ.Size = new System.Drawing.Size(74, 17);
@@ -458,9 +461,9 @@
             // txtBx住所1カナ
             // 
             this.txtBx住所1カナ.Font = new System.Drawing.Font("Meiryo UI", 10.2F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(128)));
-            this.txtBx住所1カナ.Location = new System.Drawing.Point(569, 366);
+            this.txtBx住所1カナ.Location = new System.Drawing.Point(589, 437);
             this.txtBx住所1カナ.Margin = new System.Windows.Forms.Padding(5);
-            this.txtBx住所1カナ.MaxLength = 36;
+            this.txtBx住所1カナ.MaxLength = 145;
             this.txtBx住所1カナ.Name = "txtBx住所1カナ";
             this.txtBx住所1カナ.Size = new System.Drawing.Size(343, 25);
             this.txtBx住所1カナ.TabIndex = 12;
@@ -469,7 +472,7 @@
             // 
             this.lb住所2カナ.AutoSize = true;
             this.lb住所2カナ.Font = new System.Drawing.Font("Meiryo UI", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(128)));
-            this.lb住所2カナ.Location = new System.Drawing.Point(492, 417);
+            this.lb住所2カナ.Location = new System.Drawing.Point(513, 488);
             this.lb住所2カナ.Margin = new System.Windows.Forms.Padding(5, 0, 5, 0);
             this.lb住所2カナ.Name = "lb住所2カナ";
             this.lb住所2カナ.Size = new System.Drawing.Size(74, 17);
@@ -479,9 +482,9 @@
             // txtBx住所2カナ
             // 
             this.txtBx住所2カナ.Font = new System.Drawing.Font("Meiryo UI", 10.2F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(128)));
-            this.txtBx住所2カナ.Location = new System.Drawing.Point(569, 413);
+            this.txtBx住所2カナ.Location = new System.Drawing.Point(589, 484);
             this.txtBx住所2カナ.Margin = new System.Windows.Forms.Padding(5);
-            this.txtBx住所2カナ.MaxLength = 36;
+            this.txtBx住所2カナ.MaxLength = 80;
             this.txtBx住所2カナ.Name = "txtBx住所2カナ";
             this.txtBx住所2カナ.Size = new System.Drawing.Size(343, 25);
             this.txtBx住所2カナ.TabIndex = 13;
@@ -490,7 +493,7 @@
             // 
             this.lb電話番号2.AutoSize = true;
             this.lb電話番号2.Font = new System.Drawing.Font("Meiryo UI", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(128)));
-            this.lb電話番号2.Location = new System.Drawing.Point(305, 269);
+            this.lb電話番号2.Location = new System.Drawing.Point(286, 310);
             this.lb電話番号2.Margin = new System.Windows.Forms.Padding(5, 0, 5, 0);
             this.lb電話番号2.Name = "lb電話番号2";
             this.lb電話番号2.Size = new System.Drawing.Size(81, 17);
@@ -500,18 +503,18 @@
             // txtBx電話番号2
             // 
             this.txtBx電話番号2.Font = new System.Drawing.Font("Meiryo UI", 10.2F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(128)));
-            this.txtBx電話番号2.Location = new System.Drawing.Point(390, 263);
+            this.txtBx電話番号2.Location = new System.Drawing.Point(365, 306);
             this.txtBx電話番号2.Margin = new System.Windows.Forms.Padding(5);
             this.txtBx電話番号2.MaxLength = 15;
             this.txtBx電話番号2.Name = "txtBx電話番号2";
-            this.txtBx電話番号2.Size = new System.Drawing.Size(109, 25);
+            this.txtBx電話番号2.Size = new System.Drawing.Size(120, 25);
             this.txtBx電話番号2.TabIndex = 33;
             // 
             // lbFAX番号2
             // 
             this.lbFAX番号2.AutoSize = true;
             this.lbFAX番号2.Font = new System.Drawing.Font("Meiryo UI", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(128)));
-            this.lbFAX番号2.Location = new System.Drawing.Point(771, 267);
+            this.lbFAX番号2.Location = new System.Drawing.Point(641, 311);
             this.lbFAX番号2.Margin = new System.Windows.Forms.Padding(5, 0, 5, 0);
             this.lbFAX番号2.Name = "lbFAX番号2";
             this.lbFAX番号2.Size = new System.Drawing.Size(79, 17);
@@ -521,16 +524,16 @@
             // txtBxFAX番号2
             // 
             this.txtBxFAX番号2.Font = new System.Drawing.Font("Meiryo UI", 10.2F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(128)));
-            this.txtBxFAX番号2.Location = new System.Drawing.Point(850, 263);
+            this.txtBxFAX番号2.Location = new System.Drawing.Point(719, 307);
             this.txtBxFAX番号2.Margin = new System.Windows.Forms.Padding(5);
             this.txtBxFAX番号2.MaxLength = 15;
             this.txtBxFAX番号2.Name = "txtBxFAX番号2";
-            this.txtBxFAX番号2.Size = new System.Drawing.Size(111, 25);
+            this.txtBxFAX番号2.Size = new System.Drawing.Size(120, 25);
             this.txtBxFAX番号2.TabIndex = 35;
             // 
             // txtBx備考
             // 
-            this.txtBx備考.Location = new System.Drawing.Point(569, 320);
+            this.txtBx備考.Location = new System.Drawing.Point(589, 388);
             this.txtBx備考.MaxLength = 46;
             this.txtBx備考.Name = "txtBx備考";
             this.txtBx備考.Size = new System.Drawing.Size(342, 24);
@@ -540,17 +543,47 @@
             // 
             this.lb備考.AutoSize = true;
             this.lb備考.Font = new System.Drawing.Font("Meiryo UI", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(128)));
-            this.lb備考.Location = new System.Drawing.Point(518, 327);
+            this.lb備考.Location = new System.Drawing.Point(539, 394);
             this.lb備考.Margin = new System.Windows.Forms.Padding(5, 0, 5, 0);
             this.lb備考.Name = "lb備考";
             this.lb備考.Size = new System.Drawing.Size(47, 17);
             this.lb備考.TabIndex = 38;
             this.lb備考.Text = "備考：";
             // 
+            // chkListBx取引先ロール
+            // 
+            this.chkListBx取引先ロール.CheckOnClick = true;
+            this.chkListBx取引先ロール.Font = new System.Drawing.Font("Meiryo UI", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(128)));
+            this.chkListBx取引先ロール.FormattingEnabled = true;
+            this.chkListBx取引先ロール.Items.AddRange(new object[] {
+            "商社",
+            "仕入先",
+            "販売先",
+            "得意先",
+            "出荷先",
+            "預り先",
+            "運送便",
+            "倉庫"});
+            this.chkListBx取引先ロール.Location = new System.Drawing.Point(97, 200);
+            this.chkListBx取引先ロール.Name = "chkListBx取引先ロール";
+            this.chkListBx取引先ロール.Size = new System.Drawing.Size(104, 156);
+            this.chkListBx取引先ロール.TabIndex = 39;
+            // 
+            // lb取引先ロール
+            // 
+            this.lb取引先ロール.AutoSize = true;
+            this.lb取引先ロール.Location = new System.Drawing.Point(48, 180);
+            this.lb取引先ロール.Name = "lb取引先ロール";
+            this.lb取引先ロール.Size = new System.Drawing.Size(91, 17);
+            this.lb取引先ロール.TabIndex = 40;
+            this.lb取引先ロール.Text = "取引先ロール：";
+            // 
             // 取引先マスタFm
             // 
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.None;
-            this.ClientSize = new System.Drawing.Size(1034, 536);
+            this.ClientSize = new System.Drawing.Size(1034, 602);
+            this.Controls.Add(this.lb取引先ロール);
+            this.Controls.Add(this.chkListBx取引先ロール);
             this.Controls.Add(this.lb備考);
             this.Controls.Add(this.txtBx備考);
             this.Controls.Add(this.lbFAX番号2);
@@ -589,7 +622,7 @@
             this.Controls.Add(this.cmbBx会社);
             this.Controls.Add(this.lb部門);
             this.Controls.Add(this.btn削除);
-            this.Controls.Add(this.btn次へ);
+            this.Controls.Add(this.btn登録);
             this.Font = new System.Drawing.Font("Meiryo UI", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(128)));
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
             this.Margin = new System.Windows.Forms.Padding(4);
@@ -611,7 +644,7 @@
         private System.Windows.Forms.ComboBox cmbBx会社;
         private System.Windows.Forms.Label lb部門;
         private System.Windows.Forms.Button btn削除;
-        private System.Windows.Forms.Button btn次へ;
+        private System.Windows.Forms.Button btn登録;
         private System.Windows.Forms.Button btnインポート;
         private System.Windows.Forms.TextBox txtBx取引先名;
         private System.Windows.Forms.TextBox txtBx取引先正式名;
@@ -646,5 +679,7 @@
         private System.Windows.Forms.TextBox txtBxFAX番号2;
         private System.Windows.Forms.TextBox txtBx備考;
         private System.Windows.Forms.Label lb備考;
+        private System.Windows.Forms.CheckedListBox chkListBx取引先ロール;
+        private System.Windows.Forms.Label lb取引先ロール;
     }
 }

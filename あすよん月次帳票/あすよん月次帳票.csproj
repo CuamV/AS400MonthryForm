@@ -139,7 +139,27 @@
     <Reference Include="System.Buffers, Version=4.0.3.0, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51, processorArchitecture=MSIL">
       <HintPath>..\packages\System.Buffers.4.5.1\lib\net461\System.Buffers.dll</HintPath>
     </Reference>
+    <Reference Include="System.Configuration" />
+    <Reference Include="System.Configuration.ConfigurationManager, Version=10.0.0.1, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51, processorArchitecture=MSIL">
+      <HintPath>..\packages\System.Configuration.ConfigurationManager.10.0.1\lib\net462\System.Configuration.ConfigurationManager.dll</HintPath>
+    </Reference>
     <Reference Include="System.Core" />
+    <Reference Include="System.IO.Compression.FileSystem" />
+    <Reference Include="System.IO.Compression.ZipFile, Version=4.0.2.0, Culture=neutral, PublicKeyToken=b77a5c561934e089, processorArchitecture=MSIL">
+      <HintPath>..\packages\System.IO.Compression.ZipFile.4.3.0\lib\net46\System.IO.Compression.ZipFile.dll</HintPath>
+      <Private>True</Private>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="System.IO.FileSystem, Version=4.0.2.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
+      <HintPath>..\packages\System.IO.FileSystem.4.3.0\lib\net46\System.IO.FileSystem.dll</HintPath>
+      <Private>True</Private>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="System.IO.FileSystem.Primitives, Version=4.0.2.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
+      <HintPath>..\packages\System.IO.FileSystem.Primitives.4.3.0\lib\net46\System.IO.FileSystem.Primitives.dll</HintPath>
+      <Private>True</Private>
+      <Private>True</Private>
+    </Reference>
     <Reference Include="System.IO.Pipelines, Version=9.0.0.9, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51, processorArchitecture=MSIL">
       <HintPath>..\packages\System.IO.Pipelines.9.0.9\lib\net462\System.IO.Pipelines.dll</HintPath>
     </Reference>
@@ -289,10 +309,6 @@
     <Compile Include="Forms\MasterMenuFm\郵便番号辞書インポートFm.Designer.cs">
       <DependentUpon>郵便番号辞書インポートFm.cs</DependentUpon>
     </Compile>
-    <Compile Include="Forms\MasterMenuFm\取引先マスタFm_2.cs" />
-    <Compile Include="Forms\MasterMenuFm\取引先マスタFm_2.Designer.cs">
-      <DependentUpon>取引先マスタFm_2.cs</DependentUpon>
-    </Compile>
     <Compile Include="Forms\StandardisedFormFm.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -304,9 +320,6 @@
     </EmbeddedResource>
     <EmbeddedResource Include="Forms\LoginFm.resx">
       <DependentUpon>LoginFm.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="Forms\MasterMenuFm\取引先マスタFm_2.resx">
-      <DependentUpon>取引先マスタFm_2.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Forms\MasterMenuFm\取引先マスタFm.resx">
       <DependentUpon>取引先マスタFm.cs</DependentUpon>

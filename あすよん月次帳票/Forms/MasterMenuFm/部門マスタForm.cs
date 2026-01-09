@@ -38,7 +38,7 @@ namespace あすよん月次帳票
 
         internal void 部門マスタForm_Load(object sender, EventArgs e)
         {
-            _inputControls = GetTextBoxAndComboBox(this);
+            _inputControls = GetTextInputControl(this);
         }
 
         //=========================================================
@@ -55,7 +55,7 @@ namespace あすよん月次帳票
             if (string.IsNullOrEmpty(inputBumon)) return;
 
             //マスターファイル有無チェック＆読込
-            var lines = fam.CheckAndLoadMater(mf, mst, CMD.utf8);
+            var lines = fam.CheckAndLoadMater(mf, mst, CMD.utf8, 1);
 
             // 既存データチェック
             for (int i = 0; i < lines.Count; i++)
@@ -124,14 +124,17 @@ namespace あすよん月次帳票
 
             // 書き込む行（半角スペース区切り）
             // 1:部門コード 2:部門名 3:部門名カナ 4:会社
-            string newLine = $"{bumonCD} {bumonNAME} {bumonKANA} {company}";
+            List<string> newLineList = new List<string>
+            {
+                bumonCD, bumonNAME, bumonKANA, company
+            };
 
             // マスターファイル有無チェック＆読込
-            var lines = fam.CheckAndLoadMater(mf, mst, CMD.utf8);
+            var lines = fam.CheckAndLoadMater(mf, mst, CMD.utf8, 0);
 
             // 新規・変更登録
             bool replaced;
-            (lines, replaced) = fam.AddMasterFile(lines, bumonCD, newLine);
+            (lines, replaced) = fam.AddMasterFile(lines, newLineList);
 
             // 部門コードでソート
             lines = lines
@@ -149,17 +152,10 @@ namespace あすよん月次帳票
             File.WriteAllLines(mf,lines, Encoding.UTF8);
 
             // 入力内容クリア
-            foreach (var input in _inputControls)
-            {
-                if (input is ComboBox cb)
-                    cb.SelectedItem = null;
-                if ( input is TextBox tb)
-                    tb.Clear();
-            }
+            fam.ClearInput(_inputControls);
 
             MessageBox.Show(replaced ? "変更登録が完了しました。" : "新規登録が完了しました。",
                 $"{mst}登録", MessageBoxButtons.OK, MessageBoxIcon.None);
-
             
             HIZTIM = $"{DateTime.Now:yyyy/MM/dd HH:mm:ss}";
             fam.AddLog($"{HIZTIM} マスタ登録 1 {CMD.UserName} btn登録_Click {mst}");
@@ -276,7 +272,7 @@ namespace あすよん月次帳票
             // ★表示用フォーム起動
             // ----------------------------------------------------
             //マスターファイル有無チェック＆読込
-            var lines = fam.CheckAndLoadMater(mf, mst, CMD.utf8);
+            var lines = fam.CheckAndLoadMater(mf, mst, CMD.utf8, 1);
 
             // 照会Formを開く
             var frm = new 部門マスタ照会Form();
@@ -295,7 +291,7 @@ namespace あすよん月次帳票
             // ★ダウンロード用マスターデータ取得
             // ----------------------------------------------------
             //マスターファイル有無チェック＆読込
-            var lines = fam.CheckAndLoadMater(mf, mst, CMD.utf8);
+            var lines = fam.CheckAndLoadMater(mf, mst, CMD.utf8, 1);
 
             // DataTableの作成
             DataTable dt = new DataTable();
@@ -379,7 +375,7 @@ namespace あすよん月次帳票
 
             return field;
         }
-        private List<Control> GetTextBoxAndComboBox(Control parent)
+        private List<Control> GetTextInputControl(Control parent)
         {
             var list = new List<Control>();
 
@@ -394,7 +390,7 @@ namespace あすよん月次帳票
                 // 子コントロールがある場合は再帰
                 if (ctrl.HasChildren)
                 {
-                    list.AddRange(GetTextBoxAndComboBox(ctrl));
+                    list.AddRange(GetTextInputControl(ctrl));
                 }
             }
 

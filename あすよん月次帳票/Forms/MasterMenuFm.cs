@@ -31,6 +31,53 @@ namespace あすよん月次帳票
         //=========================================================
         // 【コントロール実行メソッド】
         //=========================================================
+        
+        
+        /// <summary>
+        /// 戻るボタンクリック
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void btnForm1Back_Click(object sender, EventArgs e)
+        {
+            HIZTIM = $"{DateTime.Now:yyyy/MM/dd HH:mm:ss}";
+            fam.AddLog($"{HIZTIM} コントロール 1 {CMD.UserName} btnForm1Back_Click");
+            // Form1 のインスタンスを取得して表示
+            // 名前で探すと見つからない場合があるため、型で検索して取得する
+            var form1 = Application.OpenForms.OfType<TopMenuFm>().FirstOrDefault();
+            if (form1 != null)
+            {
+                form1.Show();   
+            }
+            // マスタメニューForm を閉じる
+            this.Close();
+        }
+
+        /// <summary>
+        /// 部門マスタボタンクリック
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void btn部門マスタ_Click(object sender, EventArgs e)
+        {
+            HIZTIM = $"{DateTime.Now:yyyy/MM/dd HH:mm:ss}";
+            fam.AddLog($"{HIZTIM} コントロール 1 {CMD.UserName} lnkLbStandard_LinkClicked");
+            // 部門マスタFormを作成
+            var form = new 部門マスタForm();
+            // 部門マスタFormを表示
+            form.Show();
+        }
+
+        private void btn取引先マスタ_Click(object sender, EventArgs e)
+        {
+            HIZTIM = $"{DateTime.Now:yyyy/MM/dd HH:mm:ss}";
+            fam.AddLog($"{HIZTIM} コントロール 1 {CMD.UserName} btn取引先マスタ_Click");
+            // 取引先マスタFormを作成
+            var form = new 取引先マスタFm();
+            // 取引先マスタFormを表示
+            form.Show();
+        }
+
         /// <summary>
         /// 取引先ボタンクリック
         /// </summary>
@@ -108,49 +155,15 @@ namespace あすよん月次帳票
             }
         }
 
-        /// <summary>
-        /// 部門マスタボタンクリック
-        /// </summary>
-        /// <param name="sender"></param>
-        /// <param name="e"></param>
-        private void btn部門マスタ_Click(object sender, EventArgs e)
+        private void btn郵便番号辞書_Click(object sender, EventArgs e)
         {
             HIZTIM = $"{DateTime.Now:yyyy/MM/dd HH:mm:ss}";
-            fam.AddLog($"{HIZTIM} コントロール 1 {CMD.UserName} lnkLbStandard_LinkClicked");
-            // 部門マスタFormを作成
-            var form = new 部門マスタForm();
-            // 部門マスタFormを表示
+            fam.AddLog($"{HIZTIM} コントロール 1 {CMD.UserName} btn郵便番号辞書_Click");
+            // 郵便番号辞書インポートFormを作成
+            var form = new 郵便番号辞書インポートFm();
+            // 郵便番号辞書インポートFormを表示
             form.Show();
         }
-        /// <summary>
-        /// 戻るボタンクリック
-        /// </summary>
-        /// <param name="sender"></param>
-        /// <param name="e"></param>
-        private void btnForm1Back_Click(object sender, EventArgs e)
-        {
-            HIZTIM = $"{DateTime.Now:yyyy/MM/dd HH:mm:ss}";
-            fam.AddLog($"{HIZTIM} コントロール 1 {CMD.UserName} btnForm1Back_Click");
-            // Form1 のインスタンスを取得して表示
-            // 名前で探すと見つからない場合があるため、型で検索して取得する
-            var form1 = Application.OpenForms.OfType<TopMenuFm>().FirstOrDefault();
-            if (form1 != null)
-            {
-                form1.Show();   
-            }
-            // マスタメニューForm を閉じる
-            this.Close();
-        }
-        
-        
-        private void btn仕入先マスタ_Click(object sender, EventArgs e)
-        {
-            HIZTIM = $"{DateTime.Now:yyyy/MM/dd HH:mm:ss}";
-            fam.AddLog($"{HIZTIM} コントロール 1 {CMD.UserName} btn仕入先マスタ_Click");
-            // 仕入先マスタFormを作成
-            var form = new 取引先マスタFm();
-            // 仕入先マスタFormを表示
-            form.Show();
-        }
+
     }
 }
