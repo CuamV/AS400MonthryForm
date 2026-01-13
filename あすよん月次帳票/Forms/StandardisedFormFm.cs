@@ -11,8 +11,6 @@ using System.Threading.Tasks;
 using System.Windows.Forms;
 using CMD = あすよん月次帳票.CommonData;
 using DCN = あすよん月次帳票.Dictionaries;
-using ENM = あすよん月次帳票.Enums;
-
 
 namespace あすよん月次帳票
 {

@@ -11,7 +11,6 @@ using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using CMD = あすよん月次帳票.CommonData;
-using ENM = あすよん月次帳票.Enums;
 
 namespace あすよん月次帳票
 {
@@ -23,12 +22,41 @@ namespace あすよん月次帳票
         FormAction fam = new FormAction();
         ColorManager clrmg = new ColorManager();
 
-        // 選択されたファイルパスを保持
-        private string selectedFilePath;
-
+        // フィールド変数
+        private string selectedFilePath;  // 選択されたファイルパスを保持
+        string HIZTIM;
+        string mf;
+        string mfName;
         string BUMONmf = Path.Combine(CMD.mfPath, "BUMON.txt");
+        string[] mfTxtNames = new[] { "DLB01TORIHIKI", "DLB02TORIHIKI", "DLB03TORIHIKI" };
+        string[] mfTxtPaths = new[]
+        {
+            Path.Combine(CMD.mfPath, "DLB01TORIHIKI.txt"),
+            Path.Combine(CMD.mfPath, "DLB02TORIHIKI.txt"),
+            Path.Combine(CMD.mfPath, "DLB03TORIHIKI.txt")
+        };
+
+        string mf_bumon = Path.Combine(CMD.mfPath, "TORIHIKI-BUMON.txt");
+        string mf_bumonName = "TORIHIKI-BUMON";
+        string[] mf_torirollTxtNames = new[] { "SYOSYA", "SIIRE", "HANBAI", "TOKUISAKI", "SYUKKA", "AZUKARI", "UNSOU", "SOUKO" };
+        string[] mf_torirollTxtPaths = new[]
+        {
+            Path.Combine(CMD.mfPath, "SYOSYA.txt"),
+            Path.Combine(CMD.mfPath, "SIIRE.txt"),
+            Path.Combine(CMD.mfPath, "HANBAI.txt"),
+            Path.Combine(CMD.mfPath, "TOKUISAKI.txt"),
+            Path.Combine(CMD.mfPath, "SYUKKA.txt"),
+            Path.Combine(CMD.mfPath, "AZUKARI.txt"),
+            Path.Combine(CMD.mfPath, "UNSOU.txt"),
+            Path.Combine(CMD.mfPath, "SOUKO.txt"),
+        };
         string mst = "取引先マスタ";
         string mst_bumon = "取引先部門マスタ";
+        string mst_torirole = "取引先ロール別マスタ";
+
+        //=========================================================
+        // コンストラクタ
+        //=========================================================
         public 取引先マスタインポートFm()
         {
             InitializeComponent();
@@ -143,7 +171,9 @@ namespace あすよん月次帳票
 
                 // rawLines を読み直してヘッダ含めて渡す
                 var raw = ReadAllLinesDetectEncoding(selectedFilePath, out usedEnc);
-                var (ok, msg) = fam.ImportMaster(raw, cmbBx会社.SelectedItem.ToString());
+                var (ok, msg) = fam.ImportMaster(raw, cmbBx会社.SelectedItem.ToString(), BUMONmf,
+                    mfTxtNames, mfTxtPaths, mf_bumon, mf_bumonName, mf_torirollTxtNames, mf_torirollTxtPaths,
+                    mst, mst_bumon, mst_torirole);
                 if (!ok)
                 {
                     MessageBox.Show($"インポートに失敗しました: {msg}", "エラー", MessageBoxButtons.OK, MessageBoxIcon.Error);
@@ -152,6 +182,12 @@ namespace あすよん月次帳票
 
                 MessageBox.Show("インポート処理を完了しました。", "完了", MessageBoxButtons.OK, MessageBoxIcon.Information);
                 this.Close();
+
+                HIZTIM = $"{DateTime.Now:yyyy/MM/dd HH:mm:ss}";
+                fam.AddLog($"{HIZTIM} マスタインポート 1 {CMD.UserName} btn登録_Click {mst}");
+                fam.AddLog2($"{HIZTIM} マスタインポート 0 {CMD.UserName} btn登録_Click {mst}が更新されました");
+                fam.AddLog2($"{HIZTIM} マスタインポート 0 {CMD.UserName} btn登録_Click {mst_bumon}が登録されました");
+                fam.AddLog2($"{HIZTIM} マスタインポート 0 {CMD.UserName} btn登録_Click {mst_torirole}が登録されました");
             }
             catch (Exception ex)
             {
@@ -168,8 +204,6 @@ namespace あすよん月次帳票
             // ★エラーチェック
             //----------------------------------------------------
             path = selectedFilePath?.Trim();
-            var errMessages = new List<string>(); // エラーメッセージを保持するリスト
-            var errRows = new List<DataGridViewRow>(); // エラー情報を保持するリスト
 
             // ファイル存在チェック
             if (string.IsNullOrEmpty(path) || !System.IO.File.Exists(path))
@@ -191,11 +225,12 @@ namespace あすよん月次帳票
                 }
 
                 // ヘッダチェック（最低限のカラムが存在するか）
-                //  1:仕入先CD 2:部門CD    3:仕入先正式名称 4:仕入先名 5:仕入先名カナ 6:仕入先略名 7:仕入先略名カナ
-                //  8:郵便番号 9:電話番号1 10:電話番号2 11:FAX番号1 12:FAX番号2 13:住所1 14:住所1カナ 15:住所2 16:住所2カナ 17:備考
+                //  1:取引先CD  2:部門CD      3:取引正式名称 4:取引先名    5:取引先名カナ 6:取引先略名  7:取引先略名カナ 8:郵便番号
+                //  9:電話番号1 10:電話番号2  11:FAX番号1   12:FAX番号2  13:住所1      14:住所1カナ  15:住所2       16:住所2カナ
+                //  17:商社区分 18:仕入先区分 19:販売先区分  20:得意先区分 21:出荷先区分  22:預り先区分 23:運送便区分   24:倉庫区分  25:備考
                 //----------------------------------------------------
                 var headers = SplitCsvLine(lines[0]);
-                string[] reqCols = Enum.GetNames(typeof(ENM.TORIHIKI_MASTER_IN));
+                string[] reqCols = Enum.GetNames(typeof(TORIHIKI_MASTER_IN));
 
                 foreach (var col in reqCols)
                 {
@@ -421,7 +456,6 @@ namespace あすよん月次帳票
             return list.ToArray();
         }
 
-        // Read all lines trying UTF-8 first, then Shift_JIS if UTF-8 seems invalid
         private string[] ReadAllLinesDetectEncoding(string path, out Encoding usedEncoding)
         {
             // Try UTF-8

@@ -91,33 +91,16 @@ namespace あすよん月次帳票
             // ★入力内容チェック
             //----------------------------------------------------
             string company = cmbBx会社.SelectedItem?.ToString() ?? ""; // 会社名
-            string bumonCD = txtBx部門CD.Text.Trim();   //[部門コード] 数字3桁コード
-            string bumonNAME = txtBx部門名.Text.Trim();  // [部門名]
-            string bumonKANA = txtBx部門名カナ.Text.Trim();  // [部門名カナ]
-
-            Dictionary<string, string> InputTxtList = new Dictionary<string, string>();
-            InputTxtList.Add("部門コード", bumonCD);
-            InputTxtList.Add("部門名", bumonNAME);
-            InputTxtList.Add("部門名カナ", bumonKANA);
-            
-            // 空白チェック
-            foreach (var input in InputTxtList)
+            Dictionary<string, string> BumonInTxtDic = new Dictionary<string, string>
             {
-                if (string.IsNullOrWhiteSpace(input.Value))
-                {
-                    MessageBox.Show($"{input.Key}を入力して下さい。", "入力エラー", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                    return;
-                }
-            }
-            // 部門コード半角数字3桁チェック
-            if (!Regex.IsMatch(bumonCD, @"^[0-9]{3}$"))
-            {
-                MessageBox.Show("部門コードは半角数字3桁で入力して下さい。", "入力エラー", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                return;
-            }
+                { "部門CD",txtBx部門CD.Text.Trim() },
+                { "部門名",txtBx部門名.Text.Trim() },
+                { "部門名カナ",txtBx部門名カナ.Text.Trim() },
+                { "会社",company  },
+            };
 
-            if (MessageBox.Show("部門マスタ登録を行います。\n", "【部門登録】",
-                MessageBoxButtons.YesNo, MessageBoxIcon.None) == DialogResult.No) return;
+            // 空白/部門コード半角数字3桁/登録実行確認
+            if (!fam.ValidateInput(VaridationPattern.登録前初期チェック, BumonInTxtDic,3, mst)) return;
             //----------------------------------------------------
             // ★部門マスタ登録処理
             //----------------------------------------------------
@@ -126,7 +109,7 @@ namespace あすよん月次帳票
             // 1:部門コード 2:部門名 3:部門名カナ 4:会社
             List<string> newLineList = new List<string>
             {
-                bumonCD, bumonNAME, bumonKANA, company
+                BumonInTxtDic["部門CD"], BumonInTxtDic["部門名"], BumonInTxtDic["部門名カナ"], company
             };
 
             // マスターファイル有無チェック＆読込
@@ -134,7 +117,7 @@ namespace あすよん月次帳票
 
             // 新規・変更登録
             bool replaced;
-            (lines, replaced) = fam.AddMasterFile(lines, newLineList);
+            (lines, replaced) = fam.AddMasterFile(AddMasterPattern.Keyが1項目で追加は単行,lines, newLineList);
 
             // 部門コードでソート
             lines = lines
@@ -176,22 +159,13 @@ namespace あすよん月次帳票
             string bumonCD = txtBx部門CD.Text.Trim();   //[部門コード] 数字3桁コード
             string bumonNAME = txtBx部門名.Text.Trim();  // [部門名]
             string bumonKANA = txtBx部門名カナ.Text.Trim();  // [部門名カナ]
-
-            // 空白チェック
-            if (string.IsNullOrWhiteSpace(bumonCD))
+            Dictionary<string, string> BumonInTxtDic = new Dictionary<string, string>
             {
-                MessageBox.Show("部門コードを入力して下さい。", "入力エラー", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                return;
-            }
-            // 部門コード半角数字3桁チェック
-            if (!Regex.IsMatch(bumonCD, @"^[0-9]{3}$"))
-            {
-                MessageBox.Show("部門コードは半角数字3桁で入力して下さい。", "入力エラー", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                return;
-            }
+                { "部門CD",txtBx部門CD.Text.Trim() },
+             };
 
-            if (MessageBox.Show("部門マスタ削除を行います。\n", "【部門登録】",
-                MessageBoxButtons.YesNo, MessageBoxIcon.None) == DialogResult.No) return;
+            // 空白/部門コード半角数字3桁/登録実行確認
+            if (!fam.ValidateInput(VaridationPattern.登録前初期チェック, BumonInTxtDic,3, mst)) return;
 
             //----------------------------------------------------
             // ★部門マスタ削除処理

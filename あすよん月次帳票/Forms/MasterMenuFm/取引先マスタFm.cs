@@ -3,19 +3,12 @@ using Newtonsoft.Json;
 using Ohno.Db;
 using System;
 using System.Collections.Generic;
-using System.ComponentModel;
 using System.Data;
-using System.Drawing;
 using System.IO;
 using System.Linq;
 using System.Text;
-using System.Text.RegularExpressions;
-using System.Threading.Tasks;
 using System.Windows.Forms;
-using System.Windows.Shapes;
 using CMD = あすよん月次帳票.CommonData;
-using ENM = あすよん月次帳票.Enums;
-using DCN = あすよん月次帳票.Dictionaries;
 using DataTable = System.Data.DataTable;
 using Path = System.IO.Path;
 using Application = System.Windows.Forms.Application;
@@ -33,20 +26,37 @@ namespace あすよん月次帳票
         //=========================================================
         FormAction fam = new FormAction();
         ColorManager clrmg = new ColorManager();
-        Dictionaries2 dic2 = new Dictionaries2();
 
         // フィールド変数
         string HIZTIM;
         string mf;
         string mfName;
-        string mf_bumonName = "TORIHIKI-BUMON";
-        string mf1 = Path.Combine(CMD.mfPath, "DLB01TORIHIKI.txt"); //オーノ
-        string mf2 = Path.Combine(CMD.mfPath, "DLB02TORIHIKI.txt"); // サンミックダスコン
-        string mf3 = Path.Combine(CMD.mfPath, "DLB03TORIHIKI.txt"); //サンミックカーペット
+        string[] mfTxtNames = new[] { "DLB01TORIHIKI", "DLB02TORIHIKI", "DLB03TORIHIKI" };
+        string[] mfTxtPaths = new[]
+        {
+            Path.Combine(CMD.mfPath, "DLB01TORIHIKI.txt"),
+            Path.Combine(CMD.mfPath, "DLB02TORIHIKI.txt"),
+            Path.Combine(CMD.mfPath, "DLB03TORIHIKI.txt")
+        };
+            
         string mf_bumon = Path.Combine(CMD.mfPath, "TORIHIKI-BUMON.txt");
+        string mf_bumonName = "TORIHIKI-BUMON";
+        string[] mf_torirollTxtNames = new[] { "SYOSYA", "SIIRE", "HANBAI", "TOKUISAKI", "SYUKKA", "AZUKARI", "UNSOU", "SOUKO" };
+        string[] mf_torirollTxtPaths = new[] 
+        {
+            Path.Combine(CMD.mfPath, "SYOSYA.txt"),
+            Path.Combine(CMD.mfPath, "SIIRE.txt"),
+            Path.Combine(CMD.mfPath, "HANBAI.txt"),
+            Path.Combine(CMD.mfPath, "TOKUISAKI.txt"),
+            Path.Combine(CMD.mfPath, "SYUKKA.txt"),
+            Path.Combine(CMD.mfPath, "AZUKARI.txt"),
+            Path.Combine(CMD.mfPath, "UNSOU.txt"),
+            Path.Combine(CMD.mfPath, "SOUKO.txt"), 
+        };
+
         string mst = "取引先マスタ";
         string mst_bumon = "取引先部門マスタ";
-        string mst_toriroru = "取引先ロール別マスタ";
+        string mst_torirole = "取引先ロール別マスタ";
         List<Control> _inputControls;
 
         //========================================================
@@ -65,11 +75,11 @@ namespace あすよん月次帳票
         //=========================================================
         // コントロール実行メソッド
         //=========================================================
-            /// <summary>
-            /// 会社セレクトチェンジ
-            /// </summary>
-            /// <param name="sender"></param>
-            /// <param name="e"></param>
+        /// <summary>
+        /// 会社セレクトチェンジ
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void cmboBx会社_SelectionChangeCommitted(object sender, EventArgs e)
         {
             // 会社選択確認(stringへ変換)
@@ -145,11 +155,9 @@ namespace あすよん月次帳票
             // 0:商社 1:仕入先 2:販売先 4:得意先 5:出荷先 6:預り先 7:運送便 8:倉庫
             // チェックボックス状態取得
             // チェックあり→"1", チェックなし→"0"　としてtoriRoll配列に格納
-            string[] toriRoll = new string[chkListBx取引先ロール.Items.Count];
+            string[] toriRolls = new string[chkListBx取引先ロール.Items.Count];
             for(int i = 0; i < chkListBx取引先ロール.Items.Count; i++)
-            {
-                toriRoll[i] = chkListBx取引先ロール.GetItemChecked(i) ? "1" : "0";
-            }
+                toriRolls[i] = chkListBx取引先ロール.GetItemChecked(i) ? "1" : "0";
 
             Dictionary<string, string> ToriInTxtDic = new Dictionary<string, string> 
             {
@@ -163,12 +171,8 @@ namespace あすよん月次帳票
             // ----------------------------------------------------
             // ★入力内容チェックNO1
             // ----------------------------------------------------
-            // 空白チェック
-            if (!fam.CheckedNullOrWhiteSpace(ToriInTxtDic)) return;
-            // 取引先コード半角数字7桁チェック
-            if (!fam.CheckedErrLength("取引先コード", ToriInTxtDic["取引先コード"], 7)) return;
-            // 登録実行確認
-            if (!fam.CheckedAddYesNo(mst)) return;
+            // 空白/取引先コード半角数字7桁/登録実行確認
+            if (!fam.ValidateInput(VaridationPattern.登録前初期チェック,ToriInTxtDic,7, mst)) return;
 
             //----------------------------------------------------
             // ★入力内容取得NO2
@@ -184,34 +188,24 @@ namespace あすよん月次帳票
                 { "住所1カナ", txtBx住所1カナ.Text.Trim() },
                 { "住所2", txtBx住所2.Text.Trim() },
                 { "住所2カナ", txtBx住所2カナ.Text.Trim() },
-                { "商社区分", toriRoll[0] },
-                { "仕入先区分", toriRoll[1] },
-                { "販売先区分", toriRoll[2] },
-                { "得意先区分", toriRoll[3] },
-                { "出荷先区分", toriRoll[4] },
-                { "預り先区分", toriRoll[5] },
-                { "運送便区分", toriRoll[6] },
-                { "倉庫区分", toriRoll[7] },
+                { "商社区分", toriRolls[0] },
+                { "仕入先区分", toriRolls[1] },
+                { "販売先区分", toriRolls[2] },
+                { "得意先区分", toriRolls[3] },
+                { "出荷先区分", toriRolls[4] },
+                { "預り先区分", toriRolls[5] },
+                { "運送便区分", toriRolls[6] },
+                { "倉庫区分", toriRolls[7] },
                 { "備考", txtBx備考.Text.Trim() }
             };
             foreach(var key in ToriInTxtDic2.Keys)
-            {
                 ToriInTxtDic[key] = ToriInTxtDic2[key];
-            }
 
             // ----------------------------------------------------
             // ★入力内容チェックNO2
             // ----------------------------------------------------
-            // 郵便番号半角数字チェック(アルファベット不可)
-            if (!fam.CheckedHalfNum("郵便番号", ToriInTxtDic2["郵便番号"], allowHyphen: true)) return;
-            // 電話番号1半角数字チェック(アルファベット不可)
-            if (!fam.CheckedHalfNum("電話番号1", ToriInTxtDic2["電話番号1"], allowHyphen: true)) return;
-            // 電話番号2半角数字チェック(アルファベット不可)
-            if (!fam.CheckedHalfNum("電話番号2", ToriInTxtDic2["電話番号2"], allowHyphen: true)) return;
-            // FAX番号1半角数字チェック(アルファベット不可)
-            if (!fam.CheckedHalfNum("FAX番号1", ToriInTxtDic2["FAX番号1"], allowHyphen: true)) return;
-            // FAX番号2半角数字チェック(アルファベット不可)
-            if (!fam.CheckedHalfNum("FAX番号2", ToriInTxtDic2["FAX番号2"], allowHyphen: true)) return;
+            // 郵便/電話/FAX番号半角数字チェック(アルファベット不可)
+            if(!fam.ValidateInput(VaridationPattern.入力値チェック, ToriInTxtDic2)) return;
 
             // ----------------------------------------------------
             // ★マスタ登録レコード形成
@@ -262,42 +256,26 @@ namespace あすよん月次帳票
             };
             // 1:取引先CD 2:部門CD 3:取引先名 4:取引先名カナ
             // ----------------------------------------------------
-            // [商社マスタ]
-            if (toriRoll[0] == "1") // 商社区分が"1"の場合のみ登録
-                MakingNewLineToriRoll(ToriInTxtDic["取引先コード"], bumonCD, ToriInTxtDic["取引先名"], ToriInTxtDic["取引先名カナ"], newLine_syosya);
-            // [仕入先マスタ]
-            if (toriRoll[1] == "1") // 仕入先区分が"1"の場合のみ登録
-                MakingNewLineToriRoll(ToriInTxtDic["取引先コード"], bumonCD, ToriInTxtDic["取引先名"], ToriInTxtDic["取引先名カナ"], newLine_syosya);
-            // [販売先マスタ]
-            if (toriRoll[2] == "1") // 販売先区分が"1"の場合のみ登録
-                MakingNewLineToriRoll(ToriInTxtDic["取引先コード"], bumonCD, ToriInTxtDic["取引先名"], ToriInTxtDic["取引先名カナ"], newLine_hanbai);
-            // [得意先マスタ]
-            if (toriRoll[3] == "1") // 得意先区分が"1"の場合のみ登録
-                MakingNewLineToriRoll(ToriInTxtDic["取引先コード"], bumonCD, ToriInTxtDic["取引先名"], ToriInTxtDic["取引先名カナ"], newLine_tokui);
-            // [出荷先マスタ]
-            if (toriRoll[4] == "1") // 出荷先区分が"1"の場合のみ登録
-                MakingNewLineToriRoll(ToriInTxtDic["取引先コード"], bumonCD, ToriInTxtDic["取引先名"], ToriInTxtDic["取引先名カナ"], newLine_syukka);
-            // [預り先マスタ]
-            if (toriRoll[5] == "1") // 預り先区分が"1"の場合のみ登録
-                MakingNewLineToriRoll(ToriInTxtDic["取引先コード"], bumonCD, ToriInTxtDic["取引先名"], ToriInTxtDic["取引先名カナ"], newLine_azukari);
-            // [運送便マスタ]
-            if (toriRoll[6] == "1") // 運送便区分が"1"の場合のみ登録
-                MakingNewLineToriRoll(ToriInTxtDic["取引先コード"], bumonCD, ToriInTxtDic["取引先名"], ToriInTxtDic["取引先名カナ"], newLine_unsou);
+            for(int i = 0; i < newLineRollList.Count; i++)
+            {
+                if (toriRolls[i] == "1")
+                    fam.MakingNewLineToriRoll(ToriInTxtDic["取引先コード"], bumonCD, ToriInTxtDic["取引先名"], ToriInTxtDic["取引先名カナ"], newLineRollList[i]);
+            }
 
             // mf判定
             switch (company)
             {
                 case "オーノ":
-                    mf = mf1;
-                    mfName = "BLB01SHIIRE";
+                    mf = mfTxtPaths[0];
+                    mfName = mfTxtNames[0];
                     break;
                 case "サンミックダスコン":
-                    mf = mf2;
-                    mfName = "BLB02SHIIRE";
+                    mf = mfTxtPaths[1];
+                    mfName = mfTxtNames[1];
                     break;
                 case "サンミックカーペット":
-                    mf = mf3;
-                    mfName = "BLB03SHIIRE";
+                    mf = mfTxtPaths[2];
+                    mfName = mfTxtNames[2];
                     break;
             }
 
@@ -311,8 +289,8 @@ namespace あすよん月次帳票
             // 新規・変更登録
             bool replaced1;
             bool replaced2;
-            (lines, replaced1) = fam.AddMasterFile(lines, newLineList);
-            (lines_bumon, replaced2) = fam.AddMasterFile2(lines_bumon, newLine_bumon);
+            (lines, replaced1) = fam.AddMasterFile(AddMasterPattern.Keyが1項目で追加は単行,lines, newLineList);
+            (lines_bumon, replaced2) = fam.AddMasterFile(AddMasterPattern.Keyが1項目と2項目で追加は複数行,lines_bumon, newLine_bumon);
             // 取引先コードでソート
             lines = lines
                 .Where(x => !string.IsNullOrWhiteSpace(x))
@@ -333,43 +311,30 @@ namespace あすよん月次帳票
             // ★マスタ登録処理[取引先ロール別マスタ]
             // ----------------------------------------------------
             // 取引先ロール別マスターファイル有無チェック＆読込
-            foreach (var newLineRoll in newLineRollList)
+            for(int i = 0; i <= newLineRollList.Count; i++)
             {
-                if (newLineRoll.Count == 0) continue; // 登録なしの場合スキップ
-                string mf_toriroll = null;
-                if (ReferenceEquals(newLineRoll, newLine_syosya))
-                    mf_toriroll = Path.Combine(CMD.mfPath, "SYOSYA-MASTER.txt");
-                else if (ReferenceEquals(newLineRoll, newLine_siire))
-                    mf_toriroll = Path.Combine(CMD.mfPath, "SIIRE-MASTER.txt");
-                else if (ReferenceEquals(newLineRoll, newLine_hanbai))
-                    mf_toriroll = Path.Combine(CMD.mfPath, "HANBAI-MASTER.txt");
-                else if (ReferenceEquals(newLineRoll, newLine_tokui))
-                    mf_toriroll = Path.Combine(CMD.mfPath, "TOKUISAKI-MASTER.txt");
-                else if (ReferenceEquals(newLineRoll, newLine_syukka))
-                    mf_toriroll = Path.Combine(CMD.mfPath, "SYUKKA-MASTER.txt");
-                else if (ReferenceEquals(newLineRoll, newLine_azukari))
-                    mf_toriroll = Path.Combine(CMD.mfPath, "AZUKARI-MASTER.txt");
-                else if (ReferenceEquals(newLineRoll, newLine_unsou))
-                    mf_toriroll = Path.Combine(CMD.mfPath, "UNSOU-MASTER.txt");
-                else if (ReferenceEquals(newLineRoll, newLine_souko))
-                    mf_toriroll = Path.Combine(CMD.mfPath, "SOUKO-MASTER.txt");
+                if (newLineRollList[i].Count == 0) continue; // 登録なしの場合スキップ
+                {
+                    string mf_toriroll = null;
+                    mf_toriroll = mf_torirollTxtPaths[i];
 
-                // 取引先ロール別マスターファイル有無チェック＆読込
-                var lines_toriroru = fam.CheckAndLoadMater(mf_toriroll, mst, CMD.utf8, 0);
-                bool replaced_toriroru;
-                // 新規・変更登録
-                (lines_toriroru, replaced_toriroru) = fam.AddMasterFile(lines_toriroru, newLineRoll);
-                // 取引先ロール別マスターファイル書き込み
-                File.WriteAllLines(mf_toriroll, lines_toriroru, Encoding.UTF8);
-                // 取引先コードでソート
-                lines_toriroru = lines_toriroru
-                    .Where(x => !string.IsNullOrWhiteSpace(x))
-                    .OrderBy(x => x.Split(' ')[0])
-                    .ToList();
-                // バックアップ
-                fam.BackupMaster(mf_bumon, mf_bumonName, "Add", mst_bumon);
-                // ファイル書き込み
-                File.WriteAllLines(mf_toriroll, lines_toriroru, Encoding.UTF8);
+                    // 取引先ロール別マスターファイル有無チェック＆読込
+                    var lines_toriroru = fam.CheckAndLoadMater(mf_toriroll, mst, CMD.utf8, 0);
+                    bool replaced_toriroru;
+                    // 新規・変更登録
+                    (lines_toriroru, replaced_toriroru) = fam.AddMasterFile(AddMasterPattern.Keyが1項目と2項目で追加は複数行, lines_toriroru, newLineRollList[i]);
+                    // 取引先ロール別マスターファイル書き込み
+                    File.WriteAllLines(mf_toriroll, lines_toriroru, Encoding.UTF8);
+                    // 取引先コードでソート
+                    lines_toriroru = lines_toriroru
+                        .Where(x => !string.IsNullOrWhiteSpace(x))
+                        .OrderBy(x => x.Split(' ')[0])
+                        .ToList();
+                    // バックアップ
+                    fam.BackupMaster(mf_bumon, mf_bumonName, "Add", mst_bumon);
+                    // ファイル書き込み
+                    File.WriteAllLines(mf_toriroll, lines_toriroru, Encoding.UTF8);
+                }
             }
 
             // 入力内容クリア
@@ -382,7 +347,7 @@ namespace あすよん月次帳票
             fam.AddLog($"{HIZTIM} マスタ登録 1 {CMD.UserName} btn登録_Click {mst}");
             fam.AddLog2($"{HIZTIM} マスタ登録 0 {CMD.UserName} btn登録_Click {mst}が更新されました");
             fam.AddLog2($"{HIZTIM} マスタ登録 0 {CMD.UserName} btn登録_Click {mst_bumon}が登録されました");
-            fam.AddLog2($"{HIZTIM} マスタ登録 0 {CMD.UserName} btn登録_Click {mst_toriroru}が登録されました");
+            fam.AddLog2($"{HIZTIM} マスタ登録 0 {CMD.UserName} btn登録_Click {mst_torirole}が登録されました");
         }
 
         
@@ -412,13 +377,13 @@ namespace あすよん月次帳票
             switch (company)
             {
                 case "オーノ":
-                    mf = mf1;
+                    mf = mfTxtPaths[0];
                     break;
                 case "サンミックダスコン":
-                    mf = mf2;
+                    mf = mfTxtPaths[1];
                     break;
                 case "サンミックカーペット":
-                    mf = mf3;
+                    mf = mfTxtPaths[2];
                     break;
             }
             //マスターファイル有無チェック＆読込
@@ -454,7 +419,7 @@ namespace あすよん月次帳票
             //  8:郵便番号 9:電話番号1 10:電話番号2    11:FAX番号1 12:FAX番号2  13:住所1    14:住所1カナ 15:住所2 16:住所2カナ 17:備考
             //----------------------------------------------------
             DataTable dt = new DataTable();
-            foreach (var col in Enum.GetNames(typeof(ENM.TORIHIKI_MASTER_OUT)))
+            foreach (var col in Enum.GetNames(typeof(TORIHIKI_MASTER_OUT)))
             {
                 dt.Columns.Add(col);
             }
@@ -566,15 +531,7 @@ namespace あすよん月次帳票
             }
             return list;
         }
-        private List<string> MakingNewLineToriRoll(string col1, string col2, string col3, string col4, List<string> list)
-        {
-            list = new List<string>
-            {
-                col1, col2, col3, col4
-            };
-            
-            return list;
-        }
+        
 
     }
 }

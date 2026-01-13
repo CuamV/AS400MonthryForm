@@ -9,7 +9,6 @@ using System.Text;
 using System.Windows.Forms;
 using CMD = あすよん月次帳票.CommonData;
 using DataTable = System.Data.DataTable;
-using ENM = あすよん月次帳票.Enums;
 using Path = System.IO.Path;
 
 namespace あすよん月次帳票
@@ -126,7 +125,7 @@ namespace あすよん月次帳票
 
                 // バルクインサート用DataTable作成
                 DataTable bulkData = new DataTable();
-                foreach (var col in Enum.GetNames(typeof(ENM.POSTALCODES)))
+                foreach (var col in Enum.GetNames(typeof(POSTALCODES)))
                 {
                     bulkData.Columns.Add(col, typeof(string));
                 }
