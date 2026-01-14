@@ -38,17 +38,19 @@ namespace あすよん月次帳票
 
         string mf_bumon = Path.Combine(CMD.mfPath, "TORIHIKI-BUMON.txt");
         string mf_bumonName = "TORIHIKI-BUMON";
-        string[] mf_torirollTxtNames = new[] { "SYOSYA", "SIIRE", "HANBAI", "TOKUISAKI", "SYUKKA", "AZUKARI", "UNSOU", "SOUKO" };
+        string[] mf_torirollTxtNames = new[] { 
+            "TROLE-SYOSYA", "TROLE-SIIRE", "TROLE-HANBAI", "TROLE-TOKUISAKI", "TROLE-SYUKKA", "TROLE-AZUKARI", "TROLE-UNSOU", "TROLE-SOUKO" };
+
         string[] mf_torirollTxtPaths = new[]
         {
-            Path.Combine(CMD.mfPath, "SYOSYA.txt"),
-            Path.Combine(CMD.mfPath, "SIIRE.txt"),
-            Path.Combine(CMD.mfPath, "HANBAI.txt"),
-            Path.Combine(CMD.mfPath, "TOKUISAKI.txt"),
-            Path.Combine(CMD.mfPath, "SYUKKA.txt"),
-            Path.Combine(CMD.mfPath, "AZUKARI.txt"),
-            Path.Combine(CMD.mfPath, "UNSOU.txt"),
-            Path.Combine(CMD.mfPath, "SOUKO.txt"),
+            Path.Combine(CMD.mfPath, "TROLE-SYOSYA.txt"),
+            Path.Combine(CMD.mfPath, "TROLE-SIIRE.txt"),
+            Path.Combine(CMD.mfPath, "TROLE-HANBAI.txt"),
+            Path.Combine(CMD.mfPath, "TROLE-TOKUISAKI.txt"),
+            Path.Combine(CMD.mfPath, "TROLE-SYUKKA.txt"),
+            Path.Combine(CMD.mfPath, "TROLE-AZUKARI.txt"),
+            Path.Combine(CMD.mfPath, "TROLE-UNSOU.txt"),
+            Path.Combine(CMD.mfPath, "TROLE-SOUKO.txt"),
         };
         string mst = "取引先マスタ";
         string mst_bumon = "取引先部門マスタ";

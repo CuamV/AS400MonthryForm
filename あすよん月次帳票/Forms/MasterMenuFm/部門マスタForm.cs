@@ -117,7 +117,7 @@ namespace あすよん月次帳票
 
             // 新規・変更登録
             bool replaced;
-            (lines, replaced) = fam.AddMasterFile(AddMasterPattern.Keyが1項目で追加は単行,lines, newLineList);
+            (lines, replaced) = fam.AddMasterFile(AddMasterPattern.Keyが1項目,lines, newLineList);
 
             // 部門コードでソート
             lines = lines

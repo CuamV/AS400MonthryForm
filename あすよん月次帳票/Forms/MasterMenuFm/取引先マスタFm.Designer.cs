@@ -34,8 +34,6 @@
             this.btn照会 = new System.Windows.Forms.Button();
             this.btnダウンロード = new System.Windows.Forms.Button();
             this.btn戻る = new System.Windows.Forms.Button();
-            this.lb会社 = new System.Windows.Forms.Label();
-            this.cmbBx会社 = new System.Windows.Forms.ComboBox();
             this.lb部門 = new System.Windows.Forms.Label();
             this.btn削除 = new System.Windows.Forms.Button();
             this.btn登録 = new System.Windows.Forms.Button();
@@ -139,37 +137,11 @@
             this.btn戻る.UseVisualStyleBackColor = true;
             this.btn戻る.Click += new System.EventHandler(this.btnForm1Back_Click);
             // 
-            // lb会社
-            // 
-            this.lb会社.AutoSize = true;
-            this.lb会社.Font = new System.Drawing.Font("Meiryo UI", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(128)));
-            this.lb会社.Location = new System.Drawing.Point(48, 94);
-            this.lb会社.Margin = new System.Windows.Forms.Padding(5, 0, 5, 0);
-            this.lb会社.Name = "lb会社";
-            this.lb会社.Size = new System.Drawing.Size(47, 17);
-            this.lb会社.TabIndex = 24;
-            this.lb会社.Text = "会社：";
-            // 
-            // cmbBx会社
-            // 
-            this.cmbBx会社.Font = new System.Drawing.Font("Meiryo UI", 10.2F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(128)));
-            this.cmbBx会社.FormattingEnabled = true;
-            this.cmbBx会社.Items.AddRange(new object[] {
-            "オーノ",
-            "サンミックダスコン",
-            "サンミックカーペット"});
-            this.cmbBx会社.Location = new System.Drawing.Point(97, 88);
-            this.cmbBx会社.Margin = new System.Windows.Forms.Padding(5);
-            this.cmbBx会社.Name = "cmbBx会社";
-            this.cmbBx会社.Size = new System.Drawing.Size(120, 26);
-            this.cmbBx会社.TabIndex = 7;
-            this.cmbBx会社.SelectionChangeCommitted += new System.EventHandler(this.cmboBx会社_SelectionChangeCommitted);
-            // 
             // lb部門
             // 
             this.lb部門.AutoSize = true;
             this.lb部門.Font = new System.Drawing.Font("Meiryo UI", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(128)));
-            this.lb部門.Location = new System.Drawing.Point(48, 138);
+            this.lb部門.Location = new System.Drawing.Point(48, 111);
             this.lb部門.Margin = new System.Windows.Forms.Padding(5, 0, 5, 0);
             this.lb部門.Name = "lb部門";
             this.lb部門.Size = new System.Drawing.Size(47, 17);
@@ -186,7 +158,6 @@
             this.btn削除.TabIndex = 17;
             this.btn削除.Text = "削除";
             this.btn削除.UseVisualStyleBackColor = true;
-            this.btn削除.Click += new System.EventHandler(this.btn削除_Click);
             // 
             // btn登録
             // 
@@ -230,6 +201,7 @@
             this.txtBx取引先CD.Name = "txtBx取引先CD";
             this.txtBx取引先CD.Size = new System.Drawing.Size(104, 25);
             this.txtBx取引先CD.TabIndex = 1;
+            this.txtBx取引先CD.TextChanged += new System.EventHandler(this.txtBx取引先CD_TextChanged);
             // 
             // lb取引先名
             // 
@@ -293,11 +265,12 @@
             "オーノ",
             "サンミックダスコン",
             "サンミックカーペット"});
-            this.cmbBx部門.Location = new System.Drawing.Point(97, 134);
+            this.cmbBx部門.Location = new System.Drawing.Point(97, 107);
             this.cmbBx部門.Margin = new System.Windows.Forms.Padding(5);
             this.cmbBx部門.Name = "cmbBx部門";
             this.cmbBx部門.Size = new System.Drawing.Size(120, 26);
             this.cmbBx部門.TabIndex = 8;
+            this.cmbBx部門.SelectionChangeCommitted += new System.EventHandler(this.txtBx取引先CD_TextChanged);
             // 
             // lb取引先名カナ
             // 
@@ -564,7 +537,7 @@
             "預り先",
             "運送便",
             "倉庫"});
-            this.chkListBx取引先ロール.Location = new System.Drawing.Point(97, 200);
+            this.chkListBx取引先ロール.Location = new System.Drawing.Point(97, 189);
             this.chkListBx取引先ロール.Name = "chkListBx取引先ロール";
             this.chkListBx取引先ロール.Size = new System.Drawing.Size(104, 156);
             this.chkListBx取引先ロール.TabIndex = 39;
@@ -572,7 +545,7 @@
             // lb取引先ロール
             // 
             this.lb取引先ロール.AutoSize = true;
-            this.lb取引先ロール.Location = new System.Drawing.Point(48, 180);
+            this.lb取引先ロール.Location = new System.Drawing.Point(48, 169);
             this.lb取引先ロール.Name = "lb取引先ロール";
             this.lb取引先ロール.Size = new System.Drawing.Size(91, 17);
             this.lb取引先ロール.TabIndex = 40;
@@ -618,8 +591,6 @@
             this.Controls.Add(this.txtBx取引先正式名);
             this.Controls.Add(this.txtBx取引先名);
             this.Controls.Add(this.btnメニュー);
-            this.Controls.Add(this.lb会社);
-            this.Controls.Add(this.cmbBx会社);
             this.Controls.Add(this.lb部門);
             this.Controls.Add(this.btn削除);
             this.Controls.Add(this.btn登録);
@@ -640,8 +611,6 @@
         private System.Windows.Forms.Button btn照会;
         private System.Windows.Forms.Button btnダウンロード;
         private System.Windows.Forms.Button btn戻る;
-        private System.Windows.Forms.Label lb会社;
-        private System.Windows.Forms.ComboBox cmbBx会社;
         private System.Windows.Forms.Label lb部門;
         private System.Windows.Forms.Button btn削除;
         private System.Windows.Forms.Button btn登録;

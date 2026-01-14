@@ -1277,9 +1277,58 @@ namespace あすよん月次帳票
         //=======================================================================
         // マスタメニュー関連メソッド
         //=======================================================================
+        internal (List<string>, bool) AddMaster(string newLine,List<string> lines, bool replaced, string CD1 = null, string CD2 = null)
+        {
+            for (int i = 0; i < lines.Count; i++)
+            {
+                if (string.IsNullOrWhiteSpace(lines[i])) continue;
+
+                var parts = lines[i].Split(' ');
+                if(CD1 == null && CD2 == null)
+                {
+                    // 全列完全一致で上書き
+                    for (int j = 0; j < lines.Count; j++)
+                    {
+                        if (string.IsNullOrWhiteSpace(lines[j])) continue;
+                        // 完全一致で上書き
+                        if (lines[j] == newLine)
+                        {
+                            lines[i] = newLine;
+                            replaced = true;
+                            break;
+                        }
+                    }
+                }
+                else if(CD2 == null)
+                {
+                    // 1項目目のみ一致する場合に上書き
+                    if (parts.Length > 0 && parts[0] == CD1)
+                    {
+                        // 重複あり→上書き
+                        lines[i] = newLine;
+                        replaced = true;
+                        break;
+                    }
+                }
+                else
+                {
+                    // 1項目目と2項目目の両方が一致する場合のみ上書き
+                    if (parts.Length > 1 && parts[0] == CD1 && parts[1] == CD2)
+                    {
+                        // 重複あり→上書き
+                        lines[i] = newLine;
+                        replaced = true;
+                        break;
+                    }
+                }
+            }
+            // 新規追加
+            if (!replaced) lines.Add(newLine);
+
+            return (lines, replaced);
+        }
         /// <summary>
-        /// ★マスタファイルに新規追加または上書き保存[部門]
-        /// (※1項目目キーのみ)
+        /// ★マスタファイルに新規追加または上書き保存
         /// </summary>
         /// <param name="lines"></param>
         /// <param name="bumonCD"></param>
@@ -1290,62 +1339,53 @@ namespace あすよん月次帳票
             string newLine;
             string CD1;
             string CD2;
-            bool replaced = false;
-            if (pattern == AddMasterPattern.Keyが1項目で追加は単行)
-            {
-                // newLineListを半角スペース区切りの文字列に変換
-                newLine = string.Join(" ", newLinesList);
-                CD1 = newLinesList[0]; // 1項目目をキーとする
-                // 既存データチェック(重複)
-                for (int i = 0; i < lines.Count; i++)
-                {
-                    if (string.IsNullOrWhiteSpace(lines[i])) continue;
-
-                    var parts = lines[i].Split(' ');
-                    if (parts.Length > 0 && parts[0] == CD1)
-                    {
-                        // 重複あり→上書き
-                        lines[i] = newLine;
-                        replaced = true;
-                        break;
-                    }
-                }
-                // 新規追加
-                if (!replaced) lines.Add(newLine);
-            }
-            else if (pattern == AddMasterPattern.Keyが1項目と2項目で追加は複数行)
+            bool replaced = false; // ← ここで宣言
+            
+            if (pattern == AddMasterPattern.Keyが1項目)
             {
                 foreach (var newLineList in newLinesList)
                 {
                     // newLineListを半角スペース区切りの文字列に変換
                     newLine = string.Join(" ", newLineList);
+                    // 1項目目をキーとする
+                    string[] newLineListStr = newLine.Split(' ');
+                    CD1 = newLineListStr[0]; // 1項目目をキーとする
+
+                    var result = AddMaster(newLine, lines, replaced,CD1);
+                    lines = result.Item1;
+                    replaced = replaced || result.Item2;
+                }
+            }
+            else if (pattern == AddMasterPattern.Keyが1項目と2項目)
+            {
+                foreach (var newLineList in newLinesList)
+                {
+                    // newLineListを半角スペース区切りの文字列に変換
+                    newLine = string.Join(" ", newLineList);
+                    // 1項目目と2項目目をキーとする
                     string[] newLineListStr = newLine.Split(' ');
                     CD1 = newLineListStr[0]; // 1項目目をキーとする
                     CD2 = newLineListStr[1]; // 2項目目をキーとする
 
-                    // 既存データチェック(重複)
-                    for (int i = 0; i < lines.Count; i++)
-                    {
-                        if (string.IsNullOrWhiteSpace(lines[i])) continue;
-
-                        var parts = lines[i].Split(' ');
-
-                        // 1項目目と2項目目の両方が一致する場合のみ上書き
-                        if (parts.Length > 1 && parts[0] == CD1 && parts[1] == CD2)
-                        {
-                            // 重複あり→上書き
-                            lines[i] = newLine;
-                            replaced = true;
-                            break;
-                        }
-                    }
-                    // 新規追加(両方のキーが一致しない場合)
-                    if (!replaced) lines.Add(newLine);
+                    var result = AddMaster(newLine, lines, replaced,CD1, CD2);
+                    lines = result.Item1;
+                    replaced = replaced || result.Item2;
+                }
+            }
+            else if (pattern == AddMasterPattern.Keyなし)
+            {
+                foreach (var newLineList in newLinesList)
+                {
+                    // newLineListを半角スペース区切りの文字列に変換
+                    newLine = string.Join(" ", newLineList);
+                    var result = AddMaster(newLine, lines, replaced);
+                    lines = result.Item1;
+                    replaced = replaced || result.Item2;
                 }
             }
             return (lines, replaced);
         }
-
+      
         /// <summary>
         /// 入力内容クリア処理
         /// </summary>
@@ -1543,12 +1583,24 @@ namespace あすよん月次帳票
                     // 17:仕入先区分 18:販売先区分   19:得意先区分 20:出荷先区分  21:預り先区分 22:運送便区分   23:倉庫区分  24:備考
                     // 25:登録者ID  26:登録日       27:登録時刻
                     //----------------------------------------------------
-                    var newFields = new[] { f[0], f[2], f[3], f[4], f[5], f[6], f[7], f[8], f[9], f[10],
+                    if (!string.IsNullOrWhiteSpace(f[0]))
+                    {
+                        var newFields = new[] { f[0], f[2], f[3], f[4], f[5], f[6], f[7], f[8], f[9], f[10],
                         f[11], f[12], f[13], f[14], f[15], f[16], f[17], f[18], f[19], f[20], f[21], f[22],
                         f[23], f[24], CMD.UserID, CMD.HIZ, DateTime.Now.ToString("HHmmss") };
-                    var Line = string.Join(" ", newFields.Select(x => string.IsNullOrEmpty(x) ? "" : x));
+                        var Line = string.Join(" ", newFields.Select(x => string.IsNullOrEmpty(x) ? "" : x));
 
-                    lines.Add(Line);
+                        lines.Add(Line);
+                    }
+                    // linesを取引先CDでユニーク
+                    lines = lines
+                        .GroupBy(line =>
+                        {
+                            var parts = line.Split(' ');
+                            return (parts.Length > 0) ? parts[0] : string.Empty;
+                        })
+                        .Select(g => g.First())
+                        .ToList();
 
                     // [取引先部門マスタ]（半角スペース区切り）
                     //  1:取引先CD 2:部門CD
@@ -1561,13 +1613,18 @@ namespace あすよん月次帳票
                         f[16], f[17], f[18], f[19],
                         f[20], f[21], f[22], f[23]
                     };
-
-                    // 1:取引先CD 2:部門CD 3:取引先名 4:取引先名カナ
-                    // ----------------------------------------------------
+                    
                     for (int toriRole = 0; toriRole < toriRoles.Length; toriRole++)
                     {
                         if (toriRoles[toriRole] == "1")
-                            newLinesRoleLists[toriRole].Add($"{f[0]} {f[1]} {f[3]} {f[4]}");
+                            if (toriRole == 3)
+                                // 得意先(newLines_tokui)の場合
+                                // 1:取引先CD 2:部門CD 3:取引先名 4:取引先名カナ 5:適用開始日付 6:適用終了日付
+                                newLinesRoleLists[toriRole].Add($"{f[0]} {f[1]} {f[3]} {f[4]} {CMD.HIZ} 99991231");
+                            else
+                                // 1:取引先CD 2:部門CD 3:取引先名 4:取引先名カナ
+                                // ----------------------------------------------------
+                                newLinesRoleLists[toriRole].Add($"{f[0]} {f[1]} {f[3]} {f[4]}");
                     }
                 }
 
@@ -1588,7 +1645,7 @@ namespace あすよん月次帳票
                 // 取引先部門マスタファイル有無チェック＆読込
                 var lines_bumon = CheckAndLoadMater(mf_bumon, mst_bumon, CMD.utf8, 0);
                 bool replaced;
-                (lines_bumon, replaced) = AddMasterFile(AddMasterPattern.Keyが1項目と2項目で追加は複数行, lines_bumon, newLines_bumon);
+                (lines_bumon, replaced) = AddMasterFile(AddMasterPattern.Keyが1項目と2項目, lines_bumon, newLines_bumon);
                 
                 // バックアップ
                 BackupMaster(mf, mfName, "Import", mst);
@@ -1619,7 +1676,14 @@ namespace あすよん月次帳票
                 {
                     // 取引先ロール別マスタファイル有無チェック
                     var lines_toriroll = CheckAndLoadMater(mf_toriroleTxtPaths[c], mst_torirole, CMD.utf8, 0);
-                    (lines_toriroll, replaced) = AddMasterFile(AddMasterPattern.Keyが1項目と2項目で追加は複数行,lines_toriroll, newLinesRoleLists[c]);
+                    
+                    if (c == 3)
+                        // 得意先の場合新規追加もしくは全列完全一致で上書き
+                        (lines_toriroll, replaced) = AddMasterFile(AddMasterPattern.Keyなし,lines_toriroll, newLinesRoleLists[c]);
+                    else
+                        // 得意先以外は差分置換
+                        (lines_toriroll, replaced) = AddMasterFile(AddMasterPattern.Keyが1項目と2項目,lines_toriroll, newLinesRoleLists[c]);
+
                     // バックアップ
                     BackupMaster(mf_toriroleTxtPaths[c], mf_toriroleTxtNames[c], "Import", mst_torirole);
 

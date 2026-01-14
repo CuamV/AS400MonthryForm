@@ -449,7 +449,7 @@ namespace あすよん月次帳票
             // ----------------------------------------------------
             // ★アニメーションフォーム表示
             // ----------------------------------------------------
-            StartEndAnimationThread(true);
+            StartEndAnimationThread(AnimationPattern.開く);
 
             //----------------------------------------------------
             // ★メインデータ作成処理(メインスレッドでデータ抽出)
@@ -473,7 +473,7 @@ namespace あすよん月次帳票
             //----------------------------------------------------
             // ★アニメーションフォーム閉じる
             //----------------------------------------------------
-            StartEndAnimationThread(false);
+            StartEndAnimationThread(AnimationPattern.閉じる);
 
             //----------------------------------------------------
             // ★Excelエクスポート処理
@@ -1025,7 +1025,7 @@ namespace あすよん月次帳票
                 //----------------------------------------------------
                 // ★アニメーションフォーム表示
                 //----------------------------------------------------
-                StartEndAnimationThread(true);
+                StartEndAnimationThread(AnimationPattern.開く);
 
                 //==================== Dataシート =====================
                 xlSheet = (Excel.Worksheet)xlBook.Sheets[1];
@@ -1221,7 +1221,7 @@ namespace あすよん月次帳票
                 //----------------------------------------------------
                 // ★アニメーションフォーム閉じる
                 //----------------------------------------------------
-                StartEndAnimationThread(false);
+                StartEndAnimationThread(AnimationPattern.閉じる);
 
                 // マクロ有効形式で保存
                 xlBook.SaveAs(filePath, Excel.XlFileFormat.xlOpenXMLWorkbookMacroEnabled);
@@ -1237,7 +1237,7 @@ namespace あすよん月次帳票
             }
             catch (Exception ex)
             {
-                StartEndAnimationThread(false);
+                StartEndAnimationThread(AnimationPattern.閉じる);
                 MessageBox.Show("Excelエクスポート中にエラーが発生しました: " + ex.Message);
             }
 
@@ -1286,10 +1286,10 @@ namespace あすよん月次帳票
         /// アニメーション表示・非表示(FormAnimation3)
         /// </summary>
         /// <param name="ocFlg"></param>
-        private async void StartEndAnimationThread(bool ocFlg)
+        private async void StartEndAnimationThread(AnimationPattern pattern)
         {
             WaitExcelExport anim = null;
-            if (ocFlg)
+            if (pattern == AnimationPattern.開く)
             {
                 // ----------------------------------------------------
                 // ★アニメーションフォーム表示
@@ -1307,7 +1307,7 @@ namespace あすよん月次帳票
 
                 await Task.Delay(100); // ちょっと待って anim が作られる
             }
-            else
+            else if (pattern == AnimationPattern.閉じる)
             {
                 //----------------------------------------------------
                 // ★アニメーションフォーム閉じる
