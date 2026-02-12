@@ -31,6 +31,7 @@ namespace あすよん月次帳票
         /// </summary>
         private void InitializeComponent()
         {
+            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(DataEtlViewFm));
             this.dgvData = new System.Windows.Forms.DataGridView();
             this.lb条件 = new System.Windows.Forms.Label();
             this.txtBx条件 = new System.Windows.Forms.TextBox();
@@ -68,7 +69,7 @@ namespace あすよん月次帳票
             this.txtBx条件.Size = new System.Drawing.Size(344, 143);
             this.txtBx条件.TabIndex = 0;
             // 
-            // Form2_DataView
+            // DataEtlViewFm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
@@ -77,9 +78,12 @@ namespace あすよん月次帳票
             this.Controls.Add(this.lb条件);
             this.Controls.Add(this.dgvData);
             this.Font = new System.Drawing.Font("Meiryo UI", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(128)));
+            this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.Fixed3D;
+            this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
             this.Margin = new System.Windows.Forms.Padding(2);
-            this.Name = "Form2_DataView";
-            this.Text = "Form2_DataView";
+            this.Name = "DataEtlViewFm";
+            this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
+            this.Text = "< リクエストデータ表示 >";
             ((System.ComponentModel.ISupportInitialize)(this.dgvData)).EndInit();
             this.ResumeLayout(false);
             this.PerformLayout();

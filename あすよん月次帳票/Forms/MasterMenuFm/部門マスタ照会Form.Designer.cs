@@ -40,7 +40,7 @@
             this.dgv部門マスタ.AllowUserToOrderColumns = true;
             this.dgv部門マスタ.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
             this.dgv部門マスタ.Location = new System.Drawing.Point(14, 36);
-            this.dgv部門マスタ.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.dgv部門マスタ.Margin = new System.Windows.Forms.Padding(4);
             this.dgv部門マスタ.Name = "dgv部門マスタ";
             this.dgv部門マスタ.ReadOnly = true;
             this.dgv部門マスタ.RowTemplate.Height = 21;
@@ -54,10 +54,11 @@
             this.ClientSize = new System.Drawing.Size(472, 294);
             this.Controls.Add(this.dgv部門マスタ);
             this.Font = new System.Drawing.Font("Meiryo UI", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(128)));
+            this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.Fixed3D;
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
-            this.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.Margin = new System.Windows.Forms.Padding(4);
             this.Name = "部門マスタ照会Form";
-            this.Text = "部門マスタ照会Form";
+            this.Text = "部門マスタ照会";
             ((System.ComponentModel.ISupportInitialize)(this.dgv部門マスタ)).EndInit();
             this.ResumeLayout(false);
 

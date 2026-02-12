@@ -36,7 +36,6 @@ namespace あすよん月次帳票
         {
             this.components = new System.ComponentModel.Container();
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(DataExtractionFm));
-            this.lbTitleDisplay = new System.Windows.Forms.Label();
             this.lb抽出期間 = new System.Windows.Forms.Label();
             this.grpBx抽出期間 = new System.Windows.Forms.GroupBox();
             this.txtBxEndYearMonth = new System.Windows.Forms.TextBox();
@@ -66,7 +65,6 @@ namespace あすよん月次帳票
             this.chkBxPr = new System.Windows.Forms.CheckBox();
             this.chkBxSl = new System.Windows.Forms.CheckBox();
             this.grpBxデータ区分 = new System.Windows.Forms.GroupBox();
-            this.btnMin = new System.Windows.Forms.Button();
             this.linkLb販売先 = new System.Windows.Forms.LinkLabel();
             this.linkLb仕入先 = new System.Windows.Forms.LinkLabel();
             this.grpBx取引先 = new System.Windows.Forms.GroupBox();
@@ -77,7 +75,6 @@ namespace あすよん月次帳票
             this.rdBtn品目 = new System.Windows.Forms.RadioButton();
             this.txtBx名称 = new System.Windows.Forms.TextBox();
             this.lb名称 = new System.Windows.Forms.Label();
-            this.pictureBox1 = new System.Windows.Forms.PictureBox();
             this.grpBx在集計区分 = new System.Windows.Forms.GroupBox();
             this.rdBtn在なし = new System.Windows.Forms.RadioButton();
             this.rdBtn在品種 = new System.Windows.Forms.RadioButton();
@@ -85,8 +82,6 @@ namespace あすよん月次帳票
             this.chkBx自社 = new System.Windows.Forms.CheckBox();
             this.chkBx預り = new System.Windows.Forms.CheckBox();
             this.chkBx投入 = new System.Windows.Forms.CheckBox();
-            this.groupBox1 = new System.Windows.Forms.GroupBox();
-            this.label1 = new System.Windows.Forms.Label();
             this.timrAnimation2 = new System.Windows.Forms.Timer(this.components);
             this.grpBx抽出期間.SuspendLayout();
             this.grpBxBtn.SuspendLayout();
@@ -95,20 +90,9 @@ namespace あすよん月次帳票
             this.grpBxデータ区分.SuspendLayout();
             this.grpBx取引先.SuspendLayout();
             this.grpBx売仕集計区分.SuspendLayout();
-            ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).BeginInit();
             this.grpBx在集計区分.SuspendLayout();
             this.grpBx在庫種別.SuspendLayout();
             this.SuspendLayout();
-            // 
-            // lbTitleDisplay
-            // 
-            this.lbTitleDisplay.AutoSize = true;
-            this.lbTitleDisplay.Font = new System.Drawing.Font("Meiryo UI", 9.75F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(128)));
-            this.lbTitleDisplay.Location = new System.Drawing.Point(44, 10);
-            this.lbTitleDisplay.Name = "lbTitleDisplay";
-            this.lbTitleDisplay.Size = new System.Drawing.Size(92, 17);
-            this.lbTitleDisplay.TabIndex = 1;
-            this.lbTitleDisplay.Text = "< データ抽出>";
             // 
             // lb抽出期間
             // 
@@ -127,7 +111,7 @@ namespace あすよん月次帳票
             this.grpBx抽出期間.Controls.Add(this.lbSymbol1);
             this.grpBx抽出期間.Controls.Add(this.lb抽出期間);
             this.grpBx抽出期間.Font = new System.Drawing.Font("Meiryo UI", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(128)));
-            this.grpBx抽出期間.Location = new System.Drawing.Point(106, 105);
+            this.grpBx抽出期間.Location = new System.Drawing.Point(106, 64);
             this.grpBx抽出期間.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.grpBx抽出期間.Name = "grpBx抽出期間";
             this.grpBx抽出期間.Padding = new System.Windows.Forms.Padding(3, 2, 3, 2);
@@ -170,7 +154,7 @@ namespace あすよん月次帳票
             this.grpBxBtn.Controls.Add(this.btnDisplay);
             this.grpBxBtn.Controls.Add(this.btnForm1Back);
             this.grpBxBtn.Font = new System.Drawing.Font("MS UI Gothic", 8F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(128)));
-            this.grpBxBtn.Location = new System.Drawing.Point(491, 54);
+            this.grpBxBtn.Location = new System.Drawing.Point(491, 13);
             this.grpBxBtn.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.grpBxBtn.Name = "grpBxBtn";
             this.grpBxBtn.Padding = new System.Windows.Forms.Padding(3, 2, 3, 2);
@@ -222,7 +206,7 @@ namespace あすよん月次帳票
             this.grpBx組織.Controls.Add(this.chkBxOhno);
             this.grpBx組織.Controls.Add(this.chkBxSuncar);
             this.grpBx組織.Font = new System.Drawing.Font("Meiryo UI", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(128)));
-            this.grpBx組織.Location = new System.Drawing.Point(46, 201);
+            this.grpBx組織.Location = new System.Drawing.Point(46, 160);
             this.grpBx組織.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.grpBx組織.Name = "grpBx組織";
             this.grpBx組織.Padding = new System.Windows.Forms.Padding(3, 2, 3, 2);
@@ -323,7 +307,7 @@ namespace あすよん月次帳票
             this.grpBxクラス区分.Controls.Add(this.chkBx半製品);
             this.grpBxクラス区分.Controls.Add(this.chkBx製品);
             this.grpBxクラス区分.Font = new System.Drawing.Font("Meiryo UI", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(128)));
-            this.grpBxクラス区分.Location = new System.Drawing.Point(491, 206);
+            this.grpBxクラス区分.Location = new System.Drawing.Point(491, 165);
             this.grpBxクラス区分.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.grpBxクラス区分.Name = "grpBxクラス区分";
             this.grpBxクラス区分.Padding = new System.Windows.Forms.Padding(3, 2, 3, 2);
@@ -467,7 +451,7 @@ namespace あすよん月次帳票
             this.grpBxデータ区分.Controls.Add(this.chkBxPr);
             this.grpBxデータ区分.Controls.Add(this.chkBxIv);
             this.grpBxデータ区分.Font = new System.Drawing.Font("Meiryo UI", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(128)));
-            this.grpBxデータ区分.Location = new System.Drawing.Point(540, 135);
+            this.grpBxデータ区分.Location = new System.Drawing.Point(540, 94);
             this.grpBxデータ区分.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.grpBxデータ区分.Name = "grpBxデータ区分";
             this.grpBxデータ区分.Padding = new System.Windows.Forms.Padding(3, 2, 3, 2);
@@ -475,18 +459,6 @@ namespace あすよん月次帳票
             this.grpBxデータ区分.TabIndex = 4;
             this.grpBxデータ区分.TabStop = false;
             this.grpBxデータ区分.Text = "【データ区分】";
-            // 
-            // btnMin
-            // 
-            this.btnMin.Font = new System.Drawing.Font("Meiryo UI", 8.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(128)));
-            this.btnMin.Location = new System.Drawing.Point(821, 7);
-            this.btnMin.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
-            this.btnMin.Name = "btnMin";
-            this.btnMin.Size = new System.Drawing.Size(33, 20);
-            this.btnMin.TabIndex = 11;
-            this.btnMin.Text = "―";
-            this.btnMin.UseVisualStyleBackColor = true;
-            this.btnMin.Click += new System.EventHandler(this.btnMin_Click);
             // 
             // linkLb販売先
             // 
@@ -519,7 +491,7 @@ namespace あすよん月次帳票
             this.grpBx取引先.Controls.Add(this.listBx販売先);
             this.grpBx取引先.Controls.Add(this.linkLb仕入先);
             this.grpBx取引先.Font = new System.Drawing.Font("Meiryo UI", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(128)));
-            this.grpBx取引先.Location = new System.Drawing.Point(10, 396);
+            this.grpBx取引先.Location = new System.Drawing.Point(10, 355);
             this.grpBx取引先.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.grpBx取引先.Name = "grpBx取引先";
             this.grpBx取引先.Padding = new System.Windows.Forms.Padding(3, 2, 3, 2);
@@ -577,7 +549,7 @@ namespace あすよん月次帳票
             this.grpBx売仕集計区分.Controls.Add(this.rdBtn売仕部門);
             this.grpBx売仕集計区分.Controls.Add(this.rdBtn売仕取引先);
             this.grpBx売仕集計区分.Font = new System.Drawing.Font("Meiryo UI", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(128)));
-            this.grpBx売仕集計区分.Location = new System.Drawing.Point(507, 450);
+            this.grpBx売仕集計区分.Location = new System.Drawing.Point(507, 409);
             this.grpBx売仕集計区分.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.grpBx売仕集計区分.Name = "grpBx売仕集計区分";
             this.grpBx売仕集計区分.Padding = new System.Windows.Forms.Padding(3, 2, 3, 2);
@@ -603,7 +575,7 @@ namespace あすよん月次帳票
             // txtBx名称
             // 
             this.txtBx名称.Font = new System.Drawing.Font("Meiryo UI", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(128)));
-            this.txtBx名称.Location = new System.Drawing.Point(186, 70);
+            this.txtBx名称.Location = new System.Drawing.Point(186, 29);
             this.txtBx名称.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.txtBx名称.Name = "txtBx名称";
             this.txtBx名称.Size = new System.Drawing.Size(194, 24);
@@ -613,29 +585,18 @@ namespace あすよん月次帳票
             // 
             this.lb名称.AutoSize = true;
             this.lb名称.Font = new System.Drawing.Font("Meiryo UI", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(128)));
-            this.lb名称.Location = new System.Drawing.Point(112, 70);
+            this.lb名称.Location = new System.Drawing.Point(112, 29);
             this.lb名称.Name = "lb名称";
             this.lb名称.Size = new System.Drawing.Size(73, 17);
             this.lb名称.TabIndex = 88;
             this.lb名称.Text = "帳票名称：";
-            // 
-            // pictureBox1
-            // 
-            this.pictureBox1.Image = global::あすよん月次帳票.Properties.Resources.ic_all_csm02;
-            this.pictureBox1.Location = new System.Drawing.Point(8, 6);
-            this.pictureBox1.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
-            this.pictureBox1.Name = "pictureBox1";
-            this.pictureBox1.Size = new System.Drawing.Size(33, 26);
-            this.pictureBox1.SizeMode = System.Windows.Forms.PictureBoxSizeMode.Zoom;
-            this.pictureBox1.TabIndex = 72;
-            this.pictureBox1.TabStop = false;
             // 
             // grpBx在集計区分
             // 
             this.grpBx在集計区分.Controls.Add(this.rdBtn在なし);
             this.grpBx在集計区分.Controls.Add(this.rdBtn在品種);
             this.grpBx在集計区分.Font = new System.Drawing.Font("Meiryo UI", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(128)));
-            this.grpBx在集計区分.Location = new System.Drawing.Point(590, 520);
+            this.grpBx在集計区分.Location = new System.Drawing.Point(590, 479);
             this.grpBx在集計区分.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.grpBx在集計区分.Name = "grpBx在集計区分";
             this.grpBx在集計区分.Padding = new System.Windows.Forms.Padding(3, 2, 3, 2);
@@ -679,7 +640,7 @@ namespace あすよん月次帳票
             this.grpBx在庫種別.Controls.Add(this.chkBx預り);
             this.grpBx在庫種別.Controls.Add(this.chkBx投入);
             this.grpBx在庫種別.Font = new System.Drawing.Font("Meiryo UI", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(128)));
-            this.grpBx在庫種別.Location = new System.Drawing.Point(491, 328);
+            this.grpBx在庫種別.Location = new System.Drawing.Point(491, 287);
             this.grpBx在庫種別.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.grpBx在庫種別.Name = "grpBx在庫種別";
             this.grpBx在庫種別.Padding = new System.Windows.Forms.Padding(3, 2, 3, 2);
@@ -727,51 +688,29 @@ namespace あすよん月次帳票
             this.chkBx投入.UseVisualStyleBackColor = true;
             this.chkBx投入.CheckedChanged += new System.EventHandler(this.chkBxControl);
             // 
-            // groupBox1
-            // 
-            this.groupBox1.Location = new System.Drawing.Point(362, 108);
-            this.groupBox1.Name = "groupBox1";
-            this.groupBox1.Size = new System.Drawing.Size(8, 8);
-            this.groupBox1.TabIndex = 91;
-            this.groupBox1.TabStop = false;
-            this.groupBox1.Text = "groupBox1";
-            // 
-            // label1
-            // 
-            this.label1.AutoSize = true;
-            this.label1.Location = new System.Drawing.Point(548, 137);
-            this.label1.Name = "label1";
-            this.label1.Size = new System.Drawing.Size(0, 12);
-            this.label1.TabIndex = 92;
-            // 
             // DataExtractionFm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 12F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(867, 600);
-            this.Controls.Add(this.label1);
-            this.Controls.Add(this.groupBox1);
+            this.ClientSize = new System.Drawing.Size(867, 562);
             this.Controls.Add(this.grpBx在庫種別);
             this.Controls.Add(this.grpBx在集計区分);
             this.Controls.Add(this.lb名称);
             this.Controls.Add(this.txtBx名称);
             this.Controls.Add(this.grpBx売仕集計区分);
             this.Controls.Add(this.grpBx取引先);
-            this.Controls.Add(this.btnMin);
             this.Controls.Add(this.grpBxデータ区分);
             this.Controls.Add(this.grpBxクラス区分);
             this.Controls.Add(this.grpBx組織);
             this.Controls.Add(this.grpBx抽出期間);
             this.Controls.Add(this.grpBxBtn);
-            this.Controls.Add(this.pictureBox1);
-            this.Controls.Add(this.lbTitleDisplay);
-            this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.None;
+            this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.Fixed3D;
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
             this.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.Name = "DataExtractionFm";
             this.Opacity = 0.95D;
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
-            this.Text = "RplForm2";
+            this.Text = "< データ抽出>";
             this.grpBx抽出期間.ResumeLayout(false);
             this.grpBx抽出期間.PerformLayout();
             this.grpBxBtn.ResumeLayout(false);
@@ -785,7 +724,6 @@ namespace あすよん月次帳票
             this.grpBx取引先.PerformLayout();
             this.grpBx売仕集計区分.ResumeLayout(false);
             this.grpBx売仕集計区分.PerformLayout();
-            ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).EndInit();
             this.grpBx在集計区分.ResumeLayout(false);
             this.grpBx在集計区分.PerformLayout();
             this.grpBx在庫種別.ResumeLayout(false);
@@ -796,9 +734,6 @@ namespace あすよん月次帳票
         }
 
         #endregion
-
-        private System.Windows.Forms.PictureBox pictureBox1;
-        private System.Windows.Forms.Label lbTitleDisplay;
         private System.Windows.Forms.Label lb抽出期間;
         private System.Windows.Forms.GroupBox grpBx抽出期間;
         private System.Windows.Forms.TextBox txtBxEndYearMonth;
@@ -824,7 +759,6 @@ namespace あすよん月次帳票
         private System.Windows.Forms.CheckBox chkBx半製品;
         private System.Windows.Forms.GroupBox grpBxデータ区分;
         private System.Windows.Forms.Button btnExportExcel;
-        private System.Windows.Forms.Button btnMin;
 
         private void StyleButton(Button btn, Color backColor, Color foreColor, Color? borderColor = null, int radius = 12)
         {
@@ -1021,10 +955,8 @@ namespace あすよん月次帳票
         private CheckBox chkBx自社;
         private CheckBox chkBx預り;
         private CheckBox chkBx投入;
-        private GroupBox groupBox1;
         private CheckBox chkBx預けT;
         private CheckBox chkBx預りT;
-        private Label label1;
         private CheckBox chkBx加工T;
         private RadioButton rdBtn品目;
         private Timer timrAnimation2;

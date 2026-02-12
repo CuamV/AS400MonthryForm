@@ -41,9 +41,6 @@ namespace あすよん月次帳票
             InitializeComponent();
 
             this.Load += StandardisedFormFm_Load;
-
-            this.Region = System.Drawing.Region.FromHrgn(
-                CreateRoundRectRgn(0, 0, this.Width, this.Height, 40, 40));
         }
         [DllImport("Gdi32.dll", EntryPoint = "CreateRoundRectRgn")]
         private static extern IntPtr CreateRoundRectRgn(

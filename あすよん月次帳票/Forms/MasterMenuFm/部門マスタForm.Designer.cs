@@ -223,10 +223,11 @@
             this.Controls.Add(this.btn削除);
             this.Controls.Add(this.btn登録);
             this.Font = new System.Drawing.Font("Meiryo UI", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(128)));
+            this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.Fixed3D;
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
             this.Margin = new System.Windows.Forms.Padding(4);
             this.Name = "部門マスタForm";
-            this.Text = "部門マスタForm";
+            this.Text = "部門マスタ";
             this.btnメニュー.ResumeLayout(false);
             this.ResumeLayout(false);
             this.PerformLayout();

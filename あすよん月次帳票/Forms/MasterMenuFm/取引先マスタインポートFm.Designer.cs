@@ -38,8 +38,6 @@
             this.linkLbファイル選択 = new System.Windows.Forms.LinkLabel();
             this.lbをしてください = new System.Windows.Forms.Label();
             this.pictBxCSVインポート = new System.Windows.Forms.PictureBox();
-            this.lb会社 = new System.Windows.Forms.Label();
-            this.cmbBx会社 = new System.Windows.Forms.ComboBox();
             this.pnlCSVインポート.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.pictBxCSVインポート)).BeginInit();
             this.SuspendLayout();
@@ -124,49 +122,22 @@
             this.pictBxCSVインポート.TabIndex = 0;
             this.pictBxCSVインポート.TabStop = false;
             // 
-            // lb会社
-            // 
-            this.lb会社.AutoSize = true;
-            this.lb会社.Font = new System.Drawing.Font("Meiryo UI", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(128)));
-            this.lb会社.Location = new System.Drawing.Point(40, 33);
-            this.lb会社.Margin = new System.Windows.Forms.Padding(5, 0, 5, 0);
-            this.lb会社.Name = "lb会社";
-            this.lb会社.Size = new System.Drawing.Size(47, 17);
-            this.lb会社.TabIndex = 26;
-            this.lb会社.Text = "会社：";
-            // 
-            // cmbBx会社
-            // 
-            this.cmbBx会社.Font = new System.Drawing.Font("Meiryo UI", 10.2F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(128)));
-            this.cmbBx会社.FormattingEnabled = true;
-            this.cmbBx会社.Items.AddRange(new object[] {
-            "オーノ",
-            "サンミックダスコン",
-            "サンミックカーペット"});
-            this.cmbBx会社.Location = new System.Drawing.Point(90, 29);
-            this.cmbBx会社.Margin = new System.Windows.Forms.Padding(5);
-            this.cmbBx会社.Name = "cmbBx会社";
-            this.cmbBx会社.Size = new System.Drawing.Size(120, 26);
-            this.cmbBx会社.TabIndex = 25;
-            // 
             // 取引先マスタインポートFm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(387, 343);
-            this.Controls.Add(this.lb会社);
-            this.Controls.Add(this.cmbBx会社);
             this.Controls.Add(this.pnlCSVインポート);
             this.Font = new System.Drawing.Font("Meiryo UI", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(128)));
+            this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.Fixed3D;
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
             this.Margin = new System.Windows.Forms.Padding(4);
             this.Name = "取引先マスタインポートFm";
-            this.Text = "取引先マスタインポートForm";
+            this.Text = "取引先マスタインポート";
             this.pnlCSVインポート.ResumeLayout(false);
             this.pnlCSVインポート.PerformLayout();
             ((System.ComponentModel.ISupportInitialize)(this.pictBxCSVインポート)).EndInit();
             this.ResumeLayout(false);
-            this.PerformLayout();
 
         }
 
@@ -177,8 +148,6 @@
         private System.Windows.Forms.Label lbをしてください;
         private System.Windows.Forms.Label lbこちらから;
         private System.Windows.Forms.LinkLabel linkLbファイル選択;
-        private System.Windows.Forms.Label lb会社;
-        private System.Windows.Forms.ComboBox cmbBx会社;
         private System.Windows.Forms.Label lb対象の会社を選択し;
     }
 }

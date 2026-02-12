@@ -1,17 +1,20 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Data;
+using System.IO;
 using System.Linq;
 using System.Windows.Forms;
+using CMD = あすよん月次帳票.CommonData;
 
 namespace あすよん月次帳票
 {
     internal partial class 販売仕入先Form : Form
     {
         private string mode;  // "HANBAI" or "SHIIRE"
-        private List<Torihiki> initialSelected;  // RplForm2 から受け取る
+        private List<Torihiki> initialSelected;  // DataExtractionFm から受け取る
         private Dictionary<string, string> deptCodeToCompany; // 部門コードから会社名へのマッピング
-        private Dictionary<string, List<dynamic>> jsonData;  // JSON読込結果
+        private Dictionary<string, string> deptCodeToName; // 部門コードから部門名へのマッピング
+        private Dictionary<string, List<dynamic>> masterData;  // マスター読込結果 (会社キー -> MfItemリスト)
         private Dictionary<string, HashSet<string>> preselectedMap; // RplForm2 から受け取る事前選択データマップ
 
         internal 販売仕入先Form(string mode, List<Torihiki> selectedItems, Dictionary<string, HashSet<string>> existingMap)
@@ -28,14 +31,33 @@ namespace あすよん月次帳票
 
         internal void 販売仕入先Form_Load(object sender, EventArgs e)
         {
-            // 部門CD→会社マッピング作成
+            // 部門CD→会社/部門名 マッピング作成 (BUMON.txt を利用)
             deptCodeToCompany = new Dictionary<string, string>();
-            foreach (var comp in new[] { "オーノ", "サンミックダスコン", "サンミックカーペット" })
+            deptCodeToName = new Dictionary<string, string>();
+            string bumonPath = Path.Combine(CMD.mfPath, "BUMON.txt");
+            if (File.Exists(bumonPath))
             {
-                foreach (var bumon in JsonLoader.GetBUMONs(comp))
-                    deptCodeToCompany[bumon.Code] = comp;
+                foreach (var line in File.ReadLines(bumonPath, CMD.utf8 ?? System.Text.Encoding.Default))
+                {
+                    if (string.IsNullOrWhiteSpace(line)) continue;
+                    // 列は空白区切り。先頭が部門CD、末尾が会社名、2番目が部門名の想定
+                    var toks = line.Split(new[] { ' ' }, StringSplitOptions.RemoveEmptyEntries);
+                    if (toks.Length >= 1)
+                    {
+                        var code = toks[0].Trim();
+                        var company = toks.Length >= 4 ? toks[3].Trim() : (toks.Length >= 2 ? toks[toks.Length - 1].Trim() : "");
+                        var name = toks.Length >= 2 ? toks[1].Trim() : string.Empty;
+                        if (!string.IsNullOrEmpty(code))
+                        {
+                            deptCodeToCompany[code] = company;
+                            deptCodeToName[code] = name;
+                        }
+                    }
+                }
             }
-            LoadAllJson();
+
+            // マスター読み込み (TORIHIKI系テキストを利用)
+            LoadAllMasters();
             InitTreeView();
 
             // ListBoxに復元
@@ -57,52 +79,71 @@ namespace あすよん月次帳票
             }));
         }
 
-        // 全会社のJSONデータを読み込み
-        private void LoadAllJson()
+        // 全会社のマスタデータを読み込み
+        private void LoadAllMasters()
         {
-            jsonData = new Dictionary<string, List<dynamic>>();
+            // Read TORIHIKI master and role files to build company->items map
+            masterData = new Dictionary<string, List<dynamic>>();
             string[] companyCodes = { "オーノ", "サンミックダスコン", "サンミックカーペット" };
 
-            foreach (var cc in companyCodes)
+            // Load TORIHIKI (code -> name)
+            var torihikiName = new Dictionary<string, string>();
+            string torihikiPath = Path.Combine(CMD.mfPath, "TORIHIKI.txt");
+            if (File.Exists(torihikiPath))
             {
-                var items = new List<dynamic>();
-                var validBumons = JsonLoader.GetBUMONs(cc).Select(b => b.Code).ToHashSet(); // BUMON.json に存在する部門
-
-                IEnumerable<string> keys = mode == "HANBAI"
-                    ? JsonLoader.GetHanbaiKeys(cc)
-                    : JsonLoader.GetShiireKeys(cc);
-
-                foreach (var bumonCode in keys)
+                foreach (var line in File.ReadLines(torihikiPath, CMD.utf8 ?? System.Text.Encoding.Default))
                 {
-                    if (!validBumons.Contains(bumonCode)) continue;
-
-                    List<MfItem> itemsToAdd = new List<MfItem>();
-
-                    if (mode == "HANBAI")
+                    if (string.IsNullOrWhiteSpace(line)) continue;
+                    var toks = line.Split(new[] { ' ' }, StringSplitOptions.RemoveEmptyEntries);
+                    if (toks.Length >= 1)
                     {
-                        var list = JsonLoader.GetMf_HANBAIs(cc, new[] { bumonCode });
-                        itemsToAdd.AddRange(list.Select(x => new MfItem
-                        {
-                            Code = x.Code,
-                            Name = x.Name,
-                            Kana = x.Kana,
-                            DeptCode = bumonCode
-                        }));
+                        var code = toks[0].Trim();
+                        // try to find a reasonable name field: prefer index 3 or 2 or 1
+                        string name = string.Empty;
+                        if (toks.Length > 3) name = toks[3].Trim();
+                        else if (toks.Length > 2) name = toks[2].Trim();
+                        else if (toks.Length > 1) name = toks[1].Trim();
+                        if (!string.IsNullOrEmpty(code) && !torihikiName.ContainsKey(code))
+                            torihikiName[code] = name;
                     }
-                    else
-                    {
-                        var list = JsonLoader.GetMf_SHIIREs(cc, new[] { bumonCode });
-                        itemsToAdd.AddRange(list.Select(x => new MfItem
-                        {
-                            Code = x.Code,
-                            Name = x.Name,
-                            Kana = x.Kana,
-                            DeptCode = bumonCode
-                        }));
-                    }
-                    items.AddRange(itemsToAdd);
                 }
-                jsonData[cc] = items;
+            }
+
+            // Choose role file based on mode
+            string roleFile = mode == "HANBAI" ? "TROLE-HANBAI.txt" : "TROLE-SIIRE.txt";
+            string rolePath = Path.Combine(CMD.mfPath, roleFile);
+
+            // Build valid bumon sets per company
+            var validByCompany = new Dictionary<string, HashSet<string>>();
+            foreach (var cc in companyCodes)
+                validByCompany[cc] = new HashSet<string>(deptCodeToCompany.Where(kv => kv.Value == cc).Select(kv => kv.Key));
+
+            // Initialize company lists
+            foreach (var cc in companyCodes)
+                masterData[cc] = new List<dynamic>();
+
+            if (File.Exists(rolePath))
+            {
+                foreach (var line in File.ReadLines(rolePath, CMD.utf8 ?? System.Text.Encoding.Default))
+                {
+                    if (string.IsNullOrWhiteSpace(line)) continue;
+                    var toks = line.Split(new[] { ' ' }, StringSplitOptions.RemoveEmptyEntries);
+                    if (toks.Length < 2) continue;
+                    var code = toks[0].Trim();
+                    var bumon = toks[1].Trim();
+                    string name = toks.Length > 2 ? toks[2].Trim() : (torihikiName.ContainsKey(code) ? torihikiName[code] : string.Empty);
+
+                    if (!deptCodeToCompany.TryGetValue(bumon, out var company)) continue; // skip unknown bumon
+                    if (!validByCompany.ContainsKey(company) || !validByCompany[company].Contains(bumon)) continue;
+
+                    masterData[company].Add(new MfItem
+                    {
+                        Code = code,
+                        Name = name,
+                        Kana = string.Empty,
+                        DeptCode = bumon
+                    });
+                }
             }
         }
 
@@ -120,11 +161,11 @@ namespace あすよん月次帳票
             }
 
             // 部門ごとにアイテムを追加
-            foreach (var cc in jsonData.Keys)
+            foreach (var cc in masterData.Keys)
             {
                 List<dynamic> items = filteredItems != null
                     ? filteredItems.Where(x => deptCodeToCompany.ContainsKey(x.DeptCode) && deptCodeToCompany[x.DeptCode] == cc).ToList()
-                    : jsonData[cc];
+                    : masterData[cc];
 
                 foreach (var item in items)
                 {
@@ -138,8 +179,7 @@ namespace あすよん月次帳票
                         .FirstOrDefault(n => (string)n.Tag == deptCode);
                     if (deptNode == null)
                     {
-                        string deptName = JsonLoader.GetBUMONs(cc)
-                            .FirstOrDefault(b => b.Code == deptCode)?.Name ?? deptCode;
+                        string deptName = deptCodeToName.ContainsKey(deptCode) ? deptCodeToName[deptCode] : deptCode;
                         deptNode = new TreeNode($"{deptCode} {deptName}") { Tag = deptCode, Checked = false };
                         compNode.Nodes.Add(deptNode);
                     }
@@ -264,7 +304,7 @@ namespace あすよん月次帳票
                 return;
             }
 
-            var filtered = jsonData.Values.SelectMany(list => list)
+            var filtered = masterData.Values.SelectMany(list => list)
                 .Where(item =>
                     (string.IsNullOrEmpty(codeSearch) || item.Code == codeSearch) &&
                     (string.IsNullOrEmpty(nameSearch) || item.Name.IndexOf(nameSearch, StringComparison.OrdinalIgnoreCase) >= 0))

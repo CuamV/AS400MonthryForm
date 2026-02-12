@@ -4,6 +4,7 @@ using System.ComponentModel;
 using System.Data;
 using System.Drawing;
 using System.Linq;
+using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
@@ -22,17 +23,40 @@ namespace あすよん月次帳票
 
         // フィールド変数
         private string HIZTIM;
-    
+        private List<GroupBox> cBoxList;
+
         public MasterMenuFm()
         {
             InitializeComponent();
-        }
 
+            cBoxList = new List<GroupBox>
+            {
+                grpBx組織,
+                grpBx効率化,
+                grpBx権限,
+            };
+
+            // RplForm2の全グループボックスを配列化して共通のPaintイベントを設定
+            foreach (var gb in cBoxList)
+                gb.Paint += GroupBoxCustomBorder;
+
+            this.Load += MasterMenuFm_Load;
+        }
+        [DllImport("Gdi32.dll", EntryPoint = "CreateRoundRectRgn")]
+        private static extern IntPtr CreateRoundRectRgn(
+            int nLeftRect, int nTopRect, int nRightRect, int nBottomRect,
+            int nWidthEllipse, int nHeightEllipse);
+
+        public void MasterMenuFm_Load(object sender, EventArgs e)
+        {
+            // フォームにスノーマンカラーを適用
+            ApplySnowManColors();
+        }
         //=========================================================
         // 【コントロール実行メソッド】
         //=========================================================
-        
-        
+
+
         /// <summary>
         /// 戻るボタンクリック
         /// </summary>
@@ -78,83 +102,6 @@ namespace あすよん月次帳票
             form.Show();
         }
 
-        /// <summary>
-        /// 取引先ボタンクリック
-        /// </summary>
-        /// <param name="sender"></param>
-        /// <param name="e"></param>
-        private async void AAA(object sender, EventArgs e)
-        {
-            HIZTIM = $"{DateTime.Now:yyyy/MM/dd HH:mm:ss}";
-            fam.AddLog($"{HIZTIM} コントロール 1 {CMD.UserName} lnkLbMaster_LinkClicked");
-            try
-            {
-                WaitSnowMan anim = null;
-
-                // --- FormAnimation スレッド ---
-                Thread animThread = new Thread(() =>
-                {
-                    using (WaitSnowMan a = new WaitSnowMan())
-                    {
-
-                        anim = a; // 外部参照用
-
-                        a.Shown += (s, i) =>
-                        {
-                            a.Invoke((Action)(() =>
-                            {
-                                anim.lblMessage.Text = "あすよん月次帳票専用\r\nマスタ更新中です…\r\n";
-                                anim.BackColor = clrmg.FukaLight1;
-                            }));
-                        };
-                        Application.Run(a); // GIF表示
-                    }
-                });
-                animThread.SetApartmentState(ApartmentState.STA);
-                animThread.Start();
-
-                // --- メインスレッドでマスタ更新実行 ---
-                await Task.Delay(100); // ちょっと待って anim が作られる
-
-                // ライブラリごとに処理
-                var libs = new[] { "SM1DLB01", "SM1DLB02", "SM1DLB03" };
-
-                foreach (var lib in libs)
-                {
-                    // 販売先マスタ取得
-                    var hanbai = fam.GetHanbaiAll(lib);
-                    var hanbaiFile = $@"{CMD.mfPath}\{lib.Replace("SM1", "")}HANBAI.json";
-                    fam.SaveToJson(hanbaiFile, hanbai);
-
-
-                    // 仕入先マスタ取得
-                    var shiire = fam.GetShiireAll(lib);
-                    var shiireFile = $@"{CMD.mfPath}\{lib.Replace("SM1", "")}SHIIRE.json";
-                    fam.SaveToJson(shiireFile, shiire);
-                }
-
-                // --- 終了したらアニメーション閉じる ---
-                await Task.Delay(500);
-                if (anim != null && !anim.IsDisposed)
-                {
-                    anim.Invoke(new Action(() => anim.CloseForm()));
-                }
-
-                // アニメーションスレッド終了を待つ
-                animThread.Join();
-
-                HIZTIM = $"{DateTime.Now:yyyy/MM/dd HH:mm:ss}";
-
-                MessageBox.Show("マスタ作成が完了しました！", "完了", MessageBoxButtons.OK, MessageBoxIcon.Information);
-                fam.AddLog($"{HIZTIM} マスタ更新 0 {CMD.UserName}");
-                fam.AddLog2($"{HIZTIM} マスタ更新 0 {CMD.UserName} マスタ更新が完了しました。");
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show($"エラーが発生しました: {ex.Message}", "エラー", MessageBoxButtons.OK, MessageBoxIcon.Error);
-            }
-        }
-
         private void btn郵便番号辞書_Click(object sender, EventArgs e)
         {
             HIZTIM = $"{DateTime.Now:yyyy/MM/dd HH:mm:ss}";
@@ -164,6 +111,91 @@ namespace あすよん月次帳票
             // 郵便番号辞書インポートFormを表示
             form.Show();
         }
+        private void btnユーザーマスタ_Click(object sender, EventArgs e)
+        {
+            HIZTIM = $"{DateTime.Now:yyyy/MM/dd HH:mm:ss}";
+            fam.AddLog($"{HIZTIM} コントロール 1 {CMD.UserName} btn郵便番号辞書_Click");
+            // ユーザーマスタFormを作成
+            var form = new ユーザーマスタFm();
+            // ユーザーマスタFormを表示
+            form.Show();
+        }
 
+        private void btnAS400取引先マスタ_Click(object sender, EventArgs e)
+        {
+            取引先履歴取得 取引先履歴取得 = new 取引先履歴取得();
+            取引先履歴取得.Create取引先部門展開Table();
+        }
+        //==============================================================
+        // デザイン関連メソッド
+        //==============================================================
+        /// <summary>
+        /// Form2にスノーマンカラーを適用
+        /// </summary>
+        private void ApplySnowManColors()
+        {
+            HIZTIM = $"{DateTime.Now:yyyy/MM/dd HH:mm:ss}";
+            fam.AddLog($"{HIZTIM} デザイン関連メソッド 1 {CMD.UserName} ApplySnowManColors");
+
+            // フォーム全体の背景
+            this.BackColor = clrmg.FukaLight3;
+
+            //DataGridView[] grids = { dgvDataOhno, dgvDataSdus, dgvDataScar, dgvDataIV };
+            //foreach (var dgv in grids)
+            //{
+            //    dgv.BackgroundColor = clrmg.RauDark1;
+            //}
+
+            // ラベル類
+            lb掲題.ForeColor = clrmg.FukaDark1;
+
+            // ボタンの色
+            StyleButton(btn部門マスタ, clrmg.FukaLight1, Color.White, borderColor: clrmg.FukaBase);
+            StyleButton(btn取引先マスタ, clrmg.FukaLight2, Color.White, borderColor: clrmg.FukaBase);
+            StyleButton(btn取引先ロール別マスタ, clrmg.FukaLight1, Color.White, borderColor: clrmg.FukaBase);
+            StyleButton(btn郵便番号辞書, clrmg.FukaLight2, Color.White, borderColor: clrmg.FukaBase);
+            StyleButton(btnユーザーマスタ, clrmg.FukaLight1, Color.White, borderColor: clrmg.FukaBase);
+            StyleButton(btn戻る, clrmg.FukaBase, Color.White, borderColor: clrmg.FukaDark2);
+        }
+
+        /// <summary>
+        /// グループボックスのカスタム枠線描画
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void GroupBoxCustomBorder(object sender, PaintEventArgs e)
+        {
+            HIZTIM = $"{DateTime.Now:yyyy/MM/dd HH:mm:ss}";
+            fam.AddLog($"{HIZTIM} デザイン関連メソッド 1 {CMD.UserName} GroupBoxCustomBorder");
+
+            GroupBox box = (GroupBox)sender;
+            e.Graphics.Clear(box.BackColor);
+
+            // アンチエイリアス無効（線をくっきり）
+            e.Graphics.SmoothingMode = System.Drawing.Drawing2D.SmoothingMode.None;
+
+            // テキストを測定
+            SizeF textSize = e.Graphics.MeasureString(box.Text, box.Font);
+
+            // 枠線色を濃い紫色で
+            using (Pen pen = new Pen(clrmg.FukaDark2, 1.5f))
+            {
+                int textPadding = 8;  // 左の余白
+                int textWidth = (int)textSize.Width;
+
+                // 枠線を描画（上の線だけタイトル部分を避ける）
+                e.Graphics.DrawLine(pen, 1, (int)(textSize.Height / 2), textPadding - 2, (int)(textSize.Height / 2)); // 左上～文字前
+                e.Graphics.DrawLine(pen, textPadding + textWidth + 2, (int)(textSize.Height / 2), box.Width - 2, (int)(textSize.Height / 2)); // 文字後～右上
+                e.Graphics.DrawLine(pen, 1, (int)(textSize.Height / 2), 1, box.Height - 2); // 左線
+                e.Graphics.DrawLine(pen, 1, box.Height - 2, box.Width - 2, box.Height - 2); // 下線
+                e.Graphics.DrawLine(pen, box.Width - 2, (int)(textSize.Height / 2), box.Width - 2, box.Height - 2); // 右線
+
+                // テキストを描画
+                using (SolidBrush brush = new SolidBrush(clrmg.MemeDark1))
+                {
+                    e.Graphics.DrawString(box.Text, box.Font, brush, 8, 0);
+                }
+            }
+        }
     }
 }

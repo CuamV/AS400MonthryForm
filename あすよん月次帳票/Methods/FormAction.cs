@@ -1,4 +1,5 @@
-﻿using Ohno.Db;
+﻿using Microsoft.Office.Interop.Excel;
+using Ohno.Db;
 using OHNO.PComm;
 using System;
 using System.Collections.Generic;
@@ -6,11 +7,16 @@ using System.Data;
 using System.IO;
 using System.Linq;
 using System.Text;
-using System.Text.Json;
 using System.Text.RegularExpressions;
 using System.Windows.Forms;
+using Action = System.Action;
+using CheckBox = System.Windows.Forms.CheckBox;
 using CMD = あすよん月次帳票.CommonData;
+using DataTable = System.Data.DataTable;
 using DCN = あすよん月次帳票.Dictionaries;
+using GroupBox = System.Windows.Forms.GroupBox;
+using ListBox = System.Windows.Forms.ListBox;
+using TextBox = System.Windows.Forms.TextBox;
 
 namespace あすよん月次帳票
 {
@@ -130,84 +136,7 @@ namespace あすよん月次帳票
             }
             return string.Empty;
         }
-        //  <Form1>
-        //   ◆販売先マスター取得
-        internal Dictionary<string, List<mf_HANBAI>> GetHanbaiAll(string lib)
-        {
-            var result = new Dictionary<string, List<mf_HANBAI>>();
-            var dbManager = (DbManager_Db2)DbManager.CreateDbManager(OhnoSysDBName.Db2);
-
-            var cmdText = $@"
-                        SELECT SL.URBMCD, SL.URHBSC, MIN(PM.TOTHNM), MIN(PM.TOKANM)
-                        FROM {lib}.SLURIMP AS SL
-                        LEFT JOIN SM1MLB01.MMTORIP AS PM ON SL.URHBSC = PM.TOTHCD
-                        WHERE SL.URDNDT >= 20030701
-                        GROUP BY SL.URBMCD, SL.URHBSC
-                        ORDER BY SL.URBMCD, MIN(PM.TOKANM)";
-
-            var dTable = dbManager.GetDataTable(cmdText);
-
-            foreach (DataRow row in dTable.Rows)
-            {
-                string bumon = row["URBMCD"].ToString();
-                string code = row["URHBSC"].ToString();
-                string name = row[2].ToString();
-                string kana = row[3].ToString();
-
-                if (!result.ContainsKey(bumon))
-                    result[bumon] = new List<mf_HANBAI>();
-
-                result[bumon].Add(new mf_HANBAI
-                {
-                    Code = code,
-                    Name = name,
-                    Kana = kana
-                });
-            }
-            return result;
-        }
-        //   ◆仕入先マスター取得
-        internal Dictionary<string, List<mf_SHIIRE>> GetShiireAll(string lib)
-        {
-            var result = new Dictionary<string, List<mf_SHIIRE>>();
-            var dbManager = (DbManager_Db2)DbManager.CreateDbManager(OhnoSysDBName.Db2);
-            var cmdText = $@"
-                        SELECT PR.SRBMCD, PR.SRSRCD, MIN(PM.TOTHNM), MIN(PM.TOKANM)
-                        FROM {lib}.PRSREMP AS PR
-                        LEFT JOIN SM1MLB01.MMTORIP AS PM ON PR.SRSRCD = PM.TOTHCD
-                        WHERE PR.SRDNDT >= 20030701
-                        GROUP BY PR.SRBMCD, PR.SRSRCD
-                        ORDER BY PR.SRBMCD, MIN(PM.TOKANM)";
-
-            var dTable = dbManager.GetDataTable(cmdText);
-
-            foreach (DataRow row in dTable.Rows)
-            {
-                string bumon = row["SRBMCD"].ToString();
-                string code = row["SRSRCD"].ToString();
-                string name = row[2].ToString();
-                string kana = row[3].ToString();
-
-                if (!result.ContainsKey(bumon))
-                    result[bumon] = new List<mf_SHIIRE>();
-
-                result[bumon].Add(new mf_SHIIRE
-                {
-                    Code = code,
-                    Name = name,
-                    Kana = kana
-                });
-            }
-            return result;
-        }
-        // 【JSON操作メソッド】
-        ///  <Form1>
-        ///   ◆JSONファイル保存
-        internal void SaveToJson<T>(string filePath, T data)
-        {
-            var json = JsonSerializer.Serialize(data, new JsonSerializerOptions { WriteIndented = true });
-            File.WriteAllText(filePath, json);
-        }
+        
         // =======================================================================
 
         // =======================================================================
@@ -1232,46 +1161,6 @@ namespace あすよん月次帳票
                 listBxSituation.Items.Add(logMessage);
             }
         }
-        /// <summary>
-        /// 各Formを表示するたびに既存ログもlistBxSituationに表示
-        /// </summary>
-        internal void LoadRuntimeLog(ListBox listBxSituation)
-        {
-            listBxSituation.Items.Clear();
-            foreach (var log in runtimelog)
-            {
-                listBxSituation.Items.Add(log);
-            }
-        }
-        internal string GetShowLLog(string id, string mf)
-        {
-            try
-            {
-                if (!File.Exists(mf))
-                    return string.Empty;
-
-                foreach (var line in File.ReadLines(mf, Encoding.UTF8))
-                {
-                    if (string.IsNullOrWhiteSpace(line)) continue;
-
-                    // CSVカンマ区切り
-                    var parts = line.Split(',');
-                    if (parts.Length < 2) continue;
-
-                    // CSV特有のダブルクオーテーション除去
-                    parts[0] = parts[0].Trim().Trim('"');
-                    parts[1] = parts[1].Trim().Trim('"');
-
-                    // ID一致で2つ目の要素(名前)を返す
-                    if (parts[0] == id)
-                        return parts[1];
-                }
-            }
-            catch
-            {
-            }
-            return string.Empty;
-        }
         //=======================================================================
 
         //=======================================================================
@@ -1298,6 +1187,7 @@ namespace あすよん月次帳票
                             break;
                         }
                     }
+                    break;
                 }
                 else if(CD2 == null)
                 {
@@ -1383,9 +1273,35 @@ namespace あすよん月次帳票
                     replaced = replaced || result.Item2;
                 }
             }
-            return (lines, replaced);
+            return (SortLines(pattern,lines), replaced);
         }
       
+        internal List<string> SortLines(AddMasterPattern pattern, List<string> lines)
+        {
+            if (pattern == AddMasterPattern.Keyが1項目 || pattern == AddMasterPattern.Keyなし)
+            {
+                // 1項目目でソート
+                lines = lines
+                    .OrderBy(line =>
+                    {
+                        var parts = line.Split(' ');
+                        return (parts.Length > 0) ? parts[0] : string.Empty;
+                    })
+                    .ToList();
+            }
+            else if(pattern == AddMasterPattern.Keyが1項目と2項目)
+            {
+                // 1項目目と2項目目でソート
+                lines = lines
+                            .OrderBy(line =>
+                            {
+                                var parts = line.Split(' ');
+                                return (parts.Length > 1) ? (parts[0], parts[1]) : (string.Empty, string.Empty);
+                            })
+                        .ToList();
+            }
+            return lines;  
+        }
         /// <summary>
         /// 入力内容クリア処理
         /// </summary>
@@ -1514,37 +1430,31 @@ namespace あすよん月次帳票
         /// <summary>
         /// CSV取り込み処理（指定会社へインポート）
         /// rawLines: CSVの生行（ヘッダを含む）
-        /// レイアウト: 25項目
+        /// レイアウト: 28項目
         ///  1:取引先CD   2:部門CD    3:取引先正式名称 4:取引先名    5:取引先名カナ 6:取引先略名 7:取引先略名カナ
         ///  8:郵便番号   9:電話番号1  10:電話番号2    11:FAX番号1  12:FAX番号2  13:住所1     14:住所1カナ 
         /// 15:住所2     16:住所2カナ  17:商社区分    18:仕入先区分 19:販売先区分 20:得意先区分 21:出荷先区分 
-        /// 22:預り先区分 23:運送先区分 24:倉庫先区分   25:備考
+        /// 22:預り先区分 23:運送先区分 24:倉庫先区分   25:備考      26:登録者     27:登録日付  28:登録時刻
         /// 
         /// 説明:
-        /// - 指定された会社(targetCompany)の DLB0XTORIHIKI.txt を全件差し替えします（部門CDは除外）。
-        /// - TORIHIKI-BUMON.txt は取引先CD+部門CDをキーに差分置換（既存は保持、該当キーは置換/追加）します。
-        /// - SYOSYA.txt,SHIIRE.txt,HANBAI.txt,TOKUI.txt,SYUKKA.txt,AZUKARI.txt,UNSOU.txt,SOKO.txtは
-        ///   1:取引先CD 2:部門CD 3:取引先名 4:取引先名カナの取引先CD+部門CDをキーに差分置換（既存は保持、該当キーは置換/追加）します。
+        /// - 取引先マスタ(DLB01TORIHIKI.txt): 全件差替え
+        /// - 取引先部門マスタ(TORIHIKI-BUMON.txt): 全件差替え
+        /// - 取引先ロール別マスタ(TROLE-*.txt): 全件差替え（得意先のみ例外）
+        ///   * 得意先(TROLE-TOKUISAKI.txt): 新規追加または全列完全一致で上書き（既存データ保持）
+        /// - 得意先の取引先CD+部門CDの組み合わせが取引先部門マスタにない場合は追加
         /// </summary>
-        internal (bool success, string message) ImportMaster(string[] rawLines, string company, string BUMONmf,
-            string[] mfTxtNames, string[] mfTxtPaths, string mf_bumon, string mf_bumonName, string[] mf_toriroleTxtNames, string[] mf_toriroleTxtPaths,
+        internal (bool success, string message) ImportMaster(string[] rawLines, string BUMONmf,
+            string mfName, string mf, string mf_bumon, string mf_bumonName, string[] mf_toriroleTxtNames, string[] mf_toriroleTxtPaths,
             string mst, string mst_bumon, string mst_torirole)
         {
             try
             {
                 // ヘッダ解析
                 var headers = SplitCsvLine(rawLines[0]);
-                string[] requiredColumns = Enum.GetNames(typeof(TORIHIKI_MASTER_IN));
+                string[] requiredColumns = Enum.GetNames(typeof(TORIHIKI_MASTER_INOUT));
 
-                // 会社別マスター格納先
-                var masterByCompany = new Dictionary<string, List<string>>
-                {
-                    ["オーノ"] = new List<string>(),
-                    ["サンミックダスコン"] = new List<string>(),
-                    ["サンミックカーペット"] = new List<string>()
-                };
-                var lines = new List<string>();
-                var newLines_bumon = new List<string>(); // for TORIHIKI-BUMON
+                var lines = new List<string>(); // TORIHIKI（インポートデータのみ）
+                var newLines_bumon = new List<string>(); // TORIHIKI-BUMON（インポートデータのみ）
 
                 // ヘッダ名→インデックス
                 var headerIndex = new Dictionary<string, int>();
@@ -1568,18 +1478,19 @@ namespace あすよん月次帳票
                         newLines_unsou, newLines_souko
                     };
 
+                TIM = DateTime.Now.ToString("HHmmss");
                 for (int i = 1; i < rawLines.Length; i++)
                 {
                     var fields = SplitCsvLine(rawLines[i]);
-                    var f = new string[25];
+                    var f = new string[28];
                     for (int j = 0; j < f.Length; j++) f[j] = j < fields.Length ? fields[j].Trim() : string.Empty;
 
-                    // '_'を'NULL値'に置換
-                    for (int j = 0; j < f.Length; j++) if (f[j] == "_") f[j] = null;
+                    // '_'または空文字を'NULL値'に置換
+                    for (int j = 0; j < f.Length; j++) if (f[j] == "_" || f[j] == "") f[j] = null;
 
                     // [取引先マスタ]（半角スペース区切り）
                     //  1:取引先CD   2:取引先正式名称 3:取引先名    4:取引先名カナ 5:取引先略名  6:取引先略名カナ 7:郵便番号   8:電話番号1
-                    //  9:電話番号2  10:FAX番号1    11:FAX番号2  12:住所1      13:住所1カナ  14:住所2       15:住所2カナ 16:商社区分
+                    //  9:電話番号2  10:FAX番号1    11:FAX番号2  12:住所1      13:住所1カナ  14:住所2       15:住所2カナ 16:商 comunidad
                     // 17:仕入先区分 18:販売先区分   19:得意先区分 20:出荷先区分  21:預り先区分 22:運送便区分   23:倉庫区分  24:備考
                     // 25:登録者ID  26:登録日       27:登録時刻
                     //----------------------------------------------------
@@ -1587,24 +1498,18 @@ namespace あすよん月次帳票
                     {
                         var newFields = new[] { f[0], f[2], f[3], f[4], f[5], f[6], f[7], f[8], f[9], f[10],
                         f[11], f[12], f[13], f[14], f[15], f[16], f[17], f[18], f[19], f[20], f[21], f[22],
-                        f[23], f[24], CMD.UserID, CMD.HIZ, DateTime.Now.ToString("HHmmss") };
+                        f[23], f[24], CMD.UserID, CMD.HIZ, TIM };
                         var Line = string.Join(" ", newFields.Select(x => string.IsNullOrEmpty(x) ? "" : x));
 
                         lines.Add(Line);
                     }
-                    // linesを取引先CDでユニーク
-                    lines = lines
-                        .GroupBy(line =>
-                        {
-                            var parts = line.Split(' ');
-                            return (parts.Length > 0) ? parts[0] : string.Empty;
-                        })
-                        .Select(g => g.First())
-                        .ToList();
 
                     // [取引先部門マスタ]（半角スペース区切り）
                     //  1:取引先CD 2:部門CD
-                    newLines_bumon.Add($"{f[0]} {f[1]}");
+                    if (!string.IsNullOrWhiteSpace(f[0]) && !string.IsNullOrWhiteSpace(f[1]))
+                    {
+                        newLines_bumon.Add($"{f[0]} {f[1]}");
+                    }
 
                     // [取引先ロール別マスタ]（半角スペース区切り）
                     // 16:商社 17:仕入先 18:販売先 19:得意先 20:出荷先 21:預り先 22:運送便 23:倉庫
@@ -1617,40 +1522,39 @@ namespace あすよん月次帳票
                     for (int toriRole = 0; toriRole < toriRoles.Length; toriRole++)
                     {
                         if (toriRoles[toriRole] == "1")
+                        {
                             if (toriRole == 3)
                                 // 得意先(newLines_tokui)の場合
                                 // 1:取引先CD 2:部門CD 3:取引先名 4:取引先名カナ 5:適用開始日付 6:適用終了日付
-                                newLinesRoleLists[toriRole].Add($"{f[0]} {f[1]} {f[3]} {f[4]} {CMD.HIZ} 99991231");
+                                newLinesRoleLists[toriRole].Add($"{f[0]} {f[1]} {f[3]} {f[4]} 00000101 99991231 {CMD.HIZ} {TIM}");
                             else
+                                // 得意先以外の場合
                                 // 1:取引先CD 2:部門CD 3:取引先名 4:取引先名カナ
-                                // ----------------------------------------------------
                                 newLinesRoleLists[toriRole].Add($"{f[0]} {f[1]} {f[3]} {f[4]}");
+                        }
                     }
                 }
 
-                // 取引先マスタ全件差し替えで作成
-                string mf = mfTxtPaths[0];
-                string mfName = mfTxtNames[0];
-                if (company == "サンミックダスコン")
-                {
-                    mf = mfTxtPaths[1];
-                    mfName = mfTxtNames[1];
-                }
-                else if (company == "サンミックカーペット")
-                {
-                    mf = mfTxtPaths[2];
-                    mfName = mfTxtNames[2];
-                }
+                // linesを取引先CDでユニーク化
+                lines = lines
+                    .GroupBy(line =>
+                    {
+                        var parts = line.Split(' ');
+                        return (parts.Length > 0) ? parts[0] : string.Empty;
+                    })
+                    .Select(g => g.First())
+                    .ToList();
 
-                // 取引先部門マスタファイル有無チェック＆読込
-                var lines_bumon = CheckAndLoadMater(mf_bumon, mst_bumon, CMD.utf8, 0);
-                bool replaced;
-                (lines_bumon, replaced) = AddMasterFile(AddMasterPattern.Keyが1項目と2項目, lines_bumon, newLines_bumon);
-                
+                // newLines_bumonをユニーク化
+                newLines_bumon = newLines_bumon.Distinct().ToList();
+
                 // バックアップ
                 BackupMaster(mf, mfName, "Import", mst);
                 BackupMaster(mf_bumon, mf_bumonName, "Import", mst_bumon);
 
+                // ----------------------------------------------------
+                // ★取引先マスタ: 全件差替え
+                // ----------------------------------------------------
                 // 1:取引先CDでソート
                 lines = lines
                     .OrderBy(line =>
@@ -1659,36 +1563,111 @@ namespace あすよん月次帳票
                         return (parts.Length > 0) ? parts[0] : string.Empty;
                     })
                     .ToList();
+
+                // ファイル書き込み（全件差替え）
+                File.WriteAllLines(mf, lines, CMD.utf8);
+
+                // ----------------------------------------------------
+                // ★取引先部門マスタ: 全件差替え
+                // ----------------------------------------------------
                 // 1:取引先CD 2:部門CDでソート
-                lines_bumon = lines_bumon
-                    .OrderBy(line =>
+                newLines_bumon = newLines_bumon
+                    .OrderBy(line_bumon =>
                     {
-                        var parts = line.Split(' ');
+                        var parts = line_bumon.Split(' ');
                         return (parts.Length > 1) ? (parts[0], parts[1]) : (string.Empty, string.Empty);
                     })
                     .ToList();
 
-                // ファイル書き込み
-                File.WriteAllLines(mf, lines, CMD.utf8);  // 取引先マスタ全件差替え
-                File.WriteAllLines(mf_bumon, lines_bumon, CMD.utf8); // 取引先部門マスタ差分置換
+                // ファイル書き込み（全件差替え）
+                File.WriteAllLines(mf_bumon, newLines_bumon, CMD.utf8);
 
+                // ----------------------------------------------------
+                // ★取引先ロール別マスタ処理
+                // ----------------------------------------------------
                 for (int c = 0; c < newLinesRoleLists.Count; c++)
                 {
-                    // 取引先ロール別マスタファイル有無チェック
-                    var lines_toriroll = CheckAndLoadMater(mf_toriroleTxtPaths[c], mst_torirole, CMD.utf8, 0);
-                    
-                    if (c == 3)
-                        // 得意先の場合新規追加もしくは全列完全一致で上書き
-                        (lines_toriroll, replaced) = AddMasterFile(AddMasterPattern.Keyなし,lines_toriroll, newLinesRoleLists[c]);
-                    else
-                        // 得意先以外は差分置換
-                        (lines_toriroll, replaced) = AddMasterFile(AddMasterPattern.Keyが1項目と2項目,lines_toriroll, newLinesRoleLists[c]);
-
                     // バックアップ
                     BackupMaster(mf_toriroleTxtPaths[c], mf_toriroleTxtNames[c], "Import", mst_torirole);
 
-                    // 1:取引先CD 2:部門CDでソート
-                    lines_toriroll = lines_toriroll
+                    if (c == 3)
+                    {
+                        // ----------------------------------------------------
+                        // 得意先のみ特別処理: 既存データを保持し、新規追加または全列完全一致で上書き
+                        // ----------------------------------------------------
+                        var lines_toriroll = CheckAndLoadMater(mf_toriroleTxtPaths[c], mst_torirole, CMD.utf8, 0);
+                        bool replaced;
+                        (lines_toriroll, replaced) = AddMasterFile(AddMasterPattern.Keyなし, lines_toriroll, newLinesRoleLists[c]);
+
+                        // 1:取引先CD 2:部門CDでソート
+                        lines_toriroll = lines_toriroll
+                            .Where(x => !string.IsNullOrWhiteSpace(x))
+                            .OrderBy(line =>
+                            {
+                                var parts = line.Split(' ');
+                                return (parts.Length > 1) ? (parts[0], parts[1]) : (string.Empty, string.Empty);
+                            })
+                            .ToList();
+
+                        // ファイル書き込み
+                        File.WriteAllLines(mf_toriroleTxtPaths[c], lines_toriroll, CMD.utf8);
+                    }
+                    else
+                    {
+                        // ----------------------------------------------------
+                        // 得意先以外: 全件差替え
+                        // ----------------------------------------------------
+                        var lines_toriroll = newLinesRoleLists[c];
+
+                        // 1:取引先CD 2:部門CDでソート
+                        lines_toriroll = lines_toriroll
+                            .OrderBy(line =>
+                            {
+                                var parts = line.Split(' ');
+                                return (parts.Length > 1) ? (parts[0], parts[1]) : (string.Empty, string.Empty);
+                            })
+                            .ToList();
+
+                        // ファイル書き込み（全件差替え）
+                        File.WriteAllLines(mf_toriroleTxtPaths[c], lines_toriroll, CMD.utf8);
+                    }
+                }
+
+                // ----------------------------------------------------
+                // ★得意先の取引先CD+部門CDが取引先部門マスタにない場合は追加
+                // ----------------------------------------------------
+                var lines_bumon_current = File.ReadAllLines(mf_bumon, CMD.utf8)
+                    .Where(x => !string.IsNullOrWhiteSpace(x))
+                    .ToList();
+
+                var bumonSet = new HashSet<string>(lines_bumon_current);
+                var lines_tokui_current = File.ReadAllLines(mf_toriroleTxtPaths[3], CMD.utf8)
+                    .Where(x => !string.IsNullOrWhiteSpace(x))
+                    .ToList();
+
+                bool bumonAdded = false;
+                foreach (var tokuiLine in lines_tokui_current)
+                {
+                    var parts = tokuiLine.Split(' ');
+                    if (parts.Length >= 2)
+                    {
+                        string torihikiCD = parts[0];
+                        string bumonCD = parts[1];
+                        string bumonLine = $"{torihikiCD} {bumonCD}";
+
+                        if (!bumonSet.Contains(bumonLine))
+                        {
+                            lines_bumon_current.Add(bumonLine);
+                            bumonSet.Add(bumonLine);
+                            bumonAdded = true;
+                        }
+                    }
+                }
+
+                // 追加があった場合はソートして再書き込み
+                if (bumonAdded)
+                {
+                    lines_bumon_current = lines_bumon_current
                         .OrderBy(line =>
                         {
                             var parts = line.Split(' ');
@@ -1696,9 +1675,9 @@ namespace あすよん月次帳票
                         })
                         .ToList();
 
-                    // ファイル書き込み
-                    File.WriteAllLines(mf_toriroleTxtPaths[c], lines_toriroll, CMD.utf8); 
+                    File.WriteAllLines(mf_bumon, lines_bumon_current, CMD.utf8);
                 }
+
                 return (true, "インポートが完了しました。");
             }
             catch (Exception ex)
@@ -1747,19 +1726,19 @@ namespace あすよん月次帳票
         /// <param name="Dic"></param>
         /// <param name="mst"></param>
         /// <returns></returns>
-        internal bool ValidateInput(VaridationPattern pattern, Dictionary<string, string> Dic,int len = 0, string mst = null )
+        internal bool ValidateInput(VaridationPattern pattern1, MstMntPattern pattern2, 
+                                    Dictionary<string, string> Dic, int len = 0, string mst = null)
         {
-            if (pattern == VaridationPattern.登録前初期チェック)
+            if (pattern1 == VaridationPattern.必須項目登録前初期チェック)
             {
                 // 空白チェック
                 if (!CheckedNullOrWhiteSpace(Dic)) return false;
                 // 桁数チェック
-                if (!CheckedErrLength(Dic, len)) return false;
-                // 登録実行確認
-                if (!CheckedAddYesNo(mst)) return false;
+                if (!CheckedErrLength1(Dic, len)) return false;
+                // 登録削除実行確認
+                if (!CheckedAddYesNo(pattern2, mst)) return false;
             }
-
-            else if(pattern == VaridationPattern.入力値チェック)
+            else if (pattern1 == VaridationPattern.入力値チェック)
             {
                 // 郵便番号半角数字チェック(アルファベット不可)
                 if (!CheckedHalfNum("郵便番号", Dic["郵便番号"], allowHyphen: true)) return false;
@@ -1771,10 +1750,33 @@ namespace あすよん月次帳票
                 if (!CheckedHalfNum("FAX番号1", Dic["FAX番号1"], allowHyphen: true)) return false;
                 // FAX番号2半角数字チェック(アルファベット不可)
                 if (!CheckedHalfNum("FAX番号2", Dic["FAX番号2"], allowHyphen: true)) return false;
-
             }
-            return true;
+            else if(pattern1 == VaridationPattern.取引先マスタ関連登録先チェック)
+            {
+                int count = int.Parse(Dic["取引先ロール選択数"]);
+                // 取引先ロール選択時の部門選択チェック
+                if (count > 0 && Dic["部門コード"] == null)
+                    if (MessageBox.Show($"部門選択がされていません。\n取引先ロールへの登録には部門を選んで下さい", "【マスタ登録】",
+                  MessageBoxButtons.YesNo, MessageBoxIcon.None) == DialogResult.No) return false;
+                // 取引先ロールチェックボックス状態チェック
+                if (count == 0)
+                    if (MessageBox.Show($"取引先ロールのいずれも選択されていません。\n取引先マスタへの登録のみでよろしいですか？", "【マスタ登録】",
+                    MessageBoxButtons.YesNo, MessageBoxIcon.None) == DialogResult.No) return false;
+                // 部門選択チェック
+                if (Dic["部門コード"] == null)
+                    if (MessageBox.Show($"部門選択がされていません。\n取引先マスタへの登録のみでよろしいですか？", "【マスタ登録】",
+                    MessageBoxButtons.YesNo, MessageBoxIcon.None) == DialogResult.No) return false;
+            }
+            else if (pattern1 == VaridationPattern.ユーザーマスタ登録前チェック1)
+            {
+                // 空白チェック
+                if (!CheckedNullOrWhiteSpace(Dic)) return false;
+                // 桁数チェック
+                if (!CheckedErrLength2(Dic, len)) return false;
+            }
+                return true;
         }
+        
         /// <summary>
         /// コード桁数チェック
         /// </summary>
@@ -1783,7 +1785,7 @@ namespace あすよん月次帳票
         /// <param name="len"></param>
         /// <returns></returns>
         /// <exception cref="Exception"></exception>
-        internal bool CheckedErrLength(Dictionary<string, string> Dic, int len)
+        internal bool CheckedErrLength1(Dictionary<string, string> Dic, int len)
         {
             // Dicの[0]キーの値を取得
             string codeNmae = Dic.Keys.ElementAt(0);
@@ -1795,6 +1797,22 @@ namespace あすよん月次帳票
             }
             return true;
         }
+        internal bool CheckedErrLength2(Dictionary<string, string> Dic, int len)
+        {
+            // Dicの[0]キーの値を取得
+            string[] codeNames = { Dic.Keys.ElementAt(0), Dic.Keys.ElementAt(1) };
+            string[] codes = {Dic[codeNames[0]], Dic[codeNames[1]]};
+            for(int i = 0; i < codeNames.Length; i++)
+            {
+                if (!Regex.IsMatch(codes[i], "^[0-9]{" + len + "}$"))
+                {
+                    MessageBox.Show($"{codeNames[i]}は半角数字{len}桁で入力して下さい。", "入力エラー", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    throw new Exception("");
+                }
+            }
+            return true;
+        }
+
 
         /// <summary>
         /// 必須項目入力チェック(空白)
@@ -1819,10 +1837,18 @@ namespace あすよん月次帳票
         /// </summary>
         /// <param name="mst"></param>
         /// <returns></returns>
-        internal bool CheckedAddYesNo(string mst)
+        internal bool CheckedAddYesNo(MstMntPattern pattern1,string mst)
         {
-            if (MessageBox.Show($"{mst}登録を行います。\n", "【マスタ登録】",
+            if (pattern1 == MstMntPattern.登録)
+            {
+                if (MessageBox.Show($"{mst}登録を行います。\n", "【マスタ登録】",
                 MessageBoxButtons.YesNo, MessageBoxIcon.None) == DialogResult.No) return false;
+            }
+            else if (pattern1 == MstMntPattern.削除)
+            {
+                if (MessageBox.Show($"{mst}削除を行います。\n", "【マスタ削除】",
+                MessageBoxButtons.YesNo, MessageBoxIcon.None) == DialogResult.No) return false;
+            }
             return true;
         }
 

@@ -100,18 +100,18 @@ namespace あすよん月次帳票
             };
 
             // 空白/部門コード半角数字3桁/登録実行確認
-            if (!fam.ValidateInput(VaridationPattern.登録前初期チェック, BumonInTxtDic,3, mst)) return;
+            if (!fam.ValidateInput(VaridationPattern.必須項目登録前初期チェック, MstMntPattern.登録, BumonInTxtDic,3, mst)) return;
             //----------------------------------------------------
             // ★部門マスタ登録処理
             //----------------------------------------------------
 
             // 書き込む行（半角スペース区切り）
             // 1:部門コード 2:部門名 3:部門名カナ 4:会社
-            List<string> newLineList = new List<string>
-            {
-                BumonInTxtDic["部門CD"], BumonInTxtDic["部門名"], BumonInTxtDic["部門名カナ"], company
-            };
+            List<string> newLineList = new List<string>();
+            var newFields = new[] { BumonInTxtDic["部門CD"], BumonInTxtDic["部門名"], BumonInTxtDic["部門名カナ"], company };
 
+            var newLine = string.Join(" ", newFields.Select(x => string.IsNullOrEmpty(x) ? "" : x));
+            newLineList.Add(newLine);
             // マスターファイル有無チェック＆読込
             var lines = fam.CheckAndLoadMater(mf, mst, CMD.utf8, 0);
 
@@ -157,34 +157,19 @@ namespace あすよん月次帳票
             //----------------------------------------------------
             string company = cmbBx会社.SelectedItem?.ToString() ?? ""; // 会社名
             string bumonCD = txtBx部門CD.Text.Trim();   //[部門コード] 数字3桁コード
-            string bumonNAME = txtBx部門名.Text.Trim();  // [部門名]
-            string bumonKANA = txtBx部門名カナ.Text.Trim();  // [部門名カナ]
             Dictionary<string, string> BumonInTxtDic = new Dictionary<string, string>
             {
                 { "部門CD",txtBx部門CD.Text.Trim() },
              };
 
             // 空白/部門コード半角数字3桁/登録実行確認
-            if (!fam.ValidateInput(VaridationPattern.登録前初期チェック, BumonInTxtDic,3, mst)) return;
+            if (!fam.ValidateInput(VaridationPattern.必須項目登録前初期チェック, MstMntPattern.登録, BumonInTxtDic, 3, mst)) return;
 
             //----------------------------------------------------
             // ★部門マスタ削除処理
             //----------------------------------------------------
-            // ファイル存在チェック→なければエラー、あれば既存データ読み込み
-            List<string> lines = new List<string>();
-            if (!File.Exists(mf))
-            {
-                MessageBox.Show("部門マスタファイルが存在しません。",
-                    "エラー", MessageBoxButtons.OK, MessageBoxIcon.Error);
-
-                HIZTIM = $"{DateTime.Now:yyyy/MM/dd HH:mm:ss}";
-                fam.AddLog($"{HIZTIM} マスタ削除 1 {CMD.UserName} btn削除_Click {mst}");
-                fam.AddLog2($"{HIZTIM} マスタ削除 0 {CMD.UserName} btn削除_Click {mst}ファイルなし");
-                return;
-            }
-            else lines = File.ReadAllLines(mf, CMD.utf8)
-                .Where(x => !string.IsNullOrWhiteSpace(x))
-                .ToList();
+            // マスターファイル有無チェック＆読込
+            var lines = fam.CheckAndLoadMater(mf, mst, CMD.utf8, 0);
 
             // 該当レコード検索
             // 1:部門コード 2:部門名 3:部門名カナ 4:会社
@@ -220,11 +205,7 @@ namespace あすよん月次帳票
             File.WriteAllLines(mf, lines, CMD.utf8);
 
             // 入力内容クリア
-            cmbBx会社.SelectedItem = null;
-            txtBx部門CD.Clear();
-            txtBx部門名.Clear();
-            txtBx部門名カナ.Clear();
-            txtBx部門CD.Focus();
+            fam.ClearInput(_inputControls);
 
             MessageBox.Show("削除登録が完了しました。",
                 $"{mst}削除", MessageBoxButtons.OK, MessageBoxIcon.None);

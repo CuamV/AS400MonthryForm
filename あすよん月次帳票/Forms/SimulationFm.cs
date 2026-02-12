@@ -45,9 +45,6 @@ namespace あすよん月次帳票
 
             this.Load += Form3_Load;
 
-            this.Region = System.Drawing.Region.FromHrgn(
-                CreateRoundRectRgn(0, 0, this.Width, this.Height, 40, 40));
-
             string mf = Path.Combine(CMD.mfPath, $"Employee.csv");
 
             // Form3読込ログ
@@ -175,10 +172,30 @@ namespace あすよん月次帳票
             // 空のアイテムを追加(部門未選択用)
             cmbxBumon.Items.Add("");
 
-            // 選択された会社の部門をchkLBxBumonに追加
-            foreach (var bumon in JsonLoader.GetBUMONs(selctedComp.ToArray()))
+            // BUMON.txt を直接読んで、選択された会社の部門を追加する
+            string bumonPath = Path.Combine(CMD.mfPath, "BUMON.txt");
+            var added = new HashSet<string>();
+            if (File.Exists(bumonPath) && selctedComp != null && selctedComp.Count > 0)
             {
-                cmbxBumon.Items.Add($"{bumon.Code}:{bumon.Name}");
+                foreach (var line in File.ReadLines(bumonPath, CMD.utf8 ?? System.Text.Encoding.Default))
+                {
+                    if (string.IsNullOrWhiteSpace(line)) continue;
+                    var toks = line.Split(new[] { ' ' }, StringSplitOptions.RemoveEmptyEntries);
+                    if (toks.Length < 1) continue;
+                    var code = toks[0].Trim();
+                    var name = toks.Length > 1 ? toks[1].Trim() : string.Empty;
+                    var company = toks.Length >= 4 ? toks[3].Trim() : (toks.Length >= 2 ? toks[toks.Length - 1].Trim() : string.Empty);
+
+                    if (string.IsNullOrEmpty(company)) continue;
+                    if (!selctedComp.Contains(company)) continue;
+
+                    var item = $"{code}:{name}";
+                    if (!added.Contains(item))
+                    {
+                        cmbxBumon.Items.Add(item);
+                        added.Add(item);
+                    }
+                }
             }
 
             cmbxBumon.SelectedIndex = 0;
@@ -302,7 +319,7 @@ namespace あすよん月次帳票
                 {
                     // 部門1つ選択 → 部門指定シミュレーション
                     fam.SimulateIZAIKO_Ohno(CMD.ohuid, CMD.ohpass, sumirateYM, selectedBumon);
-                    AddLog("オーノ({selectedBumon}) のシュミレーション実行");
+                    AddLog($"オーノ({selectedBumon}) のシュミレーション実行");
                     fam.AddLog($"{HIZTIM} シュミレーション 0 {CMD.UserName} RunSimulation 部門:{selectedBumon}");
                     fam.AddLog2($"{HIZTIM} シュミレーション 0 ユーザー:{CMD.UserName} RunSimulation シュミレーション使用中です");
                 }

@@ -41,25 +41,12 @@ namespace あすよん月次帳票
                 Directory.CreateDirectory(CMD.LogPath);
 
             this.Load += FormMainTop_Load;
-
-            JsonLoader.LoadBumon(CMD.mfPath + @"\BUMON.json");
-            JsonLoader.LoadHanbai("オーノ", Path.Combine(CMD.mfPath, "DLB01HANBAI.json"));
-            JsonLoader.LoadShiire("オーノ", Path.Combine(CMD.mfPath, "DLB01SHIIRE.json"));
-            JsonLoader.LoadHanbai("サンミックダスコン", Path.Combine(CMD.mfPath, "DLB02HANBAI.json"));
-            JsonLoader.LoadShiire("サンミックダスコン", Path.Combine(CMD.mfPath, "DLB02SHIIRE.json"));
-            JsonLoader.LoadHanbai("サンミックカーペット", Path.Combine(CMD.mfPath, "DLB03HANBAI.json"));
-            JsonLoader.LoadShiire("サンミックカーペット", Path.Combine(CMD.mfPath, "DLB03SHIIRE.json"));
-
-
         }
 
         private void FormMainTop_Load(object sender, EventArgs e)
         {
             txtBxID.Text = Properties.Settings.Default.UserID;
             txtBxPASS.Text = Properties.Settings.Default.Password;
-
-            
-           
         }
 
         //=========================================================

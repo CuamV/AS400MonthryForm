@@ -94,7 +94,7 @@
             this.btnOK.Font = new System.Drawing.Font("Meiryo UI", 11.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(128)));
             this.btnOK.Location = new System.Drawing.Point(374, 12);
             this.btnOK.Name = "btnOK";
-            this.btnOK.Size = new System.Drawing.Size(82, 38);
+            this.btnOK.Size = new System.Drawing.Size(82, 33);
             this.btnOK.TabIndex = 4;
             this.btnOK.Text = "OK";
             this.btnOK.UseVisualStyleBackColor = true;
@@ -105,7 +105,7 @@
             this.btnCancel.Font = new System.Drawing.Font("Meiryo UI", 11.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(128)));
             this.btnCancel.Location = new System.Drawing.Point(374, 56);
             this.btnCancel.Name = "btnCancel";
-            this.btnCancel.Size = new System.Drawing.Size(82, 38);
+            this.btnCancel.Size = new System.Drawing.Size(82, 33);
             this.btnCancel.TabIndex = 5;
             this.btnCancel.Text = "Cancel";
             this.btnCancel.UseVisualStyleBackColor = true;
@@ -123,9 +123,11 @@
             this.Controls.Add(this.listBx部門);
             this.Controls.Add(this.label1);
             this.Controls.Add(this.treeView部門);
+            this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.Fixed3D;
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
             this.Name = "部門Form";
-            this.Text = "部門Form";
+            this.StartPosition = System.Windows.Forms.FormStartPosition.CenterParent;
+            this.Text = "< 部門選択 >";
             this.ResumeLayout(false);
             this.PerformLayout();
 

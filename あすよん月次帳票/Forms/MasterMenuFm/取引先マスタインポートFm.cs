@@ -1,16 +1,16 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.ComponentModel;
 using System.Data;
 using System.Drawing;
 using System.IO;
 using System.Linq;
-using System.Security.Cryptography;
 using System.Text;
 using System.Text.RegularExpressions;
-using System.Threading.Tasks;
 using System.Windows.Forms;
+using Button = System.Windows.Forms.Button;
 using CMD = あすよん月次帳票.CommonData;
+using Path = System.IO.Path;
+using ScrollBars = System.Windows.Forms.ScrollBars;
 
 namespace あすよん月次帳票
 {
@@ -25,20 +25,12 @@ namespace あすよん月次帳票
         // フィールド変数
         private string selectedFilePath;  // 選択されたファイルパスを保持
         string HIZTIM;
-        string mf;
-        string mfName;
         string BUMONmf = Path.Combine(CMD.mfPath, "BUMON.txt");
-        string[] mfTxtNames = new[] { "DLB01TORIHIKI", "DLB02TORIHIKI", "DLB03TORIHIKI" };
-        string[] mfTxtPaths = new[]
-        {
-            Path.Combine(CMD.mfPath, "DLB01TORIHIKI.txt"),
-            Path.Combine(CMD.mfPath, "DLB02TORIHIKI.txt"),
-            Path.Combine(CMD.mfPath, "DLB03TORIHIKI.txt")
-        };
-
-        string mf_bumon = Path.Combine(CMD.mfPath, "TORIHIKI-BUMON.txt");
+        string mfName = "TORIHIKI";
+        string mf = Path.Combine(CMD.mfPath, "TORIHIKI.txt");
         string mf_bumonName = "TORIHIKI-BUMON";
-        string[] mf_torirollTxtNames = new[] { 
+        string mf_bumon = Path.Combine(CMD.mfPath, "TORIHIKI-BUMON.txt");
+        string[] mf_torirollTxtNames = new[] {
             "TROLE-SYOSYA", "TROLE-SIIRE", "TROLE-HANBAI", "TROLE-TOKUISAKI", "TROLE-SYUKKA", "TROLE-AZUKARI", "TROLE-UNSOU", "TROLE-SOUKO" };
 
         string[] mf_torirollTxtPaths = new[]
@@ -73,9 +65,9 @@ namespace あすよん月次帳票
                 this.pictBxCSVインポート.DragDrop += PnlCSVインポート_DragDrop;
                 this.linkLbファイル選択.LinkClicked += LinkLbファイル選択_LinkClicked;
                 // 会社が選択されるまでファイル操作を無効化
-                this.linkLbファイル選択.Enabled = false;
-                this.pictBxCSVインポート.Enabled = false;
-                this.cmbBx会社.SelectedIndexChanged += CmbBx会社_SelectedIndexChanged;
+                this.linkLbファイル選択.Enabled = true;
+                this.pictBxCSVインポート.Enabled = true;
+                //this.cmbBx会社.SelectedIndexChanged += CmbBx会社_SelectedIndexChanged;
             }
             catch
             {
@@ -94,11 +86,11 @@ namespace あすよん月次帳票
         private void PnlCSVインポート_DragEnter(object sender, DragEventArgs e)
         {
             // 会社が選択されていない場合は受け付けない
-            if (cmbBx会社.SelectedItem == null)
-            {
-                e.Effect = DragDropEffects.None;
-                return;
-            }
+            //if (cmbBx会社.SelectedItem == null)
+            //{
+            //    e.Effect = DragDropEffects.None;
+            //    return;
+            //}
             if (e.Data.GetDataPresent(DataFormats.FileDrop))
                 e.Effect = DragDropEffects.Copy;
             else
@@ -112,11 +104,11 @@ namespace あすよん月次帳票
         private void PnlCSVインポート_DragDrop(object sender, DragEventArgs e)
         {
             // 会社選択がない場合は取り込ませない
-            if (cmbBx会社.SelectedItem == null)
-            {
-                MessageBox.Show("会社を選択してください。", "警告", MessageBoxButtons.OK, MessageBoxIcon.Warning);
-                return;
-            }
+            //if (cmbBx会社.SelectedItem == null)
+            //{
+            //    MessageBox.Show("会社を選択してください。", "警告", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+            //    return;
+            //}
             var files = (string[])e.Data.GetData(DataFormats.FileDrop);
             if (files != null && files.Length > 0)
             {
@@ -134,11 +126,11 @@ namespace あすよん月次帳票
         private void LinkLbファイル選択_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
         {
             // 会社選択がない場合はファイル選択不可
-            if (cmbBx会社.SelectedItem == null)
-            {
-                MessageBox.Show("先に会社を選択してください。", "警告", MessageBoxButtons.OK, MessageBoxIcon.Warning);
-                return;
-            }
+            //if (cmbBx会社.SelectedItem == null)
+            //{
+            //    MessageBox.Show("先に会社を選択してください。", "警告", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+            //    return;
+            //}
             using (OpenFileDialog ofd = new OpenFileDialog())
             {
                 ofd.Filter = "CSVファイル (*.csv)|*.csv|すべてのファイル (*.*)|*.*";
@@ -151,31 +143,38 @@ namespace あすよん月次帳票
             }
         }
 
-        // 会社選択変更時のハンドラ
-        private void CmbBx会社_SelectedIndexChanged(object sender, EventArgs e)
-        {
-            bool enabled = cmbBx会社.SelectedItem != null;
-            this.linkLbファイル選択.Enabled = enabled;
-            this.pictBxCSVインポート.Enabled = enabled;
-        }
+        /// <summary>
+        /// 会社選択変更時のハンドラ
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        //private void CmbBx会社_SelectedIndexChanged(object sender, EventArgs e)
+        //{
+        //    bool enabled = cmbBx会社.SelectedItem != null;
+        //    this.linkLbファイル選択.Enabled = enabled;
+        //    this.pictBxCSVインポート.Enabled = enabled;
+        //}
 
+        /// <summary>
+        /// インポート用ファイル選択→インポート実行
+        /// </summary>
+        /// <param name="lines"></param>
         private void ImportSelectedFile(string[] lines)
         {
-            
+
             // 簡易インポート処理の例: CSV内容を読み込んで行数を確認し、確認メッセージを表示
             try
             {
                 Encoding usedEnc;
 
-                if (MessageBox.Show($"{lines.Length - 1} 件のデータを選択会社({cmbBx会社.SelectedItem})へインポートします。よろしいですか？", "インポート確認", 
+                if (MessageBox.Show($"{lines.Length - 1} 件のデータをへインポートします。よろしいですか？", "インポート確認",
                     MessageBoxButtons.YesNo, MessageBoxIcon.Question) == DialogResult.No)
                     return;
 
                 // rawLines を読み直してヘッダ含めて渡す
                 var raw = ReadAllLinesDetectEncoding(selectedFilePath, out usedEnc);
-                var (ok, msg) = fam.ImportMaster(raw, cmbBx会社.SelectedItem.ToString(), BUMONmf,
-                    mfTxtNames, mfTxtPaths, mf_bumon, mf_bumonName, mf_torirollTxtNames, mf_torirollTxtPaths,
-                    mst, mst_bumon, mst_torirole);
+                var (ok, msg) = fam.ImportMaster(raw, BUMONmf, mfName, mf, 
+                    mf_bumon, mf_bumonName, mf_torirollTxtNames, mf_torirollTxtPaths, mst, mst_bumon, mst_torirole);
                 if (!ok)
                 {
                     MessageBox.Show($"インポートに失敗しました: {msg}", "エラー", MessageBoxButtons.OK, MessageBoxIcon.Error);
@@ -196,8 +195,12 @@ namespace あすよん月次帳票
                 MessageBox.Show($"インポートに失敗しました: {ex.Message}", "エラー", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
+
+        //=========================================================
+        // 【処理メソッド】
+        //=========================================================
         /// <summary>
-        /// プレビュー表示をモーダルで行う
+        /// 取込み前にプレビュー表示をモーダルで行う
         /// </summary>
         /// <param name="path"></param>
         private void ShowPreview(string path)
@@ -230,9 +233,10 @@ namespace あすよん月次帳票
                 //  1:取引先CD  2:部門CD      3:取引正式名称 4:取引先名    5:取引先名カナ 6:取引先略名  7:取引先略名カナ 8:郵便番号
                 //  9:電話番号1 10:電話番号2  11:FAX番号1   12:FAX番号2  13:住所1      14:住所1カナ  15:住所2       16:住所2カナ
                 //  17:商社区分 18:仕入先区分 19:販売先区分  20:得意先区分 21:出荷先区分  22:預り先区分 23:運送便区分   24:倉庫区分  25:備考
+                //  26:登録者  27:登録日付  28:登録時刻
                 //----------------------------------------------------
                 var headers = SplitCsvLine(lines[0]);
-                string[] reqCols = Enum.GetNames(typeof(TORIHIKI_MASTER_IN));
+                string[] reqCols = Enum.GetNames(typeof(TORIHIKI_MASTER_INOUT));
 
                 foreach (var col in reqCols)
                 {
@@ -276,7 +280,7 @@ namespace あすよん月次帳票
 
                     // 1. 項目数エラー
                     if (fields.Length != reqCols.Length)
-                        errs.Add("[項目数エラー] 項目数が17未満または18以上です");
+                        errs.Add("[項目数エラー] 項目数が28未満または29以上です");
 
                     // ヘルパー関数
                     Func<string, bool> isDigits = s => !string.IsNullOrEmpty(s) && s.All(char.IsDigit);
@@ -291,11 +295,11 @@ namespace あすよん月次帳票
                     if (string.IsNullOrEmpty(bumon)) errs.Add("[入力・文字数エラー] 部門CDが入力なし");
                     else if (!Regex.IsMatch(bumon, "^[0-9]{3}$")) errs.Add("[入力・文字数エラー] 部門CDは半角数字3桁で入力してください");
 
-                    // 4. 部門マスタ存在チェック
-                    if (!string.IsNullOrEmpty(bumon) && !bumonSet.Contains(bumon)) errs.Add("[部門コード未登録エラー] 部門CDが部門マスタに存在しません");
+                    //// 4. 部門マスタ存在チェック
+                    //if (!string.IsNullOrEmpty(bumon) && !bumonSet.Contains(bumon)) errs.Add("[部門コード未登録エラー] 部門CDが部門マスタに存在しません");
 
                     // 5-9 文字数チェック
-                    var col = headerIndex["取引先正式名称"]; if (!string.IsNullOrEmpty(rowFields[col]) && rowFields[col].Length >= 51) errs.Add("[文字数エラー] 取引先正式名称が51文字以上です");
+                    var col = headerIndex["取引先正式名"]; if (!string.IsNullOrEmpty(rowFields[col]) && rowFields[col].Length >= 51) errs.Add("[文字数エラー] 取引先正式名称が51文字以上です");
                     col = headerIndex["取引先名"]; if (!string.IsNullOrEmpty(rowFields[col]) && rowFields[col].Length >= 31) errs.Add("[文字数エラー] 取引先名が31文字以上です");
                     col = headerIndex["取引先名カナ"]; if (!string.IsNullOrEmpty(rowFields[col]) && rowFields[col].Length >= 41) errs.Add("[文字数エラー] 取引先名カナが41文字以上です");
                     col = headerIndex["取引先略名"]; if (!string.IsNullOrEmpty(rowFields[col]) && rowFields[col].Length >= 21) errs.Add("[文字数エラー] 取引先略名が21文字以上です");
@@ -367,56 +371,18 @@ namespace あすよん月次帳票
                 dgv.ReadOnly = true;
                 dgv.AllowUserToAddRows = false;
                 dgv.AllowUserToDeleteRows = false;
+                // ユーザーが列幅を自由に変更できるように設定
+                dgv.AllowUserToResizeColumns = true;
+                dgv.AllowUserToResizeRows = false;
+                dgv.AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.None; // 手動で幅を調整させる
+                dgv.AutoSizeRowsMode = DataGridViewAutoSizeRowsMode.None;
+                dgv.ScrollBars = ScrollBars.Both; // 横スクロールを有効にして長いエラー内容も確認可能にする
+                dgv.ColumnHeadersHeightSizeMode = DataGridViewColumnHeadersHeightSizeMode.AutoSize;
 
                 if (errorRows.Count > 0)
-                {
-                    // エラーあり: エラー行のみ表示し、インポート不可（ボタンは表示しない）
-                    dgv.Columns.Add("行番号", "行番号");
-                    foreach (var h in headers) dgv.Columns.Add(h, h);
-                    dgv.Columns.Add("エラー内容", "エラー内容");
-                    foreach (var r in errorRows) dgv.Rows.Add(r);
-
-                    previewForm.Controls.Add(dgv);
-                    var btnClose = new Button();
-                    btnClose.Text = "閉じる";
-                    btnClose.Dock = DockStyle.Bottom;
-                    btnClose.Height = 36;
-                    btnClose.Click += (s, e) => { previewForm.Close(); };
-                    previewForm.Controls.Add(btnClose);
-
-                    // show modal - do not allow import
-                    previewForm.ShowDialog(this);
-                    return;
-                }
+                    エラープレビュー(errorRows, dgv, headers, previewForm);
                 else
-                {
-                    // エラーなし: CSV全行を表示してインポート可能
-                    // show header columns
-                    foreach (var h in headers) dgv.Columns.Add(h, h);
-                    // add all data rows (from lines)
-                    for (int i = 1; i < lines.Length; i++)
-                    {
-                        var rowFields = SplitCsvLine(lines[i]);
-                        var row = new string[headers.Length];
-                        for (int j = 0; j < headers.Length && j < rowFields.Length; j++) row[j] = rowFields[j];
-                        dgv.Rows.Add(row);
-                    }
-
-                    previewForm.Controls.Add(dgv);
-                    var btn = new Button();
-                    btn.Text = "インポート";
-                    btn.Dock = DockStyle.Bottom;
-                    btn.Height = 36;
-                    btn.Click += (s, e) => { previewForm.DialogResult = DialogResult.OK; previewForm.Close(); };
-                    previewForm.Controls.Add(btn);
-
-                    if (previewForm.ShowDialog(this) == DialogResult.OK)
-                    {
-                        // ユーザーがプレビューからインポートを押した -> 実際のインポート処理を呼ぶ
-                        selectedFilePath = path;
-                        ImportSelectedFile(lines);
-                    }
-                }
+                    通常プレビュー(dgv, headers, previewForm, lines, path);
             }
             catch (Exception ex)
             {
@@ -424,6 +390,11 @@ namespace あすよん月次帳票
             }
         }
 
+        /// <summary>
+        /// csv行をカンマで分割（引用符対応）
+        /// </summary>
+        /// <param name="line"></param>
+        /// <returns></returns>
         private string[] SplitCsvLine(string line)
         {
             var list = new List<string>();
@@ -458,6 +429,12 @@ namespace あすよん月次帳票
             return list.ToArray();
         }
 
+        /// <summary>
+        /// ファイルのエンコーディングを自動検出して全行読み込み
+        /// </summary>
+        /// <param name="path"></param>
+        /// <param name="usedEncoding"></param>
+        /// <returns></returns>
         private string[] ReadAllLinesDetectEncoding(string path, out Encoding usedEncoding)
         {
             // Try UTF-8
@@ -472,6 +449,8 @@ namespace あすよん月次帳票
             catch
             {
                 // fallthrough to try Shift_JIS
+                usedEncoding = null;
+
             }
 
             try
@@ -486,6 +465,112 @@ namespace あすよん月次帳票
                 // As a last resort, read with system default
                 usedEncoding = Encoding.Default;
                 return File.ReadAllLines(path, usedEncoding);
+            }
+        }
+
+        /// <summary>
+        /// プレビュー表示（エラーありの場合）
+        /// </summary>
+        /// <param name="errorRows"></param>
+        /// <param name="dgv"></param>
+        /// <param name="headers"></param>
+        /// <param name="previewForm"></param>
+        private void エラープレビュー(List<string[]> errorRows, DataGridView dgv, string[] headers, Form previewForm)
+        {
+            if (errorRows.Count > 0)
+            {
+                // エラーあり: エラー行のみ表示し、インポート不可（ボタンは表示しない）
+                dgv.Columns.Add("行番号", "行番号");
+                foreach (var h in headers) dgv.Columns.Add(h, h);
+                dgv.Columns.Add("エラー内容", "エラー内容");
+                foreach (var r in errorRows) dgv.Rows.Add(r);
+
+                // 列の初期幅と自動調整モードを設定
+                for (int ci = 0; ci < dgv.Columns.Count; ci++)
+                {
+                    var col = dgv.Columns[ci];
+                    col.MinimumWidth = 60;
+                    if (col.HeaderText == "エラー内容")
+                    {
+                        // エラー内容は残り幅を埋めるようにして見やすくする
+                        col.AutoSizeMode = DataGridViewAutoSizeColumnMode.Fill;
+                        col.MinimumWidth = 200;
+                    }
+                    else if (col.HeaderText == "行番号")
+                    {
+                        col.AutoSizeMode = DataGridViewAutoSizeColumnMode.None;
+                        col.Width = 60;
+                    }
+                    else
+                    {
+                        col.AutoSizeMode = DataGridViewAutoSizeColumnMode.DisplayedCells;
+                    }
+                }
+
+                // 列幅の初期設定: 行番号は狭く、主要列は自動、残りは表示セル幅
+                for (int ci = 0; ci < dgv.Columns.Count; ci++)
+                {
+                    var col = dgv.Columns[ci];
+                    col.MinimumWidth = 60;
+                    if (col.HeaderText == headers[0]) // 取引先CD
+                    {
+                        col.AutoSizeMode = DataGridViewAutoSizeColumnMode.DisplayedCells;
+                    }
+                    else
+                    {
+                        col.AutoSizeMode = DataGridViewAutoSizeColumnMode.DisplayedCells;
+                    }
+                }
+
+                previewForm.Controls.Add(dgv);
+                var btnClose = new Button();
+                btnClose.Text = "閉じる";
+                btnClose.Dock = DockStyle.Bottom;
+                btnClose.Height = 36;
+                btnClose.Click += (s, e) => { previewForm.Close(); };
+                previewForm.Controls.Add(btnClose);
+
+                // show modal - do not allow import
+                previewForm.ShowDialog(this);
+                return;
+            }
+        }
+
+        /// <summary>
+        /// プレビュー表示（エラーなしの場合）
+        /// </summary>
+        /// <param name="dgv"></param>
+        /// <param name="headers"></param>
+        /// <param name="previewForm"></param>
+        /// <param name="lines"></param>
+        /// <param name="path"></param>
+        private void 通常プレビュー(DataGridView dgv, string[] headers, Form previewForm, string[] lines, string path)
+        {
+            // エラーなし: CSV全行を表示してインポート可能
+            // show header columns
+            foreach (var h in headers) dgv.Columns.Add(h, h);
+            // add all data rows (from lines)
+            for (int i = 1; i < lines.Length; i++)
+            {
+                var rowFields = SplitCsvLine(lines[i]);
+                var row = new string[headers.Length];
+                for (int j = 0; j < headers.Length && j < rowFields.Length; j++) row[j] = rowFields[j];
+                dgv.Rows.Add(row);
+            }
+
+            previewForm.Controls.Add(dgv);
+            var btn = new Button();
+            btn.Text = "インポート";
+            btn.Dock = DockStyle.Bottom;
+            btn.Height = 36;
+            btn.Click += (s, e) => { previewForm.DialogResult = DialogResult.OK; previewForm.Close(); };
+            previewForm.Controls.Add(btn);
+
+            if (previewForm.ShowDialog(this) == DialogResult.OK)
+            {
+                // ユーザーがプレビューからインポートを押した -> 実際のインポート処理を呼ぶ
+                selectedFilePath = path;
+                ImportSelectedFile(lines);
             }
         }
     }

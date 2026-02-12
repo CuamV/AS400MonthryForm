@@ -3,14 +3,15 @@ using System.Collections.Generic;
 using System.Drawing;
 using System.IO;
 using System.Linq;
+using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using Action = System.Action;
 using Application = System.Windows.Forms.Application;
-using Label = System.Windows.Forms.Label;
 using CMD = あすよん月次帳票.CommonData;
+using Label = System.Windows.Forms.Label;
 
 namespace あすよん月次帳票
 {
@@ -45,6 +46,10 @@ namespace あすよん月次帳票
             // フェードインイベント追加
             this.Shown += Form1_Shown;
         }
+        [DllImport("Gdi32.dll", EntryPoint = "CreateRoundRectRgn")]
+        private static extern IntPtr CreateRoundRectRgn(
+            int nLeftRect, int nTopRect, int nRightRect, int nBottomRect,
+            int nWidthEllipse, int nHeightEllipse);
 
         /// <summary>
         /// Form1(トップフォーム)読込時イベント
@@ -66,8 +71,8 @@ namespace あすよん月次帳票
             // ログ読込　　　　　
             LoadLogs();
 
-            // 一日一回のAS400からマスタ取得
-            fam.GetMasterFromAS400(true);
+            //// 一日一回のAS400からマスタ取得
+            //fam.GetMasterFromAS400(true);
         }
 
         //=========================================================

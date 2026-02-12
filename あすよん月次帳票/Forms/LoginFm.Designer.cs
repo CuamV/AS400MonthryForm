@@ -120,8 +120,10 @@
             this.Controls.Add(this.txtBxPASS);
             this.Controls.Add(this.txtBxID);
             this.Controls.Add(this.IbID);
+            this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.Fixed3D;
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
             this.Name = "LoginFm";
+            this.Opacity = 0.95D;
             ((System.ComponentModel.ISupportInitialize)(this.pctBxあすよん)).EndInit();
             this.ResumeLayout(false);
             this.PerformLayout();

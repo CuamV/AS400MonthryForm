@@ -117,6 +117,7 @@
             this.Controls.Add(this.btnインポート);
             this.Controls.Add(this.txtBxファイル選択);
             this.Controls.Add(this.btn参照);
+            this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.Fixed3D;
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
             this.Name = "郵便番号辞書インポートFm";
             this.Text = "郵便番号辞書インポート";

@@ -92,8 +92,9 @@ namespace あすよん月次帳票
             //StyleDataGrid(dgvDataScar, Color.DarkRed, Color.White, Color.LightGray);
             //StyleDataGrid(dgvDataIV, Color.Gray, Color.White, Color.LightGray);
 
-            this.Region = System.Drawing.Region.FromHrgn(
-                CreateRoundRectRgn(0, 0, this.Width, this.Height, 40, 40));
+            // 丸角フォーム化
+            //this.Region = System.Drawing.Region.FromHrgn(
+            //    CreateRoundRectRgn(0, 0, this.Width, this.Height, 40, 40));
         }
 
         [DllImport("Gdi32.dll", EntryPoint = "CreateRoundRectRgn")]

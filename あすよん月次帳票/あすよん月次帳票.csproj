@@ -26,7 +26,7 @@
     <MinimumRequiredVersion>1.0.0.1</MinimumRequiredVersion>
     <WebPage>publish.htm</WebPage>
     <OpenBrowserOnPublish>false</OpenBrowserOnPublish>
-    <ApplicationRevision>22</ApplicationRevision>
+    <ApplicationRevision>25</ApplicationRevision>
     <ApplicationVersion>1.0.0.%2a</ApplicationVersion>
     <UseApplicationTrust>false</UseApplicationTrust>
     <PublishWizardCompleted>true</PublishWizardCompleted>
@@ -207,6 +207,9 @@
     <Compile Include="Forms\MasterMenuFm\取引先マスタFm.Designer.cs">
       <DependentUpon>取引先マスタFm.cs</DependentUpon>
     </Compile>
+    <Compile Include="Forms\ProgressForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
     <Compile Include="Methods\Processor.cs" />
     <Compile Include="Methods\Summarize.cs" />
     <Compile Include="Forms\LoginFm.cs">
@@ -259,7 +262,6 @@
       <DependentUpon>WaitSnowMan.cs</DependentUpon>
     </Compile>
     <Compile Include="Methods\GetData_AS400.cs" />
-    <Compile Include="CommonSetings\mf.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Forms\DataExtractionFm.cs">
@@ -316,11 +318,39 @@
     <Compile Include="Forms\StandardisedFormFm.Designer.cs">
       <DependentUpon>StandardisedFormFm.cs</DependentUpon>
     </Compile>
+    <Compile Include="Forms\MasterMenuFm\取引先ロール別マスタFm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Forms\MasterMenuFm\取引先ロール別マスタFm.Designer.cs">
+      <DependentUpon>取引先ロール別マスタFm.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Forms\DataExtraction\販売仕入先Fm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Forms\DataExtraction\販売仕入先Fm.Designer.cs">
+      <DependentUpon>販売仕入先Fm.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Forms\MasterMenuFm\ユーザーマスタFm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Forms\MasterMenuFm\ユーザーマスタFm.Designer.cs">
+      <DependentUpon>ユーザーマスタFm.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Forms\MasterMenuFm\ユーザーマスタ照会Fm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Forms\MasterMenuFm\ユーザーマスタ照会Fm.Designer.cs">
+      <DependentUpon>ユーザーマスタ照会Fm.cs</DependentUpon>
+    </Compile>
+    <Compile Include="取引先履歴取得.cs" />
     <EmbeddedResource Include="Forms\DataExtraction\DataEtlViewFm.resx">
       <DependentUpon>DataEtlViewFm.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Forms\LoginFm.resx">
       <DependentUpon>LoginFm.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Forms\MasterMenuFm\ユーザーマスタ照会Fm.resx">
+      <DependentUpon>ユーザーマスタ照会Fm.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Forms\MasterMenuFm\取引先マスタFm.resx">
       <DependentUpon>取引先マスタFm.cs</DependentUpon>
@@ -379,6 +409,15 @@
     </EmbeddedResource>
     <EmbeddedResource Include="Forms\MasterMenuFm\郵便番号辞書インポートFm.resx">
       <DependentUpon>郵便番号辞書インポートFm.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Forms\MasterMenuFm\取引先ロール別マスタFm.resx">
+      <DependentUpon>取引先ロール別マスタFm.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Forms\DataExtraction\販売仕入先Fm.resx">
+      <DependentUpon>販売仕入先Fm.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Forms\MasterMenuFm\ユーザーマスタFm.resx">
+      <DependentUpon>ユーザーマスタFm.cs</DependentUpon>
     </EmbeddedResource>
     <None Include="packages.config" />
     <None Include="Properties\Settings.settings">

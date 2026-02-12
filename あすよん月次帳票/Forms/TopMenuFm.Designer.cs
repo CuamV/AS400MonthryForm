@@ -159,9 +159,10 @@ namespace あすよん月次帳票
             this.Controls.Add(this.listBxログ表示);
             this.Controls.Add(this.lb操作履歴);
             this.Font = new System.Drawing.Font("Meiryo UI", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(128)));
+            this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.Fixed3D;
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
             this.Name = "TopMenuFm";
-            this.Opacity = 0.95D;
+            this.Opacity = 0.93D;
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
             this.Text = "あすよん月次帳票";
             this.Activated += new System.EventHandler(this.timerReleaseLock_Tick);

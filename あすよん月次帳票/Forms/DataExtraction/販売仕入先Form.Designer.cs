@@ -34,7 +34,7 @@
             this.btn削除 = new System.Windows.Forms.Button();
             this.btn追加 = new System.Windows.Forms.Button();
             this.listBx販売仕入 = new System.Windows.Forms.ListBox();
-            this.label1 = new System.Windows.Forms.Label();
+            this.lb右矢印 = new System.Windows.Forms.Label();
             this.treeView販売仕入 = new System.Windows.Forms.TreeView();
             this.grpBx検索 = new System.Windows.Forms.GroupBox();
             this.btn検索 = new System.Windows.Forms.Button();
@@ -50,7 +50,7 @@
             this.btnCancel.Font = new System.Drawing.Font("Meiryo UI", 11.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(128)));
             this.btnCancel.Location = new System.Drawing.Point(495, 92);
             this.btnCancel.Name = "btnCancel";
-            this.btnCancel.Size = new System.Drawing.Size(82, 38);
+            this.btnCancel.Size = new System.Drawing.Size(86, 32);
             this.btnCancel.TabIndex = 6;
             this.btnCancel.Text = "Cancel";
             this.btnCancel.UseVisualStyleBackColor = true;
@@ -61,7 +61,7 @@
             this.btnOK.Font = new System.Drawing.Font("Meiryo UI", 11.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(128)));
             this.btnOK.Location = new System.Drawing.Point(495, 37);
             this.btnOK.Name = "btnOK";
-            this.btnOK.Size = new System.Drawing.Size(82, 38);
+            this.btnOK.Size = new System.Drawing.Size(86, 32);
             this.btnOK.TabIndex = 5;
             this.btnOK.Text = "OK";
             this.btnOK.UseVisualStyleBackColor = true;
@@ -100,15 +100,15 @@
             this.listBx販売仕入.Size = new System.Drawing.Size(275, 259);
             this.listBx販売仕入.TabIndex = 3;
             // 
-            // label1
+            // lb右矢印
             // 
-            this.label1.AutoSize = true;
-            this.label1.Font = new System.Drawing.Font("Meiryo UI", 14.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(128)));
-            this.label1.Location = new System.Drawing.Point(318, 301);
-            this.label1.Name = "label1";
-            this.label1.Size = new System.Drawing.Size(29, 24);
-            this.label1.TabIndex = 8;
-            this.label1.Text = "→";
+            this.lb右矢印.AutoSize = true;
+            this.lb右矢印.Font = new System.Drawing.Font("Meiryo UI", 14.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(128)));
+            this.lb右矢印.Location = new System.Drawing.Point(318, 301);
+            this.lb右矢印.Name = "lb右矢印";
+            this.lb右矢印.Size = new System.Drawing.Size(29, 24);
+            this.lb右矢印.TabIndex = 8;
+            this.lb右矢印.Text = "→";
             // 
             // treeView販売仕入
             // 
@@ -189,11 +189,13 @@
             this.Controls.Add(this.btn削除);
             this.Controls.Add(this.btn追加);
             this.Controls.Add(this.listBx販売仕入);
-            this.Controls.Add(this.label1);
+            this.Controls.Add(this.lb右矢印);
             this.Controls.Add(this.treeView販売仕入);
+            this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.Fixed3D;
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
             this.Name = "販売仕入先Form";
-            this.Text = "販売仕入先Form";
+            this.StartPosition = System.Windows.Forms.FormStartPosition.CenterParent;
+            this.Text = "取引先選択";
             this.grpBx検索.ResumeLayout(false);
             this.grpBx検索.PerformLayout();
             this.ResumeLayout(false);
@@ -208,7 +210,7 @@
         private System.Windows.Forms.Button btn削除;
         private System.Windows.Forms.Button btn追加;
         private System.Windows.Forms.ListBox listBx販売仕入;
-        private System.Windows.Forms.Label label1;
+        private System.Windows.Forms.Label lb右矢印;
         private System.Windows.Forms.TreeView treeView販売仕入;
         private System.Windows.Forms.GroupBox grpBx検索;
         private System.Windows.Forms.Button btn検索;

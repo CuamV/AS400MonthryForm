@@ -59,6 +59,7 @@ namespace あすよん月次帳票
         internal Color FukaBase = Color.FromArgb(150, 0, 200);
         internal Color FukaLight1 = Color.FromArgb(180, 100, 220);
         internal Color FukaLight2 = Color.FromArgb(200, 150, 230);
+        internal Color FukaLight3 = Color.FromArgb(203, 190, 253);
 
         // 舘様赤
         internal Color DateDark1 = Color.FromArgb(150, 0, 0);

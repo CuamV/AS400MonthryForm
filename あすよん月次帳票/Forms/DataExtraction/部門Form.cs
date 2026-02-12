@@ -1,8 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Data;
+using System.IO;
 using System.Linq;
 using System.Windows.Forms;
+using CMD = あすよん月次帳票.CommonData;
 
 namespace あすよん月次帳票
 {
@@ -54,6 +56,27 @@ namespace あすよん月次帳票
             // 全会社のルートノードを作成
             string[] allCompanies = new string[] { "オーノ", "サンミックダスコン", "サンミックカーペット" };
 
+            // Read BUMON.txt from mfPath and group by company
+            var bumonsByCompany = new Dictionary<string, List<(string Code, string Name)>>();
+            string bumonPath = Path.Combine(CMD.mfPath, "BUMON.txt");
+            if (File.Exists(bumonPath))
+            {
+                foreach (var line in File.ReadLines(bumonPath, CMD.utf8 ?? System.Text.Encoding.Default))
+                {
+                    if (string.IsNullOrWhiteSpace(line)) continue;
+                    var toks = line.Split(new[] { ' ' }, StringSplitOptions.RemoveEmptyEntries);
+                    if (toks.Length >= 1)
+                    {
+                        var code = toks[0].Trim();
+                        var name = toks.Length > 1 ? toks[1].Trim() : string.Empty;
+                        var company = toks.Length >= 4 ? toks[3].Trim() : (toks.Length >= 2 ? toks[toks.Length - 1].Trim() : string.Empty);
+                        if (string.IsNullOrEmpty(company)) continue;
+                        if (!bumonsByCompany.ContainsKey(company)) bumonsByCompany[company] = new List<(string, string)>();
+                        bumonsByCompany[company].Add((code, name));
+                    }
+                }
+            }
+
             foreach (var comp in allCompanies)
             {
                 TreeNode companyNode = new TreeNode(comp)
@@ -62,15 +85,17 @@ namespace あすよん月次帳票
                     Checked = false  // 初期状態ではチェックなし
                 };
 
-                // 部門ノードを追加
-                foreach (var bumon in JsonLoader.GetBUMONs(comp))
+                if (bumonsByCompany.TryGetValue(comp, out var list))
                 {
-                    TreeNode bumonNode = new TreeNode($"{bumon.Code} {bumon.Name}")
+                    foreach (var bumon in list)
                     {
-                        Tag = bumon.Code,
-                        Checked = false  // 初期状態ではチェックなし
-                    };
-                    companyNode.Nodes.Add(bumonNode);
+                        TreeNode bumonNode = new TreeNode($"{bumon.Code} {bumon.Name}")
+                        {
+                            Tag = bumon.Code,
+                            Checked = false  // 初期状態ではチェックなし
+                        };
+                        companyNode.Nodes.Add(bumonNode);
+                    }
                 }
                 treeView部門.Nodes.Add(companyNode);
             }
