@@ -262,6 +262,7 @@
       <DependentUpon>WaitSnowMan.cs</DependentUpon>
     </Compile>
     <Compile Include="Methods\GetData_AS400.cs" />
+    <Compile Include="Models\取引先Entity.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Forms\DataExtractionFm.cs">
@@ -342,7 +343,17 @@
     <Compile Include="Forms\MasterMenuFm\ユーザーマスタ照会Fm.Designer.cs">
       <DependentUpon>ユーザーマスタ照会Fm.cs</DependentUpon>
     </Compile>
-    <Compile Include="取引先履歴取得.cs" />
+    <Compile Include="Repositories\取引先Repository.cs" />
+    <Compile Include="Services\Excel出力Service.cs" />
+    <Compile Include="Services\取引先取得Service.cs" />
+    <Compile Include="Utilities\StringNormalizer.cs" />
+    <Compile Include="Forms\管理者用設定.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Forms\管理者用設定.Designer.cs">
+      <DependentUpon>管理者用設定.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Services\取引先出力Service.cs" />
     <EmbeddedResource Include="Forms\DataExtraction\DataEtlViewFm.resx">
       <DependentUpon>DataEtlViewFm.cs</DependentUpon>
     </EmbeddedResource>
@@ -418,6 +429,9 @@
     </EmbeddedResource>
     <EmbeddedResource Include="Forms\MasterMenuFm\ユーザーマスタFm.resx">
       <DependentUpon>ユーザーマスタFm.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Forms\管理者用設定.resx">
+      <DependentUpon>管理者用設定.cs</DependentUpon>
     </EmbeddedResource>
     <None Include="packages.config" />
     <None Include="Properties\Settings.settings">

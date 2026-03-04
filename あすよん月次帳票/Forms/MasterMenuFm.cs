@@ -121,10 +121,14 @@ namespace あすよん月次帳票
             form.Show();
         }
 
-        private void btnAS400取引先マスタ_Click(object sender, EventArgs e)
+        private void btn管理者用設定_Click(object sender, EventArgs e)
         {
-            取引先履歴取得 取引先履歴取得 = new 取引先履歴取得();
-            取引先履歴取得.Create取引先部門展開Table();
+            HIZTIM = $"{DateTime.Now:yyyy/MM/dd HH:mm:ss}";
+            fam.AddLog($"{HIZTIM} コントロール 1 {CMD.UserName} btn管理者用設定_Click");
+            // 管理者用設定Formを作成
+            var form = new 管理者用設定();
+            // 管理者用設定Formを表示
+            form.Show();
         }
         //==============================================================
         // デザイン関連メソッド

@@ -1,7 +1,7 @@
 ﻿namespace あすよん月次帳票
 {
     //-----　<各種マスタレイアウト>　-----
-    internal enum BUMON_MASTTER // 部門マスタ
+    internal enum BUMON_MASTER // 部門マスタ
     {
         部門CD,
         部門名,
@@ -225,6 +225,12 @@
         社員番号,
         ユーザーID,
         ドメインユーザー,
+    }
+
+    internal enum ToriBumonbtnPattern
+    {
+        出力,
+        反映,
     }
 
 }

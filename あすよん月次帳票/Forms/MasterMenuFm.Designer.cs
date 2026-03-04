@@ -242,9 +242,9 @@ namespace あすよん月次帳票
             this.btnAS400取引先マスタ.Name = "btnAS400取引先マスタ";
             this.btnAS400取引先マスタ.Size = new System.Drawing.Size(115, 36);
             this.btnAS400取引先マスタ.TabIndex = 15;
-            this.btnAS400取引先マスタ.Text = "AS400取引先マスタ";
+            this.btnAS400取引先マスタ.Text = "管理者用設定";
             this.btnAS400取引先マスタ.UseVisualStyleBackColor = true;
-            this.btnAS400取引先マスタ.Click += new System.EventHandler(this.btnAS400取引先マスタ_Click);
+            this.btnAS400取引先マスタ.Click += new System.EventHandler(this.btn管理者用設定_Click);
             // 
             // MasterMenuFm
             // 

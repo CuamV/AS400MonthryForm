@@ -8,6 +8,7 @@ using System.Windows.Documents;
 using System.Windows.Forms;
 using DCN = あすよん月次帳票.Dictionaries;
 using MessageBox = System.Windows.MessageBox;
+using あすよん月次帳票.Repositories;
 
 namespace あすよん月次帳票
 {
@@ -15,6 +16,27 @@ namespace あすよん月次帳票
     {
         // クラスフィールドとしてdbManagerを宣言
         private readonly DbManager_Db2 dbManager = (DbManager_Db2)DbManager.CreateDbManager(OhnoSysDBName.Db2);
+
+        // 新しいRepositoryを使用
+        private readonly 取引先Repository _取引先Repository;
+
+        // コンストラクタでRepositoryを初期化
+        public GetData_AS400()
+        {
+            _取引先Repository = new 取引先Repository(dbManager); // AS400取引先のマスタ実体を作成
+        }
+
+        // ---- 取引先関連Method(新Repositoryに委譲) ----
+        internal DataTable GetTorihikiMaster()
+        {
+            // AS400取引先マスタをRepositoryから取得
+            return _取引先Repository.Get取引先マスタ();
+        }
+        internal DataTable GetTorihikiHistory()
+        {
+            // AS400取引先履歴をRepositoryから取得
+            return _取引先Repository.Get取引先履歴();
+        }
 
         // 売上データ取得
         internal DataTable GetSalesData(string symd, string eymd, string lib)
@@ -123,103 +145,6 @@ namespace あすよん月次帳票
             var dt = dbManager.GetDataTable(sql, ps.ToArray());
 
             return dt;
-        }
-
-        internal DataTable GetTorihikiMaster()
-        {
-            string sql = $@"
-                        SELECT *
-                        FROM SM1MLB01.MMTORIP";
-            var dt = dbManager.GetDataTable(sql);
-
-            return dt;
-        }
-
-        internal DataTable GetTorihikiHistory()
-        {
-            var libraryNames = new[]{
-               new []{ "SM1DLB01"},  // オーノ
-               new []{ "SM1DLB02", "SM1DLB03"}  // サンミック
-            };
-
-            DataTable slDt = null;
-            DataTable prDt = null;
-
-            // すべてのライブラリから売上履歴と仕入履歴を取得
-            foreach (var libraries in libraryNames)
-            {
-                foreach (var libraryName in libraries)
-                {
-                    // 売上履歴があった販売先を部門ごとに取得
-                    var slTable = MakeSql(libraryName,"売上");
-
-                    if (slDt == null)
-                        slDt = slTable;
-                    else
-                        slDt.Merge(slTable);
-
-                    // 仕入履歴があった仕入先を部門ごとに取得
-                    var prTable = MakeSql(libraryName, "仕入");
-
-                    if (prDt == null)
-                        prDt = prTable;
-                    else
-                        prDt.Merge(prTable);
-                }
-            }
-
-            // slDtとprDtをマージ、取引先コードでソート、取引先コードと部門コードでユニーク
-            if (slDt == null) {
-                slDt = prDt.Clone();
-            }
-                if (prDt == null) {
-                    prDt = slDt.Clone();
-                }
-    
-                var dt = slDt.AsEnumerable()
-                    .Union(prDt.AsEnumerable())
-                    .GroupBy(row => new { TorihikiCode = row.Field<string>("取引先コード"), BumonCode = row.Field<string>("部門コード") })
-                    .Select(g => g.First())
-                    .OrderBy(row => row.Field<string>("取引先コード"))
-                    .CopyToDataTable();
-
-            return dt;
-        }
-
-        internal DataTable MakeSql(string libraryName, string kubun)
-        {
-            string sql;
-            if (kubun == "売上")
-            {
-                sql = $@"
-                        SELECT SL.URHBSC, SL.URBMCD, MIN(PM.TOTHNM), MIN(PM.TOKANM)
-                        FROM {libraryName}.SLURIMP AS SL
-                        LEFT JOIN SM1MLB01.MMTORIP AS PM
-                                        ON SL.URHBSC = PM.TOTHCD
-                         WHERE SL.URDNDT >= 20030101 
-                         GROUP BY SL.URBMCD, SL.URHBSC
-                         ORDER BY SL.URBMCD, MIN(PM.TOKANM)
-                     ";
-            }
-            else
-            {
-                sql = $@"
-                        SELECT PR.SRSRCD, PR.SRBMCD, MIN(PM.TOTHNM), MIN(PM.TOKANM)
-                        FROM {libraryName}.PRSREMP AS PR
-                        LEFT JOIN SM1MLB01.MMTORIP AS PM
-                            ON PR.SRSRCD = PM.TOTHCD
-                        WHERE PR.SRDNDT >= 20030101 
-                        GROUP BY PR.SRBMCD, PR.SRSRCD
-                        ORDER BY PR.SRBMCD, MIN(PM.TOKANM)
-                     ";
-            }
-            var table = dbManager.GetDataTable(sql);
-            table.Columns[0].ColumnName = "取引先コード";
-            table.Columns[1].ColumnName = "部門コード";
-            table.Columns[2].ColumnName = "取引先名";
-            table.Columns[3].ColumnName = "カナ";
-
-            return table;
         }
     }
 }
